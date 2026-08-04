@@ -1,0 +1,8 @@
+Placeholder stand-in for a real Simulink .slx binary model file.
+
+Used only to validate that the stacks/model-based-design block's
+mbd-conventions rule activates for files matching model/** and
+**/*.slx (this repo has no MATLAB/Simulink installed to generate a real one).
+
+Subsystem: brake_controller
+Traces: REQ-SAFE-001

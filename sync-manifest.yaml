@@ -1,0 +1,168 @@
+# Manifest for tools/sync. common-rules, gitlab, and claude-md-management
+# are the org-wide baseline; see docs/user-guide.md#official-plugin-catalog.
+# process-light/process-full
+# are mutually exclusive via tier: choice-group:process, blocked at sync
+# time. process-light also carries a proof-of-concept SessionStart hook
+# (process/light/hooks/remind-testing-policy.sh), synced via the same
+# file entry and registered through settings_patch on hooks.SessionStart.
+# Each stack's own official-plugin dependency (frontend-design for
+# nodejs, rust-analyzer-lsp for rust) ships as its own tier: stack entry
+# with a matching detect list; sync both ids together to get the "syncing
+# the stack also gets its LSP" behavior. stacks-model-based-design's
+# mbd-conventions.md and its two skills cross-reference
+# stacks-embedded-c's MISRA/safety-critical rules by name, not by path,
+# so sync embedded-c first if resyncing content.
+#
+# Entry fields:
+#   id             unique identifier, used on the CLI and in the state file
+#   type           "file" (default) or "official-plugin"
+#   source         path relative to the toolkit checkout root (type: file only)
+#   target         path relative to .claude/ or ~/.claude/ (type: file only)
+#   scope          "project" or "user"
+#   tier           "baseline" | "choice-group:<name>" | "stack" | "optional"
+#   detect         list of marker filenames that suggest this entry (stacks only)
+#   plugin_ref     "<plugin>@<marketplace>" (type: official-plugin only)
+#   settings_patch top-level settings.json keys to merge in, key by key
+#                  (available on any entry, not just official-plugin)
+
+- id: common-rules
+  type: file
+  source: common
+  target: .claude/
+  scope: project
+  tier: baseline
+
+- id: gitlab
+  type: official-plugin
+  plugin_ref: "gitlab@claude-plugins-official"
+  scope: project
+  tier: baseline
+  settings_patch:
+    enabledPlugins:
+      "gitlab@claude-plugins-official": true
+
+- id: claude-md-management
+  type: official-plugin
+  plugin_ref: "claude-md-management@claude-plugins-official"
+  scope: project
+  tier: baseline
+  settings_patch:
+    enabledPlugins:
+      "claude-md-management@claude-plugins-official": true
+
+- id: process-light
+  type: file
+  source: process/light
+  target: .claude/
+  scope: project
+  tier: choice-group:process
+  settings_patch:
+    hooks:
+      SessionStart:
+        - hooks:
+            - type: command
+              command: "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/remind-testing-policy.sh"
+
+- id: process-full
+  type: file
+  source: process/full
+  target: .claude/
+  scope: project
+  tier: choice-group:process
+
+- id: stacks-python
+  type: file
+  source: stacks/python
+  target: .claude/
+  scope: project
+  tier: stack
+  detect: ["pyproject.toml", "requirements.txt", "setup.py"]
+
+- id: stacks-nodejs
+  type: file
+  source: stacks/nodejs
+  target: .claude/
+  scope: project
+  tier: stack
+  detect: ["package.json"]
+
+- id: frontend-design
+  type: official-plugin
+  plugin_ref: "frontend-design@claude-plugins-official"
+  scope: project
+  tier: stack
+  detect: ["package.json"]
+  settings_patch:
+    enabledPlugins:
+      "frontend-design@claude-plugins-official": true
+
+- id: stacks-rust
+  type: file
+  source: stacks/rust
+  target: .claude/
+  scope: project
+  tier: stack
+  detect: ["Cargo.toml"]
+
+- id: rust-analyzer-lsp
+  type: official-plugin
+  plugin_ref: "rust-analyzer-lsp@claude-plugins-official"
+  scope: project
+  tier: stack
+  detect: ["Cargo.toml"]
+  settings_patch:
+    enabledPlugins:
+      "rust-analyzer-lsp@claude-plugins-official": true
+
+- id: stacks-embedded-c
+  type: file
+  source: stacks/embedded-c
+  target: .claude/
+  scope: project
+  tier: stack
+  detect: ["Makefile", "CMakeLists.txt"]
+
+- id: stacks-model-based-design
+  type: file
+  source: stacks/model-based-design
+  target: .claude/
+  scope: project
+  tier: stack
+  detect: ["*.slx", "*.mdl"]
+
+- id: user-statusline
+  type: file
+  source: user-tools/statusline
+  target: ~/.claude/
+  scope: user
+  tier: optional
+  settings_patch:
+    statusLine:
+      type: command
+      command: "python ~/.claude/statusline.py"
+
+- id: toolkit-self-check
+  type: file
+  source: self-check
+  target: .claude/
+  scope: project
+  tier: baseline
+  settings_patch:
+    hooks:
+      SessionStart:
+        - hooks:
+            - type: command
+              command: "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/toolkit-drift-check.sh"
+
+- id: toolkit-self-check-user
+  type: file
+  source: self-check
+  target: ~/.claude/
+  scope: user
+  tier: optional
+  settings_patch:
+    hooks:
+      SessionStart:
+        - hooks:
+            - type: command
+              command: "\"$HOME\"/.claude/hooks/toolkit-drift-check.sh"

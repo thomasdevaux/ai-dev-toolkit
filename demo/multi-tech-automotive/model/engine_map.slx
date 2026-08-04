@@ -1,0 +1,7 @@
+Placeholder stand-in for a real Simulink .slx binary model file, used to
+validate stacks/model-based-design's mbd-conventions rule in the combined
+automotive demo (paths model/** and **/*.slx do not overlap with
+stacks/embedded-c's src/safety/** scope).
+
+Subsystem: engine_map
+Traces: REQ-ENGINE-010

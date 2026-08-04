@@ -1,0 +1,8 @@
+[package]
+name = "demo-rust-tool"
+version = "0.1.0"
+edition = "2021"
+description = "Dummy crate for exercising the stacks/rust block."
+license = "MIT"
+
+[dependencies]

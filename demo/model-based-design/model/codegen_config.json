@@ -1,0 +1,5 @@
+{
+  "target": "generic-arm-cortex-m4",
+  "optimization": "size",
+  "naming_convention": "snake_case"
+}

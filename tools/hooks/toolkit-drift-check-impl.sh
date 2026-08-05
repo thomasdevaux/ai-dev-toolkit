@@ -10,6 +10,16 @@ set -u
 TOOLKIT_ROOT="$1"
 PROJECT_DIR="$2"
 
+# A toolkit checkout is not a consumer of its own blocks (see its AGENTS.md,
+# "Self-application"), so onboarding it into itself is meaningless — and the
+# report would be actively misleading, since the cached checkout this hook
+# runs from is usually older than the working copy being edited. Recognized
+# by the two files no consumer project has. `tools.sync status` invoked
+# explicitly still works here; only the automatic session-start report is off.
+if [ -f "$PROJECT_DIR/sync-manifest.yaml" ] && [ -f "$PROJECT_DIR/tools/sync/manifest.py" ]; then
+    exit 0
+fi
+
 STATUS_OUTPUT="$(cd "$TOOLKIT_ROOT" && python -m tools.sync status --toolkit-root "$TOOLKIT_ROOT" --project-dir "$PROJECT_DIR" 2>/dev/null)"
 
 echo "toolkit-drift-check: using toolkit checkout at $TOOLKIT_ROOT"

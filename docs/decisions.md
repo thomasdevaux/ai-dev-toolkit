@@ -234,9 +234,35 @@ when its binary isn't on the machine. The assumption is that it stays inert. If
 one turns out to download something, fail loudly, or slow startup, drop that
 entry — the per-language granularity is still there, we just aren't using it.
 
-**Also fixed here:** `common-rules-user`, `user-statusline` and
+**Also fixed here (D-12):** `common-rules-user`, `user-statusline` and
 `toolkit-self-check-user` moved from `optional`/`suggested` to `baseline` at
 user scope. Until then, the documented `sync --user` command failed outright —
 there were no user-scope baseline entries for it to expand to. `_missing_lines`
 now filters by scope, so a user-scope baseline entry is never reported as
 missing from a project it has nothing to do with.
+
+---
+
+### D-13 — The drift check exempts a toolkit checkout from itself
+
+**Status:** settled
+
+`toolkit-drift-check-impl.sh` exits silently, before producing any report,
+when the project directory holds both `sync-manifest.yaml` and
+`tools/sync/manifest.py`. Explicit `tools.sync status` calls are unaffected.
+
+**Why:** this repo is not a consumer of its own blocks, so onboarding it into
+itself is meaningless — and the report was worse than useless, because the
+hook runs from a *cached* checkout that lags the working copy being edited. It
+was listing entries this repo had already deleted, and pressing for a sync
+that must never happen. A check that is wrong in the one repository where its
+own authors read it is a check nobody trusts elsewhere either.
+
+**Rejected:** unregistering the hook in this repo's `.claude/settings.json` —
+hooks merge across scopes, a project file cannot remove a user-scope hook; a
+marker file such as `.no-toolkit-sync` (invents a convention for one case,
+and the two files already identify a checkout unambiguously).
+
+**Cost accepted:** a consumer project that happens to vendor a full copy of
+the toolkit at its root would also go silent. No such project exists, and it
+would be the right behaviour anyway.

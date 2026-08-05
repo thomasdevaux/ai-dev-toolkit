@@ -1,7 +1,6 @@
 {
   "enabledPlugins": {
     "skill-creator@claude-plugins-official": true,
-    "gitlab@claude-plugins-official": true,
-    "claude-md-management@claude-plugins-official": true
+    "gitlab@claude-plugins-official": true
   }
 }

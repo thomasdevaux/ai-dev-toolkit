@@ -52,6 +52,9 @@ authored and validated in, not a consumer of them. Don't apply
 `common/rules/*` conventions (branch-per-feature, PR review, etc.) here
 unless the user asks. It does, however, follow the doc map it publishes.
 
+The session-start drift check exits silently on any toolkit checkout — see
+[`docs/decisions.md`](docs/decisions.md#d-13).
+
 ## Only if you need it
 
 Don't preload these — open one only when the task actually calls for it.

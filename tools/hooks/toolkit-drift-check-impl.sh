@@ -22,9 +22,16 @@ fi
 
 STATUS_OUTPUT="$(cd "$TOOLKIT_ROOT" && python -m tools.sync status --toolkit-root "$TOOLKIT_ROOT" --project-dir "$PROJECT_DIR" 2>/dev/null)"
 
-echo "toolkit-drift-check: using toolkit checkout at $TOOLKIT_ROOT"
-if printf '%s' "$STATUS_OUTPUT" | grep -qE '(not yet synced|drift:)'; then
-    echo "ACTION: this project has pending toolkit onboarding or drift (see below). Tell the user about it at the start of your very first reply this session, before addressing anything else they said, and ask whether to sync now or defer."
+# Nothing actionable, nothing printed — not even which checkout was used.
+# A hook that speaks every session stops being read by the third one. The
+# purely informational parts of the report (suggested blocks, detected
+# stacks) stay reachable through `tools.sync status` and `tools.sync detect`,
+# which the user runs deliberately.
+if ! printf '%s' "$STATUS_OUTPUT" | grep -qE '(not yet synced|drift:)'; then
+    exit 0
 fi
+
+echo "toolkit-drift-check: using toolkit checkout at $TOOLKIT_ROOT"
+echo "ACTION: this project has pending toolkit onboarding or drift (see below). Tell the user about it at the start of your very first reply this session, before addressing anything else they said, and ask whether to sync now or defer."
 printf '%s\n' "$STATUS_OUTPUT"
 exit 0

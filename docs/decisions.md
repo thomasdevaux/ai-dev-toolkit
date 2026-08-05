@@ -145,6 +145,14 @@ and how to remove all of it.
 `context-check.sh` and `codegraph-freshness.sh` print nothing when their checks
 pass. The always-on `remind-testing-policy.sh` hook was removed.
 
+`toolkit-drift-check` was brought under the same rule afterwards: it used to
+announce which checkout it resolved, then print the full status, on every
+session. Now nothing is printed unless something is un-synced or drifted. The
+informational parts it used to surface for free — suggested blocks, detected
+stacks — stay reachable through `tools.sync status` and `tools.sync detect`,
+run deliberately. That's the cost accepted: discoverability moves from ambient
+to on-demand.
+
 **Why:** a hook that speaks every session stops being read by the third one,
 and it was restating a rule already loaded permanently. A rare signal is a read
 signal.

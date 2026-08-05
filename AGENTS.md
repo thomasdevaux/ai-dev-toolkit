@@ -12,21 +12,23 @@ consumer of them.
 | Command | Description |
 |---------|-------------|
 | `python -m tools.sync sync <id...> --toolkit-root . --project-dir <path>` | Sync manifest entries into a project's `.claude/`. |
-| `python -m tools.audit --toolkit-root .` | Lint: `paths:` overlap, 200-line rule cap, choice-group integrity, `vendor/` provenance, missing `summary:`. |
+| `python -m tools.audit --toolkit-root .` | Lint: `paths:` overlap, 200-line rule cap, choice-group integrity, third-party provenance, missing `summary:`. |
 | `python -m pytest` | The test suite for `tools/`. |
 
 No build step — markdown + YAML + two small Python packages under `tools/`.
 
-## Repo layout
+## Layout
 
 ```
 sync-manifest.yaml   # every syncable entry — single source of truth for tier/scope/summary/detect
 common/              # the baseline block: rules + always-available skills
 context-quality/  process/<none|light|full>/  tech-stacks/<lang>/
+self-check/          # a block too: the session-start drift-check stub
+user-tools/          # blocks deployed to ~/.claude/ rather than a project
 incubator/           # parked blocks, deliberately absent from the manifest
 handbook/            # team reference on agentic coding (not synced, not toolkit docs)
 docs/                # this toolkit's own documentation
-tools/sync/  tools/audit/  templates/new-block/
+tools/sync/  tools/audit/  templates/new-block/  tests/  demo/
 ```
 
 ## Invariants
@@ -46,9 +48,9 @@ tools/sync/  tools/audit/  templates/new-block/
 
 ## Self-application
 
-This repo does not sync its own blocks onto itself, and commits land
-directly on `main` — deliberate, since it's the source these blocks are
-authored and validated in, not a consumer of them. Don't apply
+This repo does not sync its own blocks onto itself — deliberate, since
+it's the source these blocks are authored and validated in, not a
+consumer of them. Don't apply
 `common/rules/*` conventions (branch-per-feature, PR review, etc.) here
 unless the user asks. It does, however, follow the doc map it publishes.
 
@@ -69,4 +71,5 @@ Don't preload these — open one only when the task actually calls for it.
 - Adopting the toolkit in a project, block catalog →
   [`docs/user-guide.md`](docs/user-guide.md).
 - Why this repo exists → [`docs/vision.md`](docs/vision.md).
+- Changing what the status line displays → [`docs/statusline.md`](docs/statusline.md).
 - How the team is meant to work with an agent → [`handbook/`](handbook/).

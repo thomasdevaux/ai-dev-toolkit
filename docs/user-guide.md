@@ -137,14 +137,25 @@ python -m tools.sync sync tech-stack-rust --toolkit-root <checkout> --project-di
 
 ## Automatic drift checks (toolkit-self-check)
 
-A `SessionStart` hook reports, at the start of every session, whether the
-project is missing baseline/choice-group entries or has drifted from what's
-synced. It resolves its own toolkit copy: `AI_DEV_TOOLKIT_ROOT` if set,
-otherwise a cache at `~/.cache/ai-dev-toolkit` (pulled at most hourly).
+A `SessionStart` hook reports, at the start of a session, whether the project
+is missing baseline/choice-group entries or has drifted from what's synced. It
+resolves its own toolkit copy: `AI_DEV_TOOLKIT_ROOT` if set, otherwise a cache
+at `~/.cache/ai-dev-toolkit` (pulled at most hourly).
 
-**It stays quiet where it should.** A folder that is neither a git repository
-nor previously synced gets a single line, not an onboarding checklist — see
-[`decisions.md`](decisions.md#d-09) for why.
+**It stays quiet where it should**, which is most of the time:
+
+- a project with nothing pending gets **nothing at all** — no confirmation
+  that everything is fine, see [`decisions.md`](decisions.md#d-08);
+- a folder that is neither a git repository nor previously synced gets
+  nothing either, so a scratch session is never onboarded
+  ([`decisions.md`](decisions.md#d-09));
+- a toolkit checkout is exempt from its own check
+  ([`decisions.md`](decisions.md#d-13)).
+
+Two things it still surfaces without being asked, because nothing else would:
+blocks marked `suggested` and a detected stack whose block isn't synced. Both
+stop as soon as you sync them. `python -m tools.sync status` without
+`--for-hook` prints the full picture, up-to-date entries included.
 
 Every project gets the check once it syncs the baseline. The user-scope entry
 covers the case a project hook can't: a brand-new, never-synced project.

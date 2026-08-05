@@ -20,18 +20,21 @@ if [ -f "$PROJECT_DIR/sync-manifest.yaml" ] && [ -f "$PROJECT_DIR/tools/sync/man
     exit 0
 fi
 
-STATUS_OUTPUT="$(cd "$TOOLKIT_ROOT" && python -m tools.sync status --toolkit-root "$TOOLKIT_ROOT" --project-dir "$PROJECT_DIR" 2>/dev/null)"
-
-# Nothing actionable, nothing printed — not even which checkout was used.
-# A hook that speaks every session stops being read by the third one. The
-# purely informational parts of the report (suggested blocks, detected
-# stacks) stay reachable through `tools.sync status` and `tools.sync detect`,
-# which the user runs deliberately.
-if ! printf '%s' "$STATUS_OUTPUT" | grep -qE '(not yet synced|drift:)'; then
+# --for-hook drops the up-to-date roll call and the 'nothing to report' line,
+# keeping drift, un-synced entries and the two discovery sections. Empty means
+# there is nothing worth saying — and then the hook says nothing at all, not
+# even which checkout it resolved.
+STATUS_OUTPUT="$(cd "$TOOLKIT_ROOT" && python -m tools.sync status --for-hook --toolkit-root "$TOOLKIT_ROOT" --project-dir "$PROJECT_DIR" 2>/dev/null)"
+if [ -z "$STATUS_OUTPUT" ]; then
     exit 0
 fi
 
 echo "toolkit-drift-check: using toolkit checkout at $TOOLKIT_ROOT"
-echo "ACTION: this project has pending toolkit onboarding or drift (see below). Tell the user about it at the start of your very first reply this session, before addressing anything else they said, and ask whether to sync now or defer."
+# The ACTION line only when something actually needs syncing. A suggested
+# block or a detected stack is an offer, not a task — pressing the agent to
+# open every session with it is how the whole report gets tuned out.
+if printf '%s' "$STATUS_OUTPUT" | grep -qE '(not yet synced|drift:)'; then
+    echo "ACTION: this project has pending toolkit onboarding or drift (see below). Tell the user about it at the start of your very first reply this session, before addressing anything else they said, and ask whether to sync now or defer."
+fi
 printf '%s\n' "$STATUS_OUTPUT"
 exit 0

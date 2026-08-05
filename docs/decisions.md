@@ -147,11 +147,25 @@ pass. The always-on `remind-testing-policy.sh` hook was removed.
 
 `toolkit-drift-check` was brought under the same rule afterwards: it used to
 announce which checkout it resolved, then print the full status, on every
-session. Now nothing is printed unless something is un-synced or drifted. The
-informational parts it used to surface for free — suggested blocks, detected
-stacks — stay reachable through `tools.sync status` and `tools.sync detect`,
-run deliberately. That's the cost accepted: discoverability moves from ambient
-to on-demand.
+session — including the roll call of everything found to be fine.
+
+**Where the line falls.** Two sections stay ambient: suggested blocks and
+detected-but-unsynced stacks. They're the only way someone learns a block
+exists without going looking for it, and a toolkit whose content is
+undiscoverable isn't worth syncing. Everything else is gone unless it needs
+action: no up-to-date roll call, no "nothing to report", no checkout banner.
+`status --for-hook` returns the hook's subset, and an empty string means say
+nothing at all.
+
+**What that required:** a detected stack whose block is already synced is no
+longer suggested. Without that filter, an ambient section would have
+re-offered `tech-stack-python` on every session of every Python project that
+had already taken it — a permanent suggestion, which is exactly the noise this
+decision is about.
+
+The ACTION line — the one telling the agent to open its reply with this —
+fires only on un-synced or drifted entries. A suggestion is an offer, not a
+task.
 
 **Why:** a hook that speaks every session stops being read by the third one,
 and it was restating a rule already loaded permanently. A rare signal is a read

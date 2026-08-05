@@ -55,11 +55,12 @@ def _cmd_status(args: argparse.Namespace) -> int:
     project_dir = Path(args.project_dir) if args.project_dir else Path.cwd()
     claude_dir = project_dir / ".claude"
     try:
-        report = build_status_report(toolkit_root, claude_dir, project_dir)
+        report = build_status_report(toolkit_root, claude_dir, project_dir, for_hook=args.for_hook)
     except ManifestError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
-    print(report)
+    if report:
+        print(report)
     return 0
 
 
@@ -82,6 +83,7 @@ def build_parser() -> argparse.ArgumentParser:
     status_parser = subparsers.add_parser("status", help="report sync drift and unsynced baseline/stack entries")
     status_parser.add_argument("--toolkit-root", required=True, help="path to the toolkit checkout")
     status_parser.add_argument("--project-dir", help="target project directory (default: cwd)")
+    status_parser.add_argument("--for-hook", action="store_true", help="report only what's worth interrupting a session for; print nothing when there isn't any")
     status_parser.set_defaults(func=_cmd_status)
 
     return parser

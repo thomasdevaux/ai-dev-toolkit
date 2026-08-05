@@ -268,3 +268,96 @@ def test_status_never_reports_a_user_scope_entry_as_missing_from_a_project(tmp_p
 
     assert "[project-thing] recommended (baseline), not yet synced" in report
     assert "machine-thing" not in report
+
+
+def _fully_synced_project(tmp_path: Path) -> tuple[Path, Path, Path]:
+    """A project with nothing pending: both baseline entries synced and clean,
+    a process choice made, and no suggested entry left to offer."""
+    toolkit_root = _make_toolkit(tmp_path)
+    project_dir = _make_project(tmp_path)
+    claude_dir = project_dir / ".claude"
+    (claude_dir / "rules").mkdir(parents=True)
+    (claude_dir / "rules" / "style.md").write_text("# style\n", encoding="utf-8")
+    (claude_dir / "settings.json").write_text(
+        json.dumps({"enabledPlugins": {"gitlab@claude-plugins-official": True}}), encoding="utf-8"
+    )
+    (claude_dir / ".toolkit-sync-state").write_text(
+        json.dumps(
+            {
+                "ref": "abc123",
+                "files": {"rules/style.md": "irrelevant"},
+                "entries": {
+                    "common-rules": {"scope": "project", "tier": "baseline"},
+                    "gitlab": {"scope": "project", "tier": "baseline"},
+                    "some-tool": {"scope": "project", "tier": "suggested"},
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    return toolkit_root, project_dir, claude_dir
+
+
+def test_hook_report_is_empty_when_nothing_needs_saying(tmp_path):
+    """The whole point of for_hook: an empty string is the signal to print
+    nothing at all, not even which checkout was resolved."""
+    toolkit_root, project_dir, claude_dir = _fully_synced_project(tmp_path)
+
+    assert build_status_report(toolkit_root, claude_dir, project_dir, for_hook=True) == ""
+
+
+def test_hook_report_drops_the_up_to_date_roll_call_but_status_keeps_it(tmp_path):
+    toolkit_root, project_dir, claude_dir = _fully_synced_project(tmp_path)
+    (claude_dir / "rules" / "style.md").write_text("# drifted\n", encoding="utf-8")
+
+    hook_report = build_status_report(toolkit_root, claude_dir, project_dir, for_hook=True)
+    full_report = build_status_report(toolkit_root, claude_dir, project_dir)
+
+    assert "[common-rules] drift: 1 file(s) changed" in hook_report
+    assert "up to date" not in hook_report
+    assert "[gitlab] up to date" in full_report
+
+
+def test_hook_report_keeps_the_two_discovery_sections(tmp_path):
+    """Suggested blocks and detected stacks stay ambient — they're the only
+    way someone finds out a block exists without going looking for it."""
+    toolkit_root = _make_toolkit(tmp_path)
+    project_dir = _make_project(tmp_path)
+    (project_dir / "pyproject.toml").write_text("", encoding="utf-8")
+
+    report = build_status_report(toolkit_root, project_dir / ".claude", project_dir, for_hook=True)
+
+    assert "  - python" in report
+    assert "  - some-tool - A useful extra." in report
+
+
+def test_hook_report_stays_empty_in_a_scratch_folder(tmp_path):
+    toolkit_root = _make_toolkit(tmp_path)
+    project_dir = tmp_path / "scratch"
+    project_dir.mkdir()
+
+    assert build_status_report(toolkit_root, project_dir / ".claude", project_dir, for_hook=True) == ""
+
+
+def test_status_stops_suggesting_a_stack_once_its_block_is_synced(tmp_path):
+    """Otherwise the suggestion is permanent: it's printed every session of
+    every Python project, including the ones that already took it."""
+    toolkit_root = _make_toolkit(tmp_path)
+    project_dir = _make_project(tmp_path)
+    (project_dir / "pyproject.toml").write_text("", encoding="utf-8")
+    claude_dir = project_dir / ".claude"
+    claude_dir.mkdir(parents=True)
+    (claude_dir / ".toolkit-sync-state").write_text(
+        json.dumps(
+            {
+                "ref": "abc",
+                "files": {},
+                "entries": {"tech-stack-python": {"scope": "project", "tier": "tech-stack"}},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = build_status_report(toolkit_root, claude_dir, project_dir)
+
+    assert "detected stack(s)" not in report

@@ -40,7 +40,17 @@ def _entry_drift(entry: SyncEntry, toolkit_root: Path, claude_dir: Path) -> str 
     return ", ".join(detail)
 
 
-def _synced_lines(manifest: dict[str, SyncEntry], state: SyncState, toolkit_root: Path, claude_dir: Path) -> list[str]:
+def _synced_lines(
+    manifest: dict[str, SyncEntry],
+    state: SyncState,
+    toolkit_root: Path,
+    claude_dir: Path,
+    include_clean: bool = True,
+) -> list[str]:
+    """`include_clean=False` drops the '[x] up to date' lines. The hook uses it:
+    confirming every session that nothing changed is the noise D-08 forbids,
+    while `tools.sync status` run deliberately should still show the whole
+    picture — including what it checked and found fine."""
     lines = []
     for entry_id in sorted(state.entries):
         if entry_id not in manifest:
@@ -48,7 +58,8 @@ def _synced_lines(manifest: dict[str, SyncEntry], state: SyncState, toolkit_root
             continue
         drift = _entry_drift(manifest[entry_id], toolkit_root, claude_dir)
         if drift is None:
-            lines.append(f"[{entry_id}] up to date")
+            if include_clean:
+                lines.append(f"[{entry_id}] up to date")
         else:
             lines.append(f"[{entry_id}] drift: {drift}")
     return lines
@@ -116,8 +127,13 @@ def _is_onboardable(project_dir: Path, state: SyncState) -> bool:
     return (project_dir / ".git").exists() or bool(state.entries)
 
 
-def _stack_lines(project_dir: Path) -> list[str]:
-    stacks = detect_stacks(project_dir)
+def _stack_lines(project_dir: Path, state: SyncState) -> list[str]:
+    """A stack whose block is already synced isn't 'suggested for review' any
+    more. Without this filter the report re-suggests tech-stack-python on every
+    session of every Python project that already has it — and this is one of
+    the two sections the hook keeps printing ambiently, so a stale suggestion
+    here is a permanent one."""
+    stacks = [stack for stack in detect_stacks(project_dir) if f"tech-stack-{stack}" not in state.entries]
     if not stacks:
         return []
     lines = ["detected stack(s), suggested for review (not synced automatically):"]
@@ -125,18 +141,25 @@ def _stack_lines(project_dir: Path) -> list[str]:
     return lines
 
 
-def build_status_report(toolkit_root: Path, claude_dir: Path, project_dir: Path) -> str:
+def build_status_report(toolkit_root: Path, claude_dir: Path, project_dir: Path, for_hook: bool = False) -> str:
+    """`for_hook=True` returns only what's worth interrupting a session for:
+    drift, un-synced baseline/choice-group entries, and the two discovery
+    sections (suggested blocks, detected stacks) the user asked to keep
+    ambient. Everything else — the up-to-date roll call, the 'nothing to
+    report' line — is dropped, so an empty string means say nothing at all."""
     manifest = load_manifest(toolkit_root)
     state = load_state(claude_dir)
 
     if not _is_onboardable(project_dir, state):
+        if for_hook:
+            return ""
         return (
             "toolkit: this folder isn't a git repository and has never been synced, "
             "nothing to report. Run 'toolkit-sync sync' here if it becomes a real project."
         )
 
     lines: list[str] = []
-    lines.extend(_synced_lines(manifest, state, toolkit_root, claude_dir))
+    lines.extend(_synced_lines(manifest, state, toolkit_root, claude_dir, include_clean=not for_hook))
     missing_lines, has_missing_baseline = _missing_lines(manifest, state)
     lines.extend(missing_lines)
     if has_missing_baseline:
@@ -149,9 +172,11 @@ def build_status_report(toolkit_root: Path, claude_dir: Path, project_dir: Path)
             "baseline entry above in one go. (on Windows cmd/PowerShell, use "
             f"{toolkit_root}\\toolkit-sync.cmd instead)"
         )
-    lines.extend(_stack_lines(project_dir))
+    lines.extend(_stack_lines(project_dir, state))
     lines.extend(_suggested_lines(manifest, state, scope="project"))
 
     if not lines:
+        if for_hook:
+            return ""
         return "toolkit status: nothing synced, nothing recommended, no stacks detected."
     return "\n".join(lines)

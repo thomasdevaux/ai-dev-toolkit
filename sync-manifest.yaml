@@ -35,7 +35,7 @@
   target: .claude/
   scope: project
   tier: baseline
-  summary: Org-wide rules and always-available skills - security, git workflow, language, process profile, code navigation, output compression.
+  summary: Org-wide rules and always-available skills - security, language, process profile, code navigation, output compression.
   settings_patch:
     hooks:
       SessionStart:
@@ -95,7 +95,7 @@
   target: .claude/
   scope: project
   tier: choice-group:process
-  summary: The default discipline - doc map, requirements, decisions, testing policy, desktop stack selection.
+  summary: The default discipline - doc map, requirements, decisions, testing policy, git workflow.
 
 - id: process-full
   type: file
@@ -185,7 +185,6 @@
 # Official language servers, all at user scope. Measured context cost is zero
 # (no skill, command or agent), and ~/.claude applies in every folder — which is
 # the only way a scratch script session gets them, since it never syncs anything.
-# See docs/decisions.md#d-12.
 
 - id: pyright-lsp-user
   type: official-plugin

@@ -54,22 +54,14 @@ consumer of them. Don't apply
 `common/rules/*` conventions (branch-per-feature, PR review, etc.) here
 unless the user asks. It does, however, follow the doc map it publishes.
 
-The session-start drift check exits silently on any toolkit checkout — see
-[`docs/decisions.md`](docs/decisions.md#d-13).
+The session-start drift check exits silently on any toolkit checkout —
+see [`docs/maintaining.md`](docs/maintaining.md#gotchas).
 
 ## Only if you need it
 
 Don't preload these — open one only when the task actually calls for it.
 
-- Adding, modifying, or deprecating a block →
-  [`docs/developer-guide.md`](docs/developer-guide.md).
-- Why a block/tier decision was made →
-  [`docs/decisions.md`](docs/decisions.md).
-- How blocks/tiers/rule-loading work → [`docs/architecture.md`](docs/architecture.md).
-- Guarantees `tools/sync`/`tools/audit` must hold →
-  [`docs/requirements.md`](docs/requirements.md).
-- Adopting the toolkit in a project, block catalog →
-  [`docs/user-guide.md`](docs/user-guide.md).
-- Why this repo exists → [`docs/vision.md`](docs/vision.md).
-- Changing what the status line displays → [`docs/statusline.md`](docs/statusline.md).
+- Blocks, tiers, rule-loading, and the add/change/deprecate workflow →
+  [`docs/maintaining.md`](docs/maintaining.md).
+- Adopting the toolkit in a project → [`README.md`](README.md).
 - How the team is meant to work with an agent → [`handbook/`](handbook/).

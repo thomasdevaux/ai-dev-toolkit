@@ -18,14 +18,14 @@ python -m tools.sync sync --toolkit-root . --project-dir demo/process-light-proj
 ```
 
 No entry ids syncs every `tier: baseline` entry at once. Expected:
-`common-rules` writes `.claude/rules/{security,git-workflow,language,process-profile}.md`;
-`context-quality` writes its rule, two skills, the `revise-agents-md` command
-and registers `context-check.sh`; `gitlab` patches `enabledPlugins`;
-`toolkit-self-check` writes its hook and registers it.
+`common-rules` writes `.claude/rules/{security,language,process-profile}.md`
+and the `desktop-app-architecture` skill; `context-quality` writes its rule,
+two skills, the `revise-agents-md` command and registers `context-check.sh`;
+`gitlab` patches `enabledPlugins`; `toolkit-self-check` writes its hook and
+registers it.
 
-Then ask Claude to "write a commit message" anywhere — the git-workflow and
-language rules should surface unprompted, since they're unscoped and load at
-launch.
+Then ask Claude to "write a commit message" anywhere — the language rule
+should surface unprompted, since it's unscoped and loads at launch.
 
 ## The quiet path: a scratch folder
 
@@ -62,6 +62,9 @@ python -m tools.sync sync process-light --toolkit-root . --project-dir demo/proc
   then ask Claude to run `adr-cleanup` — expected: it flags the
   contradiction or the misplaced file, proposes a fix and a regenerated
   `INDEX.md`, and applies nothing on its own.
+- Ask Claude to "write a commit message" — expected: `git-workflow-light`
+  (branch/rebase/squash/PR discipline) and `commit-message-format`
+  (subject/body conventions) both surface, unprompted.
 
 ## process-none
 
@@ -94,7 +97,7 @@ python -m tools.sync sync tech-stack-python --toolkit-root . --project-dir demo/
 
 Expected: `detect` suggests `python`. Then ask "I want to build a desktop app
 for this" *before* syncing any stack — the `desktop-app-architecture` skill
-from `process-light` should tour the three branches, ask what matters, and
+from `common` should tour the three branches, ask what matters, and
 hand off with an explicit sync command rather than answering the structural
 question itself.
 

@@ -29,5 +29,4 @@ throwaway session worth opening.
 After that, opening a session in a scratch folder just works — no `.claude/`
 is created, nothing nags you. The toolkit only becomes visible in a real git
 repository, where it offers the project baseline and asks which process
-profile applies. See [`../docs/user-guide.md`](../docs/user-guide.md) for the
-project side.
+profile applies. See [`../README.md`](../README.md) for the project side.

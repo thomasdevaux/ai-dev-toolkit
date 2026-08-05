@@ -1,49 +1,37 @@
-# incubator — blocs parqués
+# incubator — parked blocks
 
-Ce répertoire contient du contenu écrit pour le toolkit mais **pas encore
-mûr**, et délibérément **absent de `sync-manifest.yaml`** : rien d'ici ne peut
-être synchronisé dans un projet.
+This directory holds content written for the toolkit but **not yet
+mature**, and deliberately **absent from `sync-manifest.yaml`**: nothing
+here can be synced into a project.
 
-## Pourquoi
-
-La première mouture du toolkit a couvert cinq stacks avec des règles de vingt
-lignes, largement déduites plutôt que vécues : conventions MISRA, règles
-safety-critical, conventions de modélisation, style et packaging par langage.
-Rien de tout ça n'a été validé sur un vrai projet. Publier une convention
-d'équipe qui n'a jamais servi coûte plus cher que ne rien publier : elle est
-suivie sans être questionnée, et personne ne sait plus ce qui est éprouvé.
-
-Le manifest n'expose donc que du contenu v1 mûr. Le reste attend ici — visible,
-lisible, réutilisable comme point de départ, sans prétendre à autre chose.
-
-## Contenu
+## Content
 
 ```
 stacks/embedded-c/           MISRA, safety-critical, build-toolchain, safety-review
-stacks/model-based-design/   conventions Simulink, check-model, generate-code-review
+stacks/model-based-design/   Simulink conventions, check-model, generate-code-review
 stacks/nodejs/               packaging, web-style, ship-web
 stacks/python/               packaging, style, ship-tool, quick-script, quick-fix
 stacks/rust/                 packaging, style, ship-rust, quick-fix
-demo/                        les projets de démo qui n'existaient que pour ces blocs
+demo/                        demo projects that existed only for these blocks
 ```
 
-`stacks/python/` et `stacks/rust/` existent toujours à la racine du toolkit :
-seul leur contenu non validé est parqué ici, le skill d'architecture desktop
-qui les compose en v1 est resté en place.
+`stacks/python/` and `stacks/rust/` still exist at the toolkit root: only
+their unvalidated content is parked here, the desktop-architecture skill
+that composes them in v1 stays in place.
 
-## Promouvoir un bloc
+## Promoting a block
 
-Deux conditions, cumulatives :
+Two conditions, both required:
 
-1. le contenu a **servi sur au moins un projet réel**, et il en revient corrigé
-   plutôt qu'intact ;
-2. il a été **relu par quelqu'un du domaine** — un développeur embarqué pour
-   les règles MISRA, pas l'auteur du toolkit.
+1. the content has **been used on at least one real project**, and comes
+   back corrected rather than untouched;
+2. it has been **reviewed by a domain expert** — an embedded developer for
+   MISRA rules, not the toolkit's author.
 
-La procédure ensuite : déplacer le bloc sous `stacks/` (ou l'emplacement qui
-convient), ajouter son entrée dans `sync-manifest.yaml` avec un `summary:`,
-lancer `python -m tools.audit --toolkit-root .`, et documenter le bloc dans le
-catalogue de [`docs/user-guide.md`](../docs/user-guide.md).
+The procedure then: move the block under `stacks/` (or wherever fits),
+add its entry to `sync-manifest.yaml` with a `summary:`, and run
+`python -m tools.audit --toolkit-root .`. See
+[`docs/maintaining.md`](../docs/maintaining.md) for the full procedure.
 
-Un bloc parqué qui n'a intéressé personne pendant un an mérite d'être supprimé
-plutôt que gardé : `git log` le retrouvera si le besoin revient.
+A parked block that nobody has touched in a year deserves to be deleted
+rather than kept: `git log` will bring it back if the need resurfaces.

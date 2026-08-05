@@ -45,8 +45,6 @@ and where the line falls.
 
 ## This toolkit
 
-- [`../docs/user-guide.md`](../docs/user-guide.md) — adopting it in a project.
-- [`../docs/architecture.md`](../docs/architecture.md) — how blocks and tiers
-  work.
-- [`../docs/developer-guide.md`](../docs/developer-guide.md) — authoring a
-  block.
+- [`../README.md`](../README.md) — adopting it in a project.
+- [`../docs/maintaining.md`](../docs/maintaining.md) — how blocks and tiers
+  work, and authoring a block.

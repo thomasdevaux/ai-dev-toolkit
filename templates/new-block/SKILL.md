@@ -23,11 +23,17 @@ you want it to auto-trigger in a session.
    - Location: `common/` (org-wide, singleton), `process/<variant>/` (a
      new mutually-exclusive process profile — confirm the full set of
      variants and their shared choice-group name now), or
-     `stacks/<topic>/` (one language/tech stack).
-   - `tier` for its manifest entry: `baseline` (common's default),
-     `choice-group:<name>` (process variants), `stack` (tech stacks, with
-     a `detect` marker-file list), or `optional` (opt-in, never
-     auto-suggested — e.g. `user-tools/`).
+     `tech-stacks/<lang>/` (one language/tech stack).
+   - `tier` for its manifest entry: `baseline` (expected everywhere),
+     `choice-group:<name>` (process variants), `tech-stack` (with a
+     `detect` marker-file list), `suggested` (useful and listed once as
+     available, never pressed), or `optional` (opt-in and never surfaced
+     at all — for something the user syncs by id because they already
+     know they want it).
+   - A one-line `summary:` — mandatory, and the source for both the
+     status report and the user-guide catalog.
+   - **Whether it belongs in the manifest at all.** Content not yet used
+     on a real project goes to `incubator/`, unsynced, until it has.
    - `scope`: `project` (written to a consumer's `.claude/`) or `user`
      (written to `~/.claude/`).
    - Does it need a subagent with a pinned model/effort for a specific
@@ -74,16 +80,17 @@ you want it to auto-trigger in a session.
 6. **If a hook was requested**, write `hooks/<name>.sh` (or the
    appropriate script type) and wire it through the manifest entry's
    `settings_patch` on the relevant `hooks.<Event>` key — see
-   `process/light`'s `remind-testing-policy.sh` entry in
-   `sync-manifest.yaml` for a worked example, including the executable
-   bit that `tools/sync` sets automatically for anything under
-   `hooks/*.sh`.
+   `context-quality`'s `context-check.sh` entry in `sync-manifest.yaml`
+   for a worked example, including the executable bit that `tools/sync`
+   sets automatically for anything under `hooks/*.sh`. **The hook must
+   print nothing when its check passes**: one that speaks every session
+   stops being read.
 
 7. **Register the block** in `sync-manifest.yaml`: add one `type: file`
    entry with `id`, `source: <location>`, `target: .claude/`, `scope`,
-   `tier`, and `detect` if it's a stack. Add a separate `type:
+   `tier`, `summary`, and `detect` if it's a tech stack. Add a separate `type:
    official-plugin` entry (with its own matching `detect` if it's a
-   stack) for any official Claude Code plugin the block depends on,
+   tech stack) for any official Claude Code plugin the block depends on,
    rather than bundling it into the block's own entry.
 
 8. **Self-check before finishing**:

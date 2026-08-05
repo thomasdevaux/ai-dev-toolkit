@@ -19,12 +19,12 @@ MANIFEST = """
     enabledPlugins:
       "gitlab@claude-plugins-official": true
 
-- id: stacks-nodejs
+- id: tech-stack-nodejs
   type: file
-  source: stacks/nodejs
+  source: tech-stacks/nodejs
   target: .claude/
   scope: project
-  tier: stack
+  tier: tech-stack
   detect: ["package.json"]
 """
 
@@ -36,7 +36,7 @@ def _make_toolkit(tmp_path: Path) -> Path:
     common_dir = toolkit_root / "common" / "rules"
     common_dir.mkdir(parents=True)
     (common_dir / "style.md").write_text("# style\n", encoding="utf-8")
-    (toolkit_root / "stacks" / "nodejs").mkdir(parents=True)
+    (toolkit_root / "tech-stacks" / "nodejs").mkdir(parents=True)
     return toolkit_root
 
 
@@ -76,7 +76,7 @@ def test_sync_with_explicit_entry_id_still_syncs_only_that_entry(tmp_path):
     exit_code = main(
         [
             "sync",
-            "stacks-nodejs",
+            "tech-stack-nodejs",
             "--toolkit-root",
             str(toolkit_root),
             "--project-dir",
@@ -90,4 +90,4 @@ def test_sync_with_explicit_entry_id_still_syncs_only_that_entry(tmp_path):
     import json
 
     state = json.loads((project_dir / ".claude" / ".toolkit-sync-state").read_text(encoding="utf-8"))
-    assert set(state["entries"]) == {"stacks-nodejs"}
+    assert set(state["entries"]) == {"tech-stack-nodejs"}

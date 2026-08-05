@@ -22,13 +22,21 @@ MANIFEST = """
     enabledPlugins:
       "gitlab@claude-plugins-official": true
 
-- id: stacks-nodejs
+- id: tech-stack-python
   type: file
-  source: stacks/nodejs
+  source: tech-stacks/python
   target: .claude/
   scope: project
-  tier: stack
-  detect: ["package.json"]
+  tier: tech-stack
+  detect: ["pyproject.toml"]
+
+- id: some-tool
+  type: file
+  source: some-tool
+  target: .claude/
+  scope: project
+  tier: suggested
+  summary: A useful extra.
 """
 
 
@@ -39,14 +47,23 @@ def _make_toolkit(tmp_path: Path) -> Path:
     common_dir = toolkit_root / "common" / "rules"
     common_dir.mkdir(parents=True)
     (common_dir / "style.md").write_text("# style\n", encoding="utf-8")
-    (toolkit_root / "stacks" / "nodejs").mkdir(parents=True)
+    (toolkit_root / "tech-stacks" / "python").mkdir(parents=True)
+    (toolkit_root / "some-tool").mkdir(parents=True)
     return toolkit_root
+
+
+def _make_project(tmp_path: Path) -> Path:
+    """A project the report is allowed to speak about: a git repository.
+    A folder that is neither a repo nor synced gets a one-line mention
+    instead, so opening a session in a scratch directory stays quiet."""
+    project_dir = tmp_path / "project"
+    (project_dir / ".git").mkdir(parents=True)
+    return project_dir
 
 
 def test_status_reports_missing_baseline_on_empty_project(tmp_path):
     toolkit_root = _make_toolkit(tmp_path)
-    project_dir = tmp_path / "project"
-    project_dir.mkdir()
+    project_dir = _make_project(tmp_path)
     claude_dir = project_dir / ".claude"
 
     report = build_status_report(toolkit_root, claude_dir, project_dir)
@@ -150,12 +167,104 @@ def test_status_reports_drift_on_changed_settings(tmp_path):
 
 def test_status_reports_detected_stacks(tmp_path):
     toolkit_root = _make_toolkit(tmp_path)
-    project_dir = tmp_path / "project"
-    project_dir.mkdir()
-    (project_dir / "package.json").write_text("{}", encoding="utf-8")
+    project_dir = _make_project(tmp_path)
+    (project_dir / "pyproject.toml").write_text("", encoding="utf-8")
     claude_dir = project_dir / ".claude"
 
     report = build_status_report(toolkit_root, claude_dir, project_dir)
 
     assert "detected stack(s), suggested for review (not synced automatically):" in report
-    assert "  - nodejs" in report
+    assert "  - python" in report
+
+
+def test_status_stays_quiet_in_a_scratch_folder(tmp_path):
+    """No .git, nothing ever synced: a session opened here to poke at a script
+    must not turn into an onboarding checklist."""
+    toolkit_root = _make_toolkit(tmp_path)
+    project_dir = tmp_path / "scratch"
+    project_dir.mkdir()
+
+    report = build_status_report(toolkit_root, project_dir / ".claude", project_dir)
+
+    assert "isn't a git repository" in report
+    assert "recommended (baseline)" not in report
+    assert "choice-group" not in report
+
+
+def test_status_speaks_in_a_synced_folder_even_without_git(tmp_path):
+    """Once something has been synced, the folder is a project whatever git
+    thinks of it — drift on what's already there still has to surface."""
+    toolkit_root = _make_toolkit(tmp_path)
+    project_dir = tmp_path / "project"
+    claude_dir = project_dir / ".claude"
+    claude_dir.mkdir(parents=True)
+    (claude_dir / ".toolkit-sync-state").write_text(
+        json.dumps({"ref": "abc123", "files": {}, "entries": {"gitlab": {"scope": "project", "tier": "baseline"}}}),
+        encoding="utf-8",
+    )
+
+    report = build_status_report(toolkit_root, claude_dir, project_dir)
+
+    assert "[common-rules] recommended (baseline), not yet synced" in report
+
+
+def test_status_lists_suggested_entries_without_pressing(tmp_path):
+    toolkit_root = _make_toolkit(tmp_path)
+    project_dir = _make_project(tmp_path)
+    claude_dir = project_dir / ".claude"
+
+    report = build_status_report(toolkit_root, claude_dir, project_dir)
+
+    assert "available, not installed (never synced automatically):" in report
+    assert "  - some-tool - A useful extra." in report
+    # A suggested entry is never phrased as missing, and never blocks.
+    assert "[some-tool] recommended" not in report
+
+
+def test_status_drops_a_suggested_entry_once_synced(tmp_path):
+    toolkit_root = _make_toolkit(tmp_path)
+    project_dir = _make_project(tmp_path)
+    claude_dir = project_dir / ".claude"
+    claude_dir.mkdir(parents=True)
+    (claude_dir / ".toolkit-sync-state").write_text(
+        json.dumps({"ref": "abc", "files": {}, "entries": {"some-tool": {"scope": "project", "tier": "suggested"}}}),
+        encoding="utf-8",
+    )
+
+    report = build_status_report(toolkit_root, claude_dir, project_dir)
+
+    assert "available, not installed" not in report
+
+
+USER_SCOPE_MANIFEST = """
+- id: project-thing
+  type: file
+  source: common
+  target: .claude/
+  scope: project
+  tier: baseline
+  summary: a project block
+
+- id: machine-thing
+  type: file
+  source: common
+  target: ~/.claude/
+  scope: user
+  tier: baseline
+  summary: a per-machine install
+"""
+
+
+def test_status_never_reports_a_user_scope_entry_as_missing_from_a_project(tmp_path):
+    """A user-scope baseline entry lives in ~/.claude. Reporting it in a
+    project's report would nag for something no project sync can fix."""
+    toolkit_root = tmp_path / "toolkit"
+    (toolkit_root / "common" / "rules").mkdir(parents=True)
+    (toolkit_root / "common" / "rules" / "r.md").write_text("# r\n", encoding="utf-8")
+    (toolkit_root / "sync-manifest.yaml").write_text(USER_SCOPE_MANIFEST, encoding="utf-8")
+    project_dir = _make_project(tmp_path)
+
+    report = build_status_report(toolkit_root, project_dir / ".claude", project_dir)
+
+    assert "[project-thing] recommended (baseline), not yet synced" in report
+    assert "machine-thing" not in report

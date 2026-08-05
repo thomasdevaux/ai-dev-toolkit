@@ -11,8 +11,9 @@ the user asks.
 1. Use [`../templates/new-block/SKILL.md`](../templates/new-block/SKILL.md)
    to scaffold it (point Claude at the file directly, or copy it into
    `.claude/skills/` locally). It asks for the block's topic, location
-   (`common/`, `process/<variant>/`, `stacks/<topic>/`,
-   `user-tools/<topic>/`, or `self-check/`), `tier`, and `scope`.
+   (`common/`, `context-quality/`, `process/<variant>/`,
+   `tech-stacks/<lang>/`, `user-tools/<topic>/`, or `self-check/`),
+   `tier`, and `scope`.
 2. Fill in real rule content directly under `rules/<topic>.md` — add
    `paths:` YAML frontmatter if the rule should only apply to matching
    files, leave it unscoped otherwise. There's no companion "rules"
@@ -21,9 +22,17 @@ the user asks.
    on-demand workflow skills under `skills/` only for genuine
    procedures, not rule-restating wrappers.
 3. Register the block in `sync-manifest.yaml`: one `type: file` entry
-   (`id`, `source`, `target: .claude/`, `scope`, `tier`, `detect` if it's
-   a stack), plus a separate `type: official-plugin` entry for any
-   official Claude Code plugin it depends on.
+   (`id`, `source`, `target: .claude/`, `scope`, `tier`, a one-line
+   `summary:`, `detect` if it's a tech stack), plus a separate
+   `type: official-plugin` entry for any official Claude Code plugin it
+   depends on. `summary:` is mandatory — `tools/audit` fails without it,
+   because it's the single source for both the status report and the
+   user-guide catalog.
+
+   **Before adding a stack or a rule set, ask whether it's been used.**
+   Content that hasn't been validated on a real project belongs in
+   `incubator/`, absent from the manifest — see
+   [`decisions.md`](decisions.md#d-01).
 4. Test locally: sync it into a scratch project —
    `python -m tools.sync sync <id> --toolkit-root . --project-dir
    /path/to/scratch --yes`, confirm the expected files land, then re-run
@@ -79,7 +88,7 @@ Non-obvious behaviors of this repo's tooling and conventions.
 
 - **A block's location and `tier` field are the only source of truth for
   governance status** — never encode it in the block's directory name.
-  A block that changes governance status (e.g. moves from `stack` to
+  A block that changes governance status (e.g. moves from `tech-stack` to
   `baseline`) should never need a rename; `tier` lives in
   `sync-manifest.yaml`, not the filesystem path.
 - `.claude/rules/*.md` loads natively — confirmed against Claude Code's
@@ -103,14 +112,29 @@ Non-obvious behaviors of this repo's tooling and conventions.
   confirmation, never blocked outright and never silently skipped.
 - `python -m tools.sync sync <id...> --toolkit-root . --user` targets
   `~/.claude/` for `scope: user` entries; `python -m tools.sync detect
-  --project-dir <path>` only ever *suggests* `tier: stack` entries from
+  --project-dir <path>` only ever *suggests* `tier: tech-stack` entries from
   marker files and never syncs anything itself.
-- `tools/audit/checks.py` is where the three automated checks (`paths:`
-  overlap, 200-line cap, choice-group integrity) live.
+- `tools/audit/checks.py` is where the five automated checks live:
+  `paths:` overlap, 200-line cap, choice-group integrity, provenance
+  (`SOURCE.md` complete, `LICENSE` present for MIT content), and missing
+  `summary:`.
+- **Third-party content is copied, not installed.** Put it in the block that
+  uses it, verbatim, with its `LICENSE` and a `SOURCE.md` beside it (upstream,
+  commit, license, import date, local modifications). Both ship to the
+  consumer deliberately — see
+  [`../handbook/plugins-policy.md`](../handbook/plugins-policy.md).
+- **`common/` is deployed at both scopes** (`common-rules` and
+  `common-rules-user`). Anything added there runs in `~/.claude/` too, so it
+  must make sense in a folder that is not a project — that's why a hook there
+  self-guards, and why `context-quality/` is a separate block.
+- **A hook must be silent when its check passes.** `context-check.sh` and
+  `codegraph-freshness.sh` print nothing on a healthy project; a hook that
+  speaks every session stops being read — see
+  [`decisions.md`](decisions.md#d-08).
 - `python -m tools.sync sync <id...>` with **no** ids expands to every
   `tier: baseline` entry for the target scope (`baseline_entry_ids` in
-  `manifest.py`) — pass explicit ids only for `stack`/`choice-group`/
-  `optional` entries, which always require a deliberate pick.
+  `manifest.py`) — pass explicit ids for `tech-stack`/`choice-group`/
+  `suggested`/`optional` entries, which always require a deliberate pick.
   `python -m tools.sync status --toolkit-root . --project-dir <path>` is
   the read-only version: same drift/missing-entry report, no writes.
 - A `SessionStart` hook script that needs to evolve without requiring

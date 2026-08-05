@@ -1,16 +1,17 @@
-# statusline
+# The status line
 
 A single-line, color-coded Claude Code status line: model/effort/thinking
 flags, a context-window progress bar, and 5h/7d rate-limit usage with time
 to reset.
 
-## Install
+It ships with the per-machine install (`python -m tools.sync sync --user
+--toolkit-root .`), or on its own:
 
 ```
 python -m tools.sync sync user-statusline --toolkit-root . --user
 ```
 
-This copies `statusline.py` to `~/.claude/statusline.py` and merges a
+Either copies `statusline.py` to `~/.claude/statusline.py` and merges a
 `statusLine` entry into `~/.claude/settings.json` (only that key — every
 other setting is left untouched). Confirm the diff when prompted.
 

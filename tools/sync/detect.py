@@ -1,5 +1,11 @@
 """Stack detection from marker files. Suggestions only — never synced
-without explicit confirmation."""
+without explicit confirmation.
+
+Only stacks that have a live sync-manifest.yaml entry belong here: suggesting
+`embedded-c` when no such entry exists any more would send the user after an
+id `tools/sync sync` rejects. Parked stacks live in incubator/ and are
+deliberately undetected.
+"""
 from __future__ import annotations
 
 from pathlib import Path
@@ -7,16 +13,14 @@ from pathlib import Path
 # stack name -> plain marker filenames looked up at root + one level deep
 MARKER_FILES: dict[str, list[str]] = {
     "python": ["pyproject.toml", "requirements.txt", "setup.py"],
-    "nodejs": ["package.json"],
     "rust": ["Cargo.toml"],
+    "go": ["go.mod"],
 }
 
 # stack name -> glob patterns searched recursively
 MARKER_GLOBS: dict[str, list[str]] = {
-    "model-based-design": ["*.slx", "*.mdl"],
+    "dotnet": ["*.csproj", "*.sln"],
 }
-
-EMBEDDED_C_BUILD_MARKERS = ["Makefile", "CMakeLists.txt"]
 
 
 def _has_marker_file(project_dir: Path, filenames: list[str]) -> bool:
@@ -40,12 +44,6 @@ def _has_marker_glob(project_dir: Path, patterns: list[str]) -> bool:
     return False
 
 
-def _has_embedded_c(project_dir: Path) -> bool:
-    if not _has_marker_file(project_dir, EMBEDDED_C_BUILD_MARKERS):
-        return False
-    return any(project_dir.rglob("*.c")) or any(project_dir.rglob("*.h"))
-
-
 def detect_stacks(project_dir: Path) -> list[str]:
     found = []
     for stack, filenames in MARKER_FILES.items():
@@ -54,6 +52,4 @@ def detect_stacks(project_dir: Path) -> list[str]:
     for stack, patterns in MARKER_GLOBS.items():
         if _has_marker_glob(project_dir, patterns):
             found.append(stack)
-    if _has_embedded_c(project_dir):
-        found.append("embedded-c")
     return sorted(found)

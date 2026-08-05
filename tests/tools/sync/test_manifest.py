@@ -1,4 +1,12 @@
-from tools.sync.manifest import SyncEntry, baseline_entry_ids, official_plugin_refs
+import pytest
+
+from tools.sync.manifest import (
+    ManifestError,
+    SyncEntry,
+    baseline_entry_ids,
+    load_manifest,
+    official_plugin_refs,
+)
 
 
 def _entry(
@@ -29,9 +37,34 @@ def test_baseline_entry_ids_filters_by_tier_and_scope():
         "common-rules": _entry("common-rules", tier="baseline", scope="project"),
         "gitlab": _entry("gitlab", tier="baseline", scope="project"),
         "toolkit-self-check-user": _entry("toolkit-self-check-user", tier="optional", scope="user"),
-        "stacks-python": _entry("stacks-python", tier="stack", scope="project"),
+        "tech-stack-python": _entry("tech-stack-python", tier="tech-stack", scope="project"),
         "process-light": _entry("process-light", tier="choice-group:process", scope="project"),
     }
 
     assert baseline_entry_ids(entries, "project") == ["common-rules", "gitlab"]
     assert baseline_entry_ids(entries, "user") == []
+
+
+def test_manifest_rejects_an_unknown_tier(tmp_path):
+    """A typo in `tier:` used to sync silently under a tier nothing looks at —
+    the entry would simply never be reported or suggested again."""
+    (tmp_path / "sync-manifest.yaml").write_text(
+        "- id: x\n  type: file\n  source: a\n  target: .claude/\n  scope: project\n  tier: sugested\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ManifestError, match="invalid tier"):
+        load_manifest(tmp_path)
+
+
+def test_manifest_accepts_suggested_and_choice_group_tiers(tmp_path):
+    (tmp_path / "sync-manifest.yaml").write_text(
+        "- id: a\n  type: file\n  source: a\n  target: .claude/\n  scope: project\n"
+        "  tier: suggested\n  summary: one line\n"
+        "- id: b\n  type: file\n  source: b\n  target: .claude/\n  scope: project\n"
+        "  tier: choice-group:process\n",
+        encoding="utf-8",
+    )
+    entries = load_manifest(tmp_path)
+    assert entries["a"].tier == "suggested"
+    assert entries["a"].summary == "one line"
+    assert entries["b"].choice_group == "process"

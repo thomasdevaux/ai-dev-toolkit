@@ -54,13 +54,19 @@ def _synced_lines(manifest: dict[str, SyncEntry], state: SyncState, toolkit_root
     return lines
 
 
-def _missing_lines(manifest: dict[str, SyncEntry], state: SyncState) -> tuple[list[str], bool]:
+def _missing_lines(manifest: dict[str, SyncEntry], state: SyncState, scope: str = "project") -> tuple[list[str], bool]:
+    """Project-scope entries only, by default. A user-scope baseline entry
+    (the per-machine install) is missing from ~/.claude, not from this
+    project — reporting it here would nag every project on this machine for
+    something no project sync can fix."""
     lines = []
     has_missing_baseline = False
     reported_groups: set[str] = set()
 
     for entry_id in sorted(manifest):
         entry = manifest[entry_id]
+        if entry.scope != scope:
+            continue
 
         if entry.tier == "baseline":
             if entry_id not in state.entries:
@@ -80,6 +86,36 @@ def _missing_lines(manifest: dict[str, SyncEntry], state: SyncState) -> tuple[li
     return lines, has_missing_baseline
 
 
+def _suggested_lines(manifest: dict[str, SyncEntry], state: SyncState, scope: str) -> list[str]:
+    """tier: suggested entries not yet synced — listed so a useful block is
+    discoverable, never counted as drift and never blocking. tier: optional
+    stays deliberately invisible here; that's the only difference between the
+    two tiers."""
+    pending = [
+        manifest[entry_id]
+        for entry_id in sorted(manifest)
+        if manifest[entry_id].tier == "suggested"
+        and manifest[entry_id].scope == scope
+        and entry_id not in state.entries
+    ]
+    if not pending:
+        return []
+    lines = ["available, not installed (never synced automatically):"]
+    for entry in pending:
+        detail = f" - {entry.summary}" if entry.summary else ""
+        lines.append(f"  - {entry.id}{detail}")
+    return lines
+
+
+def _is_onboardable(project_dir: Path, state: SyncState) -> bool:
+    """A scratch folder — no git repo, nothing ever synced — gets a one-line
+    mention instead of the full onboarding report. Opening a session anywhere
+    to work on a throwaway script must not turn into a sync checklist; the
+    common rules such a session needs come from ~/.claude (common-rules-user)
+    rather than from a project .claude/ nobody asked for."""
+    return (project_dir / ".git").exists() or bool(state.entries)
+
+
 def _stack_lines(project_dir: Path) -> list[str]:
     stacks = detect_stacks(project_dir)
     if not stacks:
@@ -92,6 +128,12 @@ def _stack_lines(project_dir: Path) -> list[str]:
 def build_status_report(toolkit_root: Path, claude_dir: Path, project_dir: Path) -> str:
     manifest = load_manifest(toolkit_root)
     state = load_state(claude_dir)
+
+    if not _is_onboardable(project_dir, state):
+        return (
+            "toolkit: this folder isn't a git repository and has never been synced, "
+            "nothing to report. Run 'toolkit-sync sync' here if it becomes a real project."
+        )
 
     lines: list[str] = []
     lines.extend(_synced_lines(manifest, state, toolkit_root, claude_dir))
@@ -108,6 +150,7 @@ def build_status_report(toolkit_root: Path, claude_dir: Path, project_dir: Path)
             f"{toolkit_root}\\toolkit-sync.cmd instead)"
         )
     lines.extend(_stack_lines(project_dir))
+    lines.extend(_suggested_lines(manifest, state, scope="project"))
 
     if not lines:
         return "toolkit status: nothing synced, nothing recommended, no stacks detected."

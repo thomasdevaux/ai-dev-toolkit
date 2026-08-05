@@ -47,7 +47,7 @@ manifest at once:
 ## Stack detection only suggests
 
 `tools/sync detect --project-dir <path>` inspects marker files and
-prints suggested `tier: stack` ids. It never syncs anything itself —
+prints suggested `tier: tech-stack` ids. It never syncs anything itself —
 every sync is an explicit, separate command.
 
 ## Settings patches are scoped

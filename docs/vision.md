@@ -5,10 +5,28 @@
 A multi-stack engineering team needs a shared baseline for how Claude
 Code behaves across its projects — security and git-workflow rules that
 apply everywhere, a process discipline every project opts into exactly
-one of, and per-stack conventions (Python, Node.js/web, Rust, embedded
-C, Simulink/MATLAB model-based design) that only apply where relevant.
-Without a shared source, each project either reinvents these rules or
-drifts out of sync with the rest of the team.
+one of, a single well-shaped context file, and per-stack conventions
+(Python, Rust, Go, .NET) that only apply where relevant. Without a shared
+source, each project either reinvents these rules or drifts out of sync
+with the rest of the team.
+
+## Two deliverables, not one
+
+- **Blocks** — the syncable conventions described below.
+- **A handbook** — [`../handbook/`](../handbook/), the team's reference on
+  working with an agentic coding tool. Never synced, never loaded into a
+  session, written for people. It exists because a shared configuration
+  doesn't teach anyone anything; the reasoning behind it does.
+
+## Expose the mechanism, don't hide it
+
+Everything a block does is a file someone can open and read. That's the
+reason third-party content is copied in plain text with pinned provenance
+rather than installed as a plugin, and why a block that wires up an external tool also
+documents exactly what that tool installs and how to remove it.
+
+The team is learning to work with agents. A magic install command teaches
+nothing; a rule file you can read, disagree with and edit does.
 
 ## The model: synced and committed, not installed
 
@@ -41,8 +59,15 @@ up upstream changes explicitly, on the project's own schedule.
 - It doesn't push updates to consuming projects — sync is always a pull,
   initiated from the consumer's side.
 - It doesn't enforce that a project adopts any particular block beyond
-  the `baseline` tier being a stated team expectation — `stack` and
-  `optional` tiers are always a judgment call.
+  the `baseline` tier being a stated team expectation — `tech-stack`,
+  `suggested` and `optional` tiers are always a judgment call.
+- **It doesn't get in the way of a throwaway session.** Opening Claude in a
+  folder to poke at a script creates nothing and asks nothing; the common
+  rules come from `~/.claude/`. A toolkit that taxes small work is a toolkit
+  people learn to work around.
+- **It doesn't publish conventions nobody has used.** Blocks that haven't
+  been validated on a real project stay in `incubator/`, absent from the
+  manifest, until they have.
 - It doesn't try to be a general-purpose plugin system; each block is
   scoped to what a `.claude/` directory can natively express (rules,
   skills, agents, hooks).

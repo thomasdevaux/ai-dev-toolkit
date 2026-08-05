@@ -134,9 +134,51 @@ def check_choice_groups(toolkit_root: Path, result: AuditResult) -> None:
             )
 
 
+VENDOR_SOURCE_FIELDS = ("upstream:", "commit:", "license:", "imported:")
+
+
+def check_vendor_provenance(toolkit_root: Path, result: AuditResult) -> None:
+    """Wherever a SOURCE.md sits, it is complete. Third-party content copied
+    into a block is indistinguishable from content we wrote unless its
+    provenance is recorded next to it — which is exactly what turns an import
+    into a black box six months later.
+
+    Scoped to blocks that are actually syncable, since that's the content that
+    gets redistributed into other people's repositories."""
+    for entry in _block_entries(toolkit_root):
+        block_root = toolkit_root / entry.source
+        if not block_root.is_dir():
+            continue
+        for source_md in sorted(block_root.rglob("SOURCE.md")):
+            rel = source_md.relative_to(toolkit_root).as_posix()
+            text = source_md.read_text(encoding="utf-8").lower()
+            missing = [f.rstrip(":") for f in VENDOR_SOURCE_FIELDS if f not in text]
+            if missing:
+                result.add("vendor", f"{rel}: missing field(s) {', '.join(missing)}.")
+            license_file = source_md.parent / "LICENSE"
+            if "license:" in text and "mit" in text and not license_file.is_file():
+                result.add(
+                    "vendor",
+                    f"{rel}: declares an MIT license but no LICENSE file sits beside it — "
+                    f"MIT requires the notice to travel with every copy.",
+                )
+
+
+def check_summaries(toolkit_root: Path, result: AuditResult) -> None:
+    """`summary:` is the single source for both the status report's suggested
+    section and the user-guide catalog, so a missing one silently degrades
+    both."""
+    manifest = load_manifest(toolkit_root)
+    for entry_id in sorted(manifest):
+        if not manifest[entry_id].summary.strip():
+            result.add("summary", f"{entry_id}: no 'summary:' in sync-manifest.yaml.")
+
+
 def run_all(toolkit_root: Path) -> AuditResult:
     result = AuditResult()
     check_paths_overlap(toolkit_root, result)
     check_rules_size(toolkit_root, result)
     check_choice_groups(toolkit_root, result)
+    check_vendor_provenance(toolkit_root, result)
+    check_summaries(toolkit_root, result)
     return result

@@ -1,5 +1,9 @@
 # Git workflow
 
+These rules describe work **inside a git repository**. In a folder that isn't
+versioned — a scratch script, a one-off — they simply don't apply: don't
+propose `git init` unless the user asks for it.
+
 - **Branch per feature**: before starting any new piece of work, ask the user
   for a branch name and create it (`git checkout -b feat/<topic>`).
 - **Rebase before merging**: update the feature branch on top of the latest

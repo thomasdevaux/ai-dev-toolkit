@@ -8,6 +8,10 @@ import yaml
 
 VALID_TYPES = {"file", "official-plugin"}
 VALID_SCOPES = {"project", "user"}
+# Plain tier values, plus the "choice-group:<name>" family handled separately.
+# `suggested` differs from `optional` only in visibility: a suggested entry is
+# listed by `status` as available-but-not-installed, an optional one never is.
+VALID_TIERS = {"baseline", "tech-stack", "suggested", "optional"}
 
 
 class ManifestError(ValueError):
@@ -23,6 +27,7 @@ class SyncEntry:
     source: str | None = None
     target: str | None = None
     plugin_ref: str | None = None
+    summary: str = ""
     detect: list[str] = field(default_factory=list)
     settings_patch: dict = field(default_factory=dict)
 
@@ -49,6 +54,11 @@ def _entry_from_dict(raw: dict) -> SyncEntry:
     tier = raw.get("tier")
     if not tier:
         raise ManifestError(f"entry '{entry_id}': missing required field 'tier'")
+    if tier not in VALID_TIERS and not tier.startswith("choice-group:"):
+        raise ManifestError(
+            f"entry '{entry_id}': invalid tier '{tier}' "
+            f"(expected one of {sorted(VALID_TIERS)} or 'choice-group:<name>')"
+        )
 
     if entry_type == "file":
         if not raw.get("source") or not raw.get("target"):
@@ -69,6 +79,7 @@ def _entry_from_dict(raw: dict) -> SyncEntry:
         source=raw.get("source"),
         target=raw.get("target"),
         plugin_ref=raw.get("plugin_ref"),
+        summary=raw.get("summary", ""),
         detect=list(raw.get("detect", [])),
         settings_patch=dict(raw.get("settings_patch", {})),
     )

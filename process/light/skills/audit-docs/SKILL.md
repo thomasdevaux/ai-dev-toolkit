@@ -20,7 +20,7 @@ that runs, so it has to be worth running.
      content belongs, or that the map needs a new slot (a decision for the
      user, not for you).
    - An **active slot missing** (`README.md`, `AGENTS.md`,
-     `docs/architecture.md`, `docs/decisions.md`, `docs/requirements.md`).
+     `docs/architecture.md`, `docs/adr/INDEX.md`, `docs/requirements.md`).
    - An **on-hold stub that was filled anyway**, with no sign its trigger
      fired — that's invented content, flag it as such.
 
@@ -45,10 +45,11 @@ that runs, so it has to be worth running.
    duplicate lines. Flag rows the code contradicts (`done` but the feature
    isn't there; a shipped feature with no row at all).
 
-5. **Decisions.** Every entry has a `D-<NN>` id and one of `settled`,
-   `provisional`, `superseded`. Flag an entry edited in place to reverse an
-   earlier one (should be a new `superseded` entry), and entries that
-   contradict each other.
+5. **ADRs.** A cheap staleness check only — is `docs/adr/INDEX.md` obviously
+   out of sync with the files under `docs/adr/active/` and `docs/adr/archive/`
+   (missing rows, files that no longer exist)? The full pass — status
+   validity, placement, contradictions, consolidation — is `adr-cleanup`'s
+   job; point the user at it instead of duplicating it here.
 
 6. **Content routing and duplication.** This is where the map earns its keep:
    - architecture explained in the `README`;

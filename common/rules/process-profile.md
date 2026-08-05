@@ -18,8 +18,8 @@ criterion is usage, not code size:
 
 | Profile | For what | What it implies |
 | --- | --- | --- |
-| `process-none` | Script, one-shot, tinkering session. | Nothing to maintain: no docs, no requirements, no decisions. |
-| `process-light` | An application or tool with its own repository. | Doc map, requirements list, decisions log. |
+| `process-none` | Script, one-shot, tinkering session. | Nothing to maintain: no docs, no requirements, no ADRs. |
+| `process-light` | An application or tool with its own repository. | Doc map, requirements list, ADR log. |
 | `process-full` | Embedded, critical or certified software. | Extra rigor — **not designed yet**, see below. |
 
 `process-full` is currently a stub: a project adopting it follows

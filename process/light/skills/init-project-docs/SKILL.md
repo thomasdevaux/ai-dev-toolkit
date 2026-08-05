@@ -27,9 +27,9 @@ Read-then-write: never overwrite an existing file. Report what you skipped.
    - `docs/architecture.md` — structure, flows, and the map of the modules
      (where each part of the code lives, one line each). Derive it by reading
      the tree, not by guessing.
-   - `docs/decisions.md` — the header and format described by the `decisions`
-     rule, plus any decision already visible in the code or git history that's
-     worth recording. An empty log with a correct header is fine.
+   - `docs/adr/` — `active/`, `archive/`, and `INDEX.md` per the `adr` rule.
+     Seed one ADR per decision already visible in the code or git history
+     that's worth recording. An empty `INDEX.md` (no ADRs yet) is fine.
    - `docs/requirements.md` — the table described by the `requirements` rule.
      Seed it with what the code already does, one `REQ-00X` line per feature,
      status `done`. If the code does nothing yet, an empty table is fine.

@@ -3,9 +3,9 @@
 This project adopted the `process-none` profile: a script, a one-shot, a
 useful hack. There is **no** long-term context to maintain here.
 
-- **No document set is imposed.** No `docs/` tree, no decisions log, no
+- **No document set is imposed.** No `docs/` tree, no ADR log, no
   requirements list. Don't create them "just in case".
-- **No requirements or decisions tracking.** Whatever needs saying goes in the
+- **No requirements or ADR tracking.** Whatever needs saying goes in the
   code, or in a `README.md` if the author wants one.
 - **The common rules still apply** — security, language, git. A throwaway
   script that commits a secret commits it for good.

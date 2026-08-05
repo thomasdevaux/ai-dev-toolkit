@@ -15,7 +15,7 @@ this map. An open map is how documentation silently scatters.
 | `README.md` | What is this, how do I run it, where do I go next | filled |
 | `AGENTS.md` | The agent's working context (see the project-context rule) | filled |
 | `docs/architecture.md` | How it's built and why, plus the map of the code | filled |
-| `docs/decisions.md` | Why a choice was made, and what was rejected | filled |
+| `docs/adr/` | Why a choice was made, and what was rejected | filled |
 | `docs/requirements.md` | What the software is expected to do | filled |
 | `docs/vision.md` | The original idea, the ambition, the roadmap | on hold |
 | `docs/user-guide.md` | How to use it, for someone who isn't the author | on hold |
@@ -60,7 +60,7 @@ Triggers:
   (where each part of the code lives and what it's for). A code-graph tool, if
   the project uses one, answers fine-grained questions on top of that map — it
   doesn't replace it.
-- `decisions.md` holds the *why*; `architecture.md` holds the *what*. A
+- `docs/adr/` holds the *why*; `architecture.md` holds the *what*. A
   decision buried in an architecture paragraph is a decision nobody will find.
 
 ## Keeping it current
@@ -69,4 +69,5 @@ There is **no rule requiring a doc update in the same commit** — no commit is
 weighed down by documentation. Staleness is caught by review instead:
 
 - `audit-docs` on demand, whenever you want to know where things stand;
-- `audit-docs` as a **mandatory step of the release procedure**.
+- `audit-docs` as a **mandatory step of the release procedure**;
+- `adr-cleanup` on demand, to garden `docs/adr/` specifically.

@@ -47,7 +47,7 @@ python -m tools.sync sync process-light --toolkit-root . --project-dir demo/proc
 ```
 
 - Ask Claude to run `init-project-docs` — expected: it fills `README.md`,
-  `docs/architecture.md`, `docs/decisions.md`, `docs/requirements.md` from
+  `docs/architecture.md`, `docs/adr/`, `docs/requirements.md` from
   what the fixture actually contains, and creates five stubs
   (`vision`, `user-guide`, `developer-guide`, `build-and-release`,
   `testing-strategy`) each carrying its own guard line.
@@ -57,6 +57,11 @@ python -m tools.sync sync process-light --toolkit-root . --project-dir demo/proc
 - Ask Claude to "audit the docs" — expected: `audit-docs` reports the map
   state, whether any trigger has fired, requirement statuses, and content
   routing. It should propose, not apply.
+- Seed a second ADR under `docs/adr/active/` that contradicts `0001` (or
+  mark `0001` `Superseded` without moving its file to `docs/adr/archive/`),
+  then ask Claude to run `adr-cleanup` — expected: it flags the
+  contradiction or the misplaced file, proposes a fix and a regenerated
+  `INDEX.md`, and applies nothing on its own.
 
 ## process-none
 

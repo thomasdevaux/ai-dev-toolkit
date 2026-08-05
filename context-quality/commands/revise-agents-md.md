@@ -39,7 +39,7 @@ on every future session, not just this one. Drop:
 | --- | --- |
 | A command, a locating fact, an invariant | `AGENTS.md` |
 | Why something is built this way | `docs/architecture.md` |
-| A choice made, an alternative rejected | `docs/decisions.md` |
+| A choice made, an alternative rejected | `docs/adr/` |
 | An install/environment prerequisite | `docs/developer-guide.md` |
 | Personal preference, not team-wide | your user-scope config, not this repo |
 

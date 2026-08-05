@@ -15,8 +15,8 @@ Statuses: `proposed`, `accepted`, `done`, `deferred`, `rejected`,
 `superseded`.
 
 - **A section below the table, only when there's something to say** —
-  `## REQ-002 — Offline mode` followed by the reasoning, a pointer to a
-  decision (`D-04`), whatever a one-line entry can't carry. Most requirements
+  `## REQ-002 — Offline mode` followed by the reasoning, a pointer to an
+  ADR (`ADR-0004`), whatever a one-line entry can't carry. Most requirements
   never get one, and that's the normal case.
 - **No link to code or tests.** That link goes stale faster than it helps, and
   the table would then vouch for coverage it can't see.

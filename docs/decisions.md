@@ -288,3 +288,34 @@ and the two files already identify a checkout unambiguously).
 **Cost accepted:** a consumer project that happens to vendor a full copy of
 the toolkit at its root would also go silent. No such project exists, and it
 would be the right behaviour anyway.
+
+---
+
+### D-14 — `process-light` moves from a flat decisions log to a Nygard ADR set
+
+**Status:** settled
+
+`process/light/rules/decisions.md` (one flat `docs/decisions.md` file) is
+replaced by `process/light/rules/adr.md`: one Nygard-format file per decision
+under `docs/adr/active/` or `docs/adr/archive/`, plus `docs/adr/INDEX.md` as
+the compact summary to scan before opening any full ADR. A new `adr-cleanup`
+skill gardens the set — contradiction and placement checks, consolidation
+proposals, index regeneration.
+
+**Why:** the user wants ADR discipline even at `process-light` scale. The
+flat file already solved context bloat by being a single file, but gave no
+per-decision file to link to, no physical active/archive separation, and
+`audit-docs`'s decisions check had no explicit rule against silently
+deviating from an accepted decision. The index gives the compact-scan
+property back without giving up per-file structure, and `adr.md` states the
+stop-on-conflict rule explicitly.
+
+**Rejected:** keeping the flat file and only adding the stop-on-conflict rule
+(cheaper, and the file's own original reasoning — "cheaper to scan than
+opening N files" — still holds at small N; rejected because the user
+explicitly wants per-decision files and physical archive separation, not
+just the missing rule).
+
+**Cost accepted:** more files per `process-light` project, and a git history
+spread across per-decision files instead of one. Bounded by `INDEX.md`
+(scan that first) and `adr-cleanup` (keeps the set from drifting).

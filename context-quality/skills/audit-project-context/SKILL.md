@@ -37,7 +37,7 @@ hook flagged something, start there and go further.
 
 4. **Routing.** Content that belongs elsewhere:
    - `Layout` that explains rather than locates → `docs/architecture.md`;
-   - a rationale or a rejected alternative → `docs/decisions.md`;
+   - a rationale or a rejected alternative → `docs/adr/`;
    - install prerequisites → `docs/developer-guide.md`;
    - anything else with a slot in the doc map → its slot.
    For each, name the destination — a finding without a destination just

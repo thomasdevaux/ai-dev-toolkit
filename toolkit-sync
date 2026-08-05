@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Location-independent entrypoint for tools/sync.
+#
+# `python -m tools.sync ...` only works when the current working directory
+# (or PYTHONPATH) already contains the `tools` package, i.e. when the caller
+# has `cd`'d into the toolkit checkout first. Forgetting that step fails with
+# a cryptic `ModuleNotFoundError: No module named 'tools'` that looks
+# unrelated to the real cause. This wrapper resolves its own location and
+# `cd`s there before invoking Python, so it can be called from anywhere.
+set -e
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+exec python -m tools.sync "$@"

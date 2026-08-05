@@ -98,10 +98,14 @@ def build_status_report(toolkit_root: Path, claude_dir: Path, project_dir: Path)
     missing_lines, has_missing_baseline = _missing_lines(manifest, state)
     lines.extend(missing_lines)
     if has_missing_baseline:
+        # Uses the /toolkit-sync wrapper (repo root), not `python -m tools.sync`
+        # directly, since this hint is meant to be copy-pasted from any cwd —
+        # see toolkit-sync's docstring comment for why that matters.
         lines.append(
-            f"hint: run 'python -m tools.sync sync --toolkit-root {toolkit_root} "
-            f"--project-dir {project_dir}' with no entry_ids to sync every baseline "
-            "entry above in one go."
+            f"hint: run '{toolkit_root}/toolkit-sync sync --toolkit-root {toolkit_root} "
+            f"--project-dir {project_dir} --yes' with no entry_ids to sync every "
+            "baseline entry above in one go. (on Windows cmd/PowerShell, use "
+            f"{toolkit_root}\\toolkit-sync.cmd instead)"
         )
     lines.extend(_stack_lines(project_dir))
 

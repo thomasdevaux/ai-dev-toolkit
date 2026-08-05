@@ -118,13 +118,13 @@ The source generators produce the property-change plumbing at compile time, whic
 Publish:
 
 ```bash
-dotnet publish src/MyApp.Desktop -c Release -r win-x64 -o out/release
+dotnet publish src/MyApp.Desktop -c Release -r win-x64 -o dist/release
 ```
 
-For local debugging, route the ordinary build output to `out/debug/` the same way — `dotnet build` supports `-o` directly, and AOT never applies to a Debug configuration:
+For local debugging, route the ordinary build output to `dist/debug/` the same way — `dotnet build` supports `-o` directly, and AOT never applies to a Debug configuration:
 
 ```bash
-dotnet build src/MyApp.Desktop -c Debug -o out/debug
+dotnet build src/MyApp.Desktop -c Debug -o dist/debug
 ```
 
 Result: a native executable requiring no .NET runtime on the user's machine, starting fast because there's no just-in-time compilation at launch.
@@ -141,7 +141,7 @@ Result: a native executable requiring no .NET runtime on the user's machine, sta
 ### Self-contained without AOT — the honest fallback
 
 ```bash
-dotnet publish src/MyApp.Desktop -c Release -r win-x64 -o out/release \
+dotnet publish src/MyApp.Desktop -c Release -r win-x64 -o dist/release \
   --self-contained true -p:PublishSingleFile=true
 ```
 

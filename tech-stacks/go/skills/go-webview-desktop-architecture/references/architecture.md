@@ -248,18 +248,18 @@ Restated because it's easy to underweight: everything bound is fully privileged.
 7. Don't create a multi-app or multi-module layout without an identified second consumer.
 8. Generate nothing tied to a forge or CI system.
 9. Document W1–W6 in the project README.
-10. **Route final build artifacts to `out/`** at the repository root — `out/release/` and `out/debug/`, gitignored.
+10. **Route final build artifacts to `dist/`** at the repository root — `dist/release/` and `dist/debug/`, gitignored.
 
     For a plain Go binary (the CLI), `go build` writes directly there:
 
     ```bash
     # release
-    go build -o out/release/<name> ./cmd/<name>
+    go build -o dist/release/<name> ./cmd/<name>
     # debug — disables optimizations/inlining for a better debugger experience
-    go build -gcflags="all=-N -l" -o out/debug/<name> ./cmd/<name>
+    go build -gcflags="all=-N -l" -o dist/debug/<name> ./cmd/<name>
     ```
 
-    For the Wails app itself, `wails build` targets production by default (it applies `-ldflags "-w -s"` and production build tags internally) and doesn't cleanly separate into a release/debug pair the way a plain `go build` does. For the release artifact, set `"build:dir"` in `wails.json` (defaults to `build`) to point at `out/release`, or copy `build/bin/` there as a post-build step — verify the exact mechanism against the Wails CLI version in use, since it has shifted between v2 and v3. For a debug artifact, Wails' own documentation supports building manually via `go build` directly (bypassing `wails build`) with the `-tags dev -gcflags "all=-N -l"` flags it uses internally for `wails dev`, redirected to `out/debug/`.
+    For the Wails app itself, `wails build` targets production by default (it applies `-ldflags "-w -s"` and production build tags internally) and doesn't cleanly separate into a release/debug pair the way a plain `go build` does. For the release artifact, set `"build:dir"` in `wails.json` (defaults to `build`) to point at `dist/release`, or copy `build/bin/` there as a post-build step — verify the exact mechanism against the Wails CLI version in use, since it has shifted between v2 and v3. For a debug artifact, Wails' own documentation supports building manually via `go build` directly (bypassing `wails build`) with the `-tags dev -gcflags "all=-N -l"` flags it uses internally for `wails dev`, redirected to `dist/debug/`.
 
 ---
 

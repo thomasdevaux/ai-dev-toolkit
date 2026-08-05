@@ -179,16 +179,16 @@ The background thread pushes progress and results onto the queue; only the main 
 ```bash
 # release
 pyinstaller --onedir --windowed --name myapp \
-  --distpath out/release --workpath .build/pyinstaller \
+  --distpath dist/release --workpath .build/pyinstaller \
   src/myapp/__main__.py
 
 # debug — no --windowed, so the console stays visible for print/log output
 pyinstaller --onedir --name myapp \
-  --distpath out/debug --workpath .build/pyinstaller \
+  --distpath dist/debug --workpath .build/pyinstaller \
   src/myapp/__main__.py
 ```
 
-**`--distpath`**: routes the packaged app to `out/release/` or `out/debug/` at the repository root, gitignored — the same destination convention used across every stack in this portfolio, so "where's the thing I actually ship" doesn't depend on which branch a given tool came from. `--workpath` keeps PyInstaller's intermediate files in a dedicated `.build/` folder rather than the default `build/`, which would otherwise collide in meaning with the output folder name used elsewhere. Dropping `--windowed` for the debug build is a deliberate, meaningful difference, not just a naming one: it keeps the console attached so print statements and unhandled exceptions are visible during development testing.
+**`--distpath`**: routes the packaged app to `dist/release/` or `dist/debug/` at the repository root, gitignored — the same destination convention used across every stack in this portfolio, so "where's the thing I actually ship" doesn't depend on which branch a given tool came from. `--workpath` keeps PyInstaller's intermediate files in a dedicated `.build/` folder rather than the default `build/`, which would otherwise collide in meaning with the output folder name used elsewhere. Dropping `--windowed` for the debug build is a deliberate, meaningful difference, not just a naming one: it keeps the console attached so print statements and unhandled exceptions are visible during development testing.
 
 - `--onedir` produces a folder. Starts noticeably faster than `--onefile`, which unpacks itself to a temporary directory on **every** launch.
 - `--windowed` suppresses the console window on Windows and macOS.

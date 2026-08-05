@@ -311,15 +311,15 @@ Anything prefixed `VITE_` is in plain text in the bundle: never a secret. API ke
 7. Don't create `crates/` or `packages/` without an identified second consumer.
 8. Generate nothing tied to a forge or CI system.
 9. Document the chosen D1–D7 values in the project `README.md`.
-10. **Route final build artifacts to `out/`** at the repository root — `out/release/` and `out/debug/`, gitignored. Cargo's own `target/` stays as-is (don't fight its incremental build cache); add a small post-build step that copies the final binary out:
+10. **Route final build artifacts to `dist/`** at the repository root — `dist/release/` and `dist/debug/`, gitignored. Cargo's own `target/` stays as-is (don't fight its incremental build cache); add a small post-build step that copies the final binary out:
 
     ```bash
     # release
     cargo build --release
-    cp target/release/<name> out/release/          # or target/release/bundle/ for a Tauri installer
+    cp target/release/<name> dist/release/          # or target/release/bundle/ for a Tauri installer
     # debug
     cargo build
-    cp target/debug/<name> out/debug/
+    cp target/debug/<name> dist/debug/
     ```
 
     On Windows, use `copy` instead of `cp`, or wrap both steps in a `justfile`/`Makefile` target so the same command works cross-platform. This keeps "where's the thing I actually ship" consistent with the other stacks in this portfolio, without changing how Cargo itself builds.

@@ -85,6 +85,19 @@ Every id is a literal `sync-manifest.yaml` entry, and each carries a
 `summary:` there — that field is the source for this table. `detect` only ever
 *suggests*; nothing syncs without an explicit command.
 
+**Why some entries appear at both scopes.** `common-rules` and
+`toolkit-self-check` each have a user-scope twin (`common-rules-user`,
+`toolkit-self-check-user`) with identical content. That's not redundancy to
+clean up — the two scopes serve different readers. The project copy is what a
+teammate sees committed in their own repo, impossible to miss. The user copy
+is what covers a session opened with no project at all — a scratch folder
+that never runs `sync` for a project. Once a project *is* synced, both copies
+are present and only the project one matters day to day; the user copy just
+keeps the scratch-folder case covered. `user-statusline` and the 13
+`<lang>-lsp-user` entries have no project-scope counterpart at all — see
+[`decisions.md#d-12`](decisions.md#d-12) for why those specifically stay
+user-only.
+
 **What isn't here:** blocks written but not yet validated on a real project
 live in [`../incubator/`](../incubator/) and cannot be synced — embedded C,
 model-based design, Node.js, and the per-language style/packaging rules. See

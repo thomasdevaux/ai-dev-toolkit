@@ -1,0 +1,17 @@
+- id: context-quality
+  type: file
+  source: context-quality
+  target: .claude/
+  scope: project
+  tier: baseline
+  summary: AGENTS.md as the single context file - fixed skeleton, init and audit skills (the audit doubles as the end-of-session harvest), session-start check.
+  settings_patch:
+    hooks:
+      SessionStart:
+        # Not "compact" or "fork": those fire mid-session, when the finding has
+        # already been delivered once. The three kept are the cases where the
+        # context window is fresh or was just wiped.
+        - matcher: "startup|resume|clear"
+          hooks:
+            - type: command
+              command: "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/context-check.sh"

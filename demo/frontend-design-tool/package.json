@@ -1,0 +1,6 @@
+{
+  "name": "demo-flash-tool",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Dummy frontend tool for validating the tech-stack-frontend-design plugin."
+}

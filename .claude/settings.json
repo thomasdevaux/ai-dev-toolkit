@@ -1,0 +1,74 @@
+{
+  "companyAnnouncements": [
+    "ai-dev-toolkit v0.0.1 \u00b7 handbook: https://github.com/thomasdevaux/ai-dev-toolkit/tree/main/handbook\n\nCommands:\n  /toolkit-sync \u2014 force a toolkit sync check\n  /toolkit-features \u2014 list available opt-in blocks not yet installed\n  /toolkit-help \u2014 show the practices guide and handbook link\n\nToken-saving: /caveman (compressed replies) \u00b7 session-report skill (session usage report)"
+  ],
+  "enabledPlugins": {
+    "gitlab@claude-plugins-official": true
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/toolkit-sync-save.sh",
+            "type": "command"
+          }
+        ],
+        "matcher": "AskUserQuestion"
+      },
+      {
+        "hooks": [
+          {
+            "command": "\"$HOME\"/.claude/hooks/style-prompt-save.sh",
+            "type": "command"
+          }
+        ],
+        "matcher": "AskUserQuestion"
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/codegraph-freshness.sh",
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/toolkit-drift-check.sh",
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "\"$HOME\"/.claude/hooks/codegraph-freshness.sh",
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "\"$HOME\"/.claude/hooks/style-prompt.sh",
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/context-check.sh",
+            "type": "command"
+          }
+        ],
+        "matcher": "startup|resume|clear"
+      }
+    ]
+  },
+  "includeCoAuthoredBy": false
+}

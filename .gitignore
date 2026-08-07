@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.env
+.env.*
+*.pem
+*.key
+credentials.json
+.scratch/
+# Local staleness-nudge bookkeeping written by context-check.sh.
+.claude/.context-check-state

@@ -1,0 +1,24 @@
+# A plugin, not a vendored block — no rules/skills content of our own to
+# ship, just the plugin_ref and settings_patch. It still gets a directory
+# because its tier is `suggested`; see docs/maintaining.md's "Where a new
+# entry's fragment goes".
+#
+# User scope only, deliberately. Authoring a skill is an occasional,
+# individual act: a project-scope entry would commit `enabledPlugins` to
+# the team's settings.json and charge every member the always-on cost of
+# a tool one person uses twice a year. At user scope it is available in
+# every folder — including a toolkit checkout — with nothing committed.
+
+- id: skill-creator-user
+  type: official-plugin
+  plugin_ref: "skill-creator@claude-plugins-official"
+  scope: user
+  tier: suggested
+  summary: >-
+    Official skill-creator plugin - writes, benchmarks and tunes the
+    triggering of an Agent Skill. Output is a plain .claude/skills/ that
+    sync does not track, and its eval loop spawns several full Claude
+    sessions per iteration.
+  settings_patch:
+    enabledPlugins:
+      "skill-creator@claude-plugins-official": true

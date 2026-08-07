@@ -1,0 +1,9 @@
+[package]
+name = "demo-flash-tool"
+version = "0.1.0"
+edition = "2021"
+description = "Dummy Rust tool for validating the tech-stacks/rust block."
+
+[[bin]]
+name = "demo-flash-tool"
+path = "src/main.rs"

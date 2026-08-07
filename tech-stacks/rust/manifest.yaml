@@ -1,0 +1,23 @@
+- id: tech-stack-rust
+  type: file
+  source: tech-stacks/rust
+  target: .claude/
+  scope: project
+  tier: tech-stack
+  # Cargo.toml marks any crate — a CLI, a library, a service — and that is
+  # the intended reach: the coding standards in this block apply to all of
+  # them. The Tauri architecture skill alongside them is desktop-only, but a
+  # skill costs nothing where it doesn't apply; it loads on demand, and only
+  # its `description:` sits in context. A project that has no src-tauri/ yet
+  # and wants one gets there through desktop-app-architecture.
+  detect: ["Cargo.toml"]
+  summary: Rust coding standards (rustfmt, clippy) plus the Tauri desktop architecture - the webview branch, React conventions included.
+  # React is the mandated frontend for both webview stacks, so this file
+  # is identical in each. It lives once in the checkout and is deployed
+  # into the block at sync time — the synced skill stays self-contained,
+  # the two copies cannot drift.
+  shared_files:
+    - source: tech-stacks/shared/react-conventions.md
+      target: skills/rust-webview-desktop-architecture/references/react-conventions.md
+    - source: tech-stacks/shared/editorconfig.ini
+      target: skills/rust-code-standards/references/editorconfig.ini

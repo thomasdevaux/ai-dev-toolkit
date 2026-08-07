@@ -1,0 +1,14 @@
+- id: tech-stack-python
+  type: file
+  source: tech-stacks/python
+  target: .claude/
+  scope: project
+  tier: tech-stack
+  detect: ["pyproject.toml", "requirements.txt", "setup.py"]
+  summary: Python coding standards (ruff, mypy) plus desktop architecture - PySide6/tkinter structure, packaging, protecting sensitive logic.
+  # The .editorconfig baseline is identical for every stack. It lives once in
+  # the checkout and is deployed into each code-standards skill at sync time,
+  # so the copies cannot drift — same mechanism as react-conventions.md.
+  shared_files:
+    - source: tech-stacks/shared/editorconfig.ini
+      target: skills/python-code-standards/references/editorconfig.ini

@@ -1,0 +1,72 @@
+# Shared Go lint configuration — copy to the module root as .golangci.yml.
+# Tooling verified 2026-08-07 against golangci-lint v2, whose schema splits
+# `formatters:` from `linters:`. A v1 config is not accepted by v2; run
+# `golangci-lint migrate` on an existing one rather than hand-editing it.
+version: "2"
+
+formatters:
+  enable:
+    # gofumpt is gofmt plus a set of small, non-negotiable extra rules. Its
+    # output is always valid gofmt output, so nothing downstream cares.
+    - gofumpt
+    # Import grouping: standard library, third party, then this module.
+    - goimports
+  settings:
+    gofumpt:
+      extra-rules: true
+    goimports:
+      local-prefixes:
+        # Replace with the module path from go.mod.
+        - github.com/your-org/your-module
+
+linters:
+  # Start from the default set (errcheck, govet, ineffassign, staticcheck,
+  # unused) and add. `enable-all` is not used on purpose: it opts the project
+  # into every linter a future release adds, which turns an upgrade into a
+  # lint-fixing session nobody planned.
+  enable:
+    - bodyclose        # HTTP response bodies that are never closed
+    - contextcheck     # a function that should take a context and doesn't
+    - errorlint        # %v where %w was meant; broken errors.Is/As chains
+    - copyloopvar      # loop variable capture
+    - gosec            # security findings
+    - misspell
+    - nilerr           # returning nil after checking err != nil
+    - noctx            # HTTP requests sent without a context
+    - nolintlint       # polices the //nolint directives themselves
+    - revive           # the maintained golint successor: naming, exported docs
+    - unconvert
+    - wastedassign
+
+  settings:
+    errcheck:
+      # Deliberately dropping an error is written `_ = f()`, never an
+      # ignored return value — see rules/style.md.
+      check-blank: true
+    govet:
+      enable:
+        - shadow
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+    revive:
+      rules:
+        - name: exported
+          # Exported identifiers in a library need doc comments. Drop this
+          # rule in an application module where nothing is imported.
+          disabled: false
+
+  exclusions:
+    rules:
+      # Tests assert and construct fixtures; gosec's rules about weak
+      # randomness and hardcoded credentials are noise there.
+      - path: _test\.go
+        linters:
+          - gosec
+          - bodyclose
+
+issues:
+  # Report everything. The defaults cap findings per linter and hide
+  # repeats, which makes a first run look clean when it is not.
+  max-issues-per-linter: 0
+  max-same-issues: 0

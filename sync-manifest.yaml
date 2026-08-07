@@ -1,0 +1,63 @@
+# Root manifest for tools/sync — the index of what can be synced into a
+# project. Each block directory owns its own manifest.yaml fragment,
+# describing only its own entries; this file just includes them, in the
+# same order the layout table in AGENTS.md lists the directories. That
+# keeps the file tree the single legible index of what exists — this file
+# stops being the only place category shows up as everything grows.
+#
+# Only mature content appears here. Blocks that aren't validated yet live in
+# incubator/ and are deliberately absent, so a consuming project can't adopt
+# something nobody has used; see incubator/README.md.
+#
+# Third-party content is vendored under vendor/<name>/ with a SOURCE.md
+# recording upstream, pin and license, rather than installed as a plugin —
+# see handbook/plugins-policy.md for when we do which.
+#
+# The three project-type/* variants are mutually exclusive via
+# tier: choice-group:project-type, blocked at sync time.
+#
+# Entry fields:
+#   id             unique identifier, used on the CLI and in the state file
+#   type           "file" (default) or "official-plugin"
+#   source         path relative to the toolkit checkout root (type: file only)
+#   target         path relative to .claude/ or ~/.claude/ (type: file only)
+#   scope          "project" or "user"
+#   tier           "baseline" | "choice-group:<name>" | "tech-stack" | "suggested"
+#                  baseline   expected everywhere; reported as missing
+#                  tech-stack suggested from detect markers only
+#                  suggested  listed as available, never pressed, never
+#                             installed unless explicitly synced by id
+#   summary        one line, shown in the status report and the user-guide
+#   detect         marker filenames/globs/dirs, ANY of which suggests this
+#                  entry — for a block that is a language's entry point
+#   detect_all     markers, ALL of which must sit in the same directory —
+#                  for a block about one framework inside a language, where
+#                  the language marker alone would fire on every project.
+#                  Mutually exclusive with detect. Both are searched at the
+#                  project root and one level below, never deeper.
+#                  No entry uses it today: the tech-stack blocks each cover
+#                  a whole language now, so the language marker is exactly
+#                  the right trigger. It stays supported and tested
+#                  (tests/tools/sync/test_detect.py) for the first block
+#                  that is genuinely framework-scoped — it is not dead code.
+#   plugin_ref     "<plugin>@<marketplace>" (type: official-plugin only)
+#   settings_patch top-level settings.json keys to merge in, key by key
+#
+# An entry in *this* file is either the fields above, or `{include: <path>}`
+# — a path to another manifest.yaml, relative to the toolkit root, merged
+# in place. Includes nest freely but may not cycle.
+
+- include: common/manifest.yaml
+- include: context-quality/manifest.yaml
+- include: project-type/none/manifest.yaml
+- include: project-type/app/manifest.yaml
+- include: project-type/embedded-fccu/manifest.yaml
+- include: tech-stacks/python/manifest.yaml
+- include: tech-stacks/rust/manifest.yaml
+- include: tech-stacks/go/manifest.yaml
+- include: tech-stacks/dotnet/manifest.yaml
+- include: user-tools/statusline/manifest.yaml
+- include: self-check/manifest.yaml
+- include: plugins.yaml
+- include: suggested/gitlab/manifest.yaml
+- include: suggested/skill-creator/manifest.yaml

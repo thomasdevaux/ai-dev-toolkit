@@ -1,0 +1,58 @@
+# Shared Python quality configuration — merge these sections into the
+# project's own pyproject.toml. Tooling verified 2026-08-07: ruff is the
+# single linter+formatter (it replaces black, isort, flake8 and its plugins,
+# pyupgrade), mypy is the type checker.
+#
+# Astral's `ty` is 10-100x faster and deliberately NOT the default here: it
+# was still beta as of this date, with a 1.0 targeted for later in 2026.
+# Revisit once it ships stable.
+
+[tool.ruff]
+# Match the oldest interpreter the project actually supports — ruff uses this
+# to decide which modernisations are safe to suggest.
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort — import ordering
+    "UP",       # pyupgrade — modernise for target-version
+    "B",        # flake8-bugbear — likely bugs, not style
+    "SIM",      # flake8-simplify
+    "C4",       # flake8-comprehensions
+    "RET",      # flake8-return
+    "PTH",      # flake8-use-pathlib
+    "S",        # flake8-bandit — security
+    "RUF",      # ruff's own rules
+]
+ignore = [
+    # The formatter owns line length; the linter flagging it too produces
+    # findings that cannot be fixed without fighting the formatter.
+    "E501",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests assert; asserts outside tests are what S101 is for.
+"tests/**" = ["S101"]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.mypy]
+python_version = "3.12"
+# Start here on an existing codebase. Tighten toward `strict = true` once the
+# baseline is clean — flipping strict on day one buries real findings under
+# hundreds of missing-annotation errors nobody reads.
+warn_return_any = true
+warn_unused_configs = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+
+[[tool.mypy.overrides]]
+# Third-party packages that ship no type information. Add to this list
+# rather than silencing the import at each call site.
+module = []
+ignore_missing_imports = true

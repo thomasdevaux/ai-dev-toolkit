@@ -1,0 +1,56 @@
+# Shared Rust lint configuration — merge these tables into the crate's own
+# Cargo.toml, or into the workspace root's. Tooling verified 2026-08-07.
+#
+# The [lints] table is the current mechanism (Cargo 1.74+). It replaces
+# crate-root `#![deny(...)]` attributes and `RUSTFLAGS` juggling: one place,
+# inherited by every target, and visible to anyone reading the manifest.
+
+# --- workspace root Cargo.toml -------------------------------------------
+# Declare once here, then each member crate opts in with the three lines in
+# the next section. A single-crate project skips the [workspace.*] prefix and
+# uses these tables directly.
+
+[workspace.lints.rust]
+unsafe_code = "warn"
+missing_debug_implementations = "warn"
+rust_2018_idioms = { level = "warn", priority = -1 }
+unreachable_pub = "warn"
+
+[workspace.lints.clippy]
+# priority = -1 so the specific entries below can override the group.
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+
+# Deny, not warn: these are correctness, not taste.
+undocumented_unsafe_blocks = "deny"
+unwrap_used = "deny"          # see rules/style.md for where unwrap is fine
+panic = "deny"
+
+# Pedantic rules that cost more than they return in application code.
+module_name_repetitions = "allow"
+must_use_candidate = "allow"
+missing_errors_doc = "allow"
+
+# `nursery` is deliberately absent: its lints are unstable by definition and
+# churn between toolchain releases, which turns a routine `rustup update`
+# into a lint-fixing session.
+
+# --- member crate Cargo.toml ---------------------------------------------
+# [lints]
+# workspace = true
+
+# --- rustfmt.toml (project root, separate file) ---------------------------
+# rustfmt is deliberately near-default: its whole value is that every Rust
+# codebase looks the same. The one setting worth pinning is the edition, so
+# formatting does not shift under a toolchain update.
+#
+#   edition = "2024"
+#
+# Anything beyond that needs a reason recorded next to it.
+
+# --- tests ---------------------------------------------------------------
+# `unwrap_used` and `panic` are denied above and would fire in every test.
+# Put this at the top of test modules and integration test files rather than
+# weakening the crate-wide setting:
+#
+#   #![cfg_attr(test, allow(clippy::unwrap_used, clippy::panic))]

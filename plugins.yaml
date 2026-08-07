@@ -1,0 +1,156 @@
+# type: official-plugin entries with no block directory of their own — a
+# plugin_ref and a settings_patch, nothing to vendor or read. Grouped here,
+# by category, rather than scattered across directories that don't exist for
+# them; each section below stays self-contained so it can be split into its
+# own file the day it outgrows a quick scan.
+#
+# Nothing at tier: suggested lives here — a suggested plugin gets its own
+# directory under suggested/, same as any other opt-in block.
+
+# --- Project-scope, tech-stack ---
+
+- id: tech-stack-frontend-design
+  type: official-plugin
+  plugin_ref: "frontend-design@claude-plugins-official"
+  scope: project
+  tier: tech-stack
+  detect: ["package.json"]
+  summary: Official frontend-design plugin - UI/component design guidance for web frontends.
+  settings_patch:
+    enabledPlugins:
+      "frontend-design@claude-plugins-official": true
+
+# --- Official language servers, all at user scope. Measured context cost is
+# zero (no skill, command or agent), and ~/.claude applies in every folder —
+# which is the only way a scratch script session gets them, since it never
+# syncs anything. ---
+
+- id: pyright-lsp-user
+  type: official-plugin
+  plugin_ref: "pyright-lsp@claude-plugins-official"
+  scope: user
+  tier: baseline
+  summary: Official Python language server.
+  settings_patch:
+    enabledPlugins:
+      "pyright-lsp@claude-plugins-official": true
+
+- id: typescript-lsp-user
+  type: official-plugin
+  plugin_ref: "typescript-lsp@claude-plugins-official"
+  scope: user
+  tier: baseline
+  summary: Official TypeScript/JavaScript language server.
+  settings_patch:
+    enabledPlugins:
+      "typescript-lsp@claude-plugins-official": true
+
+- id: rust-analyzer-lsp-user
+  type: official-plugin
+  plugin_ref: "rust-analyzer-lsp@claude-plugins-official"
+  scope: user
+  tier: baseline
+  summary: Official Rust language server.
+  settings_patch:
+    enabledPlugins:
+      "rust-analyzer-lsp@claude-plugins-official": true
+
+- id: gopls-lsp-user
+  type: official-plugin
+  plugin_ref: "gopls-lsp@claude-plugins-official"
+  scope: user
+  tier: baseline
+  summary: Official Go language server.
+  settings_patch:
+    enabledPlugins:
+      "gopls-lsp@claude-plugins-official": true
+
+- id: csharp-lsp-user
+  type: official-plugin
+  plugin_ref: "csharp-lsp@claude-plugins-official"
+  scope: user
+  tier: baseline
+  summary: Official C# language server.
+  settings_patch:
+    enabledPlugins:
+      "csharp-lsp@claude-plugins-official": true
+
+- id: clangd-lsp-user
+  type: official-plugin
+  plugin_ref: "clangd-lsp@claude-plugins-official"
+  scope: user
+  tier: baseline
+  summary: Official C/C++ language server.
+  settings_patch:
+    enabledPlugins:
+      "clangd-lsp@claude-plugins-official": true
+
+- id: jdtls-lsp-user
+  type: official-plugin
+  plugin_ref: "jdtls-lsp@claude-plugins-official"
+  scope: user
+  tier: baseline
+  summary: Official Java language server.
+  settings_patch:
+    enabledPlugins:
+      "jdtls-lsp@claude-plugins-official": true
+
+- id: kotlin-lsp-user
+  type: official-plugin
+  plugin_ref: "kotlin-lsp@claude-plugins-official"
+  scope: user
+  tier: baseline
+  summary: Official Kotlin language server.
+  settings_patch:
+    enabledPlugins:
+      "kotlin-lsp@claude-plugins-official": true
+
+- id: swift-lsp-user
+  type: official-plugin
+  plugin_ref: "swift-lsp@claude-plugins-official"
+  scope: user
+  tier: baseline
+  summary: Official Swift language server.
+  settings_patch:
+    enabledPlugins:
+      "swift-lsp@claude-plugins-official": true
+
+- id: ruby-lsp-user
+  type: official-plugin
+  plugin_ref: "ruby-lsp@claude-plugins-official"
+  scope: user
+  tier: baseline
+  summary: Official Ruby language server.
+  settings_patch:
+    enabledPlugins:
+      "ruby-lsp@claude-plugins-official": true
+
+- id: php-lsp-user
+  type: official-plugin
+  plugin_ref: "php-lsp@claude-plugins-official"
+  scope: user
+  tier: baseline
+  summary: Official PHP language server.
+  settings_patch:
+    enabledPlugins:
+      "php-lsp@claude-plugins-official": true
+
+- id: lua-lsp-user
+  type: official-plugin
+  plugin_ref: "lua-lsp@claude-plugins-official"
+  scope: user
+  tier: baseline
+  summary: Official Lua language server.
+  settings_patch:
+    enabledPlugins:
+      "lua-lsp@claude-plugins-official": true
+
+- id: liquid-lsp-user
+  type: official-plugin
+  plugin_ref: "liquid-lsp@claude-plugins-official"
+  scope: user
+  tier: baseline
+  summary: Official Liquid language server.
+  settings_patch:
+    enabledPlugins:
+      "liquid-lsp@claude-plugins-official": true

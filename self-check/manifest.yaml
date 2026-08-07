@@ -1,0 +1,44 @@
+- id: toolkit-self-check
+  type: file
+  source: self-check
+  target: .claude/
+  scope: project
+  tier: baseline
+  summary: SessionStart hook reporting toolkit onboarding and drift for this project, plus the /toolkit-sync, /toolkit-features and /toolkit-help commands.
+  settings_patch:
+    hooks:
+      SessionStart:
+        - hooks:
+            - type: command
+              command: "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/toolkit-drift-check.sh"
+      # Applies a pending "Sync now" answer as hook automation instead of
+      # an agent-issued Bash call — see toolkit-drift-check-impl.sh's
+      # ACTION line and toolkit-sync-save.py for the full mechanism.
+      PostToolUse:
+        - matcher: "AskUserQuestion"
+          hooks:
+            - type: command
+              command: "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/toolkit-sync-save.sh"
+    companyAnnouncements:
+      - "ai-dev-toolkit v{{VERSION}} · handbook: https://github.com/thomasdevaux/ai-dev-toolkit/tree/main/handbook\n\nCommands:\n  /toolkit-sync — force a toolkit sync check\n  /toolkit-features — list available opt-in blocks not yet installed\n  /toolkit-help — show the practices guide and handbook link\n\nToken-saving: /caveman (compressed replies) · session-report skill (session usage report)"
+
+- id: toolkit-self-check-user
+  type: file
+  source: self-check
+  target: ~/.claude/
+  scope: user
+  tier: baseline
+  summary: The same drift check at user scope, plus the /toolkit-sync, /toolkit-features and /toolkit-help commands, so both also fire in never-synced projects.
+  settings_patch:
+    hooks:
+      SessionStart:
+        - hooks:
+            - type: command
+              command: "\"$HOME\"/.claude/hooks/toolkit-drift-check.sh"
+      PostToolUse:
+        - matcher: "AskUserQuestion"
+          hooks:
+            - type: command
+              command: "\"$HOME\"/.claude/hooks/toolkit-sync-save.sh"
+    companyAnnouncements:
+      - "ai-dev-toolkit v{{VERSION}} · handbook: https://github.com/thomasdevaux/ai-dev-toolkit/tree/main/handbook\n\nCommands:\n  /toolkit-sync — force a toolkit sync check\n  /toolkit-features — list available opt-in blocks not yet installed\n  /toolkit-help — show the practices guide and handbook link\n\nToken-saving: /caveman (compressed replies) · session-report skill (session usage report)"

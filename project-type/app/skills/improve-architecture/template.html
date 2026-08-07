@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>architecture candidates</title>
+<style>
+  /* Self-contained on purpose: no CDN, no webfont, no script. The report is
+     read on machines behind a corporate proxy, and a card that renders as
+     unstyled text there is a card nobody reads. */
+  :root {
+    --ivory: #FAF9F5;
+    --paper: #ffffff;
+    --ink: #24211e;
+    --dim: #6b665f;
+    --faint: #a49d94;
+    --rule: rgba(36,33,30,0.12);
+    --clay: #D97757;
+    --strong: #2f8f4e;
+    --explore: #b8842b;
+    --spec: #7c7c7c;
+    --adr: #b03a48;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ivory: #161513; --paper: #1e1c1a; --ink: #e6e2da; --dim: #a09a91;
+      --faint: #6d675f; --rule: rgba(255,255,255,0.11);
+      --strong: #57b878; --explore: #d9a441; --spec: #8e8e8e; --adr: #e0707f;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px 20px 72px;
+    background: var(--ivory); color: var(--ink);
+    font: 15px/1.6 var(--sans);
+  }
+  main { max-width: 900px; margin: 0 auto; }
+
+  header { border-bottom: 2px solid var(--ink); padding-bottom: 14px; margin-bottom: 28px; }
+  header h1 { margin: 0 0 4px; font-size: 22px; letter-spacing: -0.01em; }
+  header .meta { color: var(--dim); font: 12px/1.5 var(--mono); }
+
+  /* ——— the reading order line: what to do with this page ——— */
+  .lede {
+    background: var(--paper); border-left: 3px solid var(--clay);
+    padding: 14px 18px; margin-bottom: 32px; color: var(--dim); font-size: 14px;
+  }
+  .lede b { color: var(--ink); }
+
+  /* ——— one card per candidate ——— */
+  .card {
+    background: var(--paper); border: 1px solid var(--rule); border-radius: 6px;
+    padding: 22px 24px; margin-bottom: 22px;
+  }
+  .card > h2 { margin: 0 0 3px; font-size: 18px; letter-spacing: -0.01em; }
+  .card .files { font: 12px/1.6 var(--mono); color: var(--faint); margin-bottom: 18px; word-break: break-all; }
+
+  .badge {
+    display: inline-block; vertical-align: 3px; margin-right: 9px;
+    font: 600 10px/1 var(--sans); letter-spacing: 0.09em; text-transform: uppercase;
+    padding: 5px 8px; border-radius: 3px; color: #fff;
+  }
+  .badge.strong  { background: var(--strong); }
+  .badge.explore { background: var(--explore); }
+  .badge.spec    { background: var(--spec); }
+
+  /* ——— the labelled rows: friction, deepening, buys, costs ——— */
+  .row { display: grid; grid-template-columns: 108px 1fr; gap: 14px; padding: 9px 0; border-top: 1px solid var(--rule); }
+  .row > dt { font: 600 11px/1.8 var(--sans); letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); }
+  .row > dd { margin: 0; }
+  .row code { font: 12.5px var(--mono); background: rgba(217,119,87,0.11); padding: 1px 5px; border-radius: 3px; }
+  .row p { margin: 0 0 8px; }
+  .row p:last-child { margin-bottom: 0; }
+
+  /* Evidence is what separates a finding from an opinion — give it its own
+     look so a card without any is visibly incomplete. */
+  .evidence { font: 12px/1.6 var(--mono); color: var(--dim); }
+  .evidence::before { content: "↳ "; color: var(--clay); }
+
+  .sig { display: block; font: 12.5px/1.7 var(--mono); background: rgba(36,33,30,0.05); padding: 10px 12px; border-radius: 4px; white-space: pre-wrap; }
+  @media (prefers-color-scheme: dark) { .sig { background: rgba(255,255,255,0.05); } }
+
+  .conflict { color: var(--adr); font-weight: 600; }
+
+  /* ——— before / after, drawn in CSS: boxes and arrows, no library ——— */
+  .flow { display: grid; grid-template-columns: 1fr auto 1fr; gap: 18px; align-items: center; margin: 4px 0 2px; }
+  @media (max-width: 620px) { .flow { grid-template-columns: 1fr; } .flow .sep { transform: rotate(90deg); } }
+  .flow .side > h3 { margin: 0 0 8px; font: 600 10px/1 var(--sans); letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); }
+  .flow .sep { color: var(--clay); font-size: 20px; text-align: center; }
+  .box {
+    border: 1px solid var(--rule); border-radius: 4px; padding: 7px 10px; margin-bottom: 6px;
+    font: 12px/1.4 var(--mono); background: var(--ivory);
+  }
+  .box.caller { border-style: dashed; color: var(--dim); }
+  .box.deep { border-color: var(--clay); border-width: 2px; }
+  .box .sub { display: block; color: var(--faint); font-size: 11px; margin-top: 3px; }
+  .arrow { color: var(--faint); font: 12px var(--mono); margin: 0 0 6px 12px; }
+
+  footer { margin-top: 34px; padding-top: 14px; border-top: 1px solid var(--rule); color: var(--faint); font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1>Architecture candidates</h1>
+  <!-- AGENT: replace with the repo name, the branch, the date, and the window scanned -->
+  <div class="meta">REPO · BRANCH · YYYY-MM-DD · scanned: WINDOW</div>
+</header>
+
+<div class="lede">
+  <!-- AGENT: one or two sentences on where you looked and why — the hot spots
+       that pointed here. Then leave the last sentence as it stands. -->
+  LEDE.
+  <b>Nothing has been changed.</b> Pick one candidate and the session moves to
+  grilling it; the rest stay on this page.
+</div>
+
+<!-- AGENT: one .card per candidate, strongest first. Copy the block below,
+     fill every row, and delete any row that genuinely has no content rather
+     than padding it. Delete this whole example if there are no candidates. -->
+
+<section class="card">
+  <h2><span class="badge strong">Strong</span>TITLE — what the module becomes</h2>
+  <div class="files">path/to/a.py · path/to/b.py · path/to/c.py</div>
+
+  <dl>
+    <div class="row">
+      <dt>Friction</dt>
+      <dd>
+        <p>What it costs today, concretely.</p>
+        <p class="evidence">commit a3f21e · src/x.py:88 · test_y rewritten twice</p>
+      </dd>
+    </div>
+
+    <div class="row">
+      <dt>Before / after</dt>
+      <dd>
+        <div class="flow">
+          <div class="side">
+            <h3>Today</h3>
+            <div class="box caller">caller</div>
+            <div class="arrow">├─▸</div>
+            <div class="box">step_one()</div>
+            <div class="arrow">├─▸</div>
+            <div class="box">step_two()<span class="sub">must run after step_one</span></div>
+            <div class="arrow">└─▸</div>
+            <div class="box">step_three()</div>
+          </div>
+          <div class="sep">▸</div>
+          <div class="side">
+            <h3>Deepened</h3>
+            <div class="box caller">caller</div>
+            <div class="arrow">└─▸</div>
+            <div class="box deep">Module.entry()<span class="sub">ordering held inside</span></div>
+          </div>
+        </div>
+      </dd>
+    </div>
+
+    <div class="row">
+      <dt>Interface</dt>
+      <dd><code class="sig">def entry(raw: bytes) -&gt; Result
+    raises ParseError; never partial; no ordering exposed</code></dd>
+    </div>
+
+    <div class="row">
+      <dt>Buys</dt>
+      <dd>Leverage and locality, stated as what a caller stops needing to know
+      and what stops being spread out.</dd>
+    </div>
+
+    <div class="row">
+      <dt>Costs</dt>
+      <dd>Call sites touched, migration steps, what gets harder.</dd>
+    </div>
+
+    <div class="row">
+      <dt>Decided</dt>
+      <dd class="conflict">Contradicts ADR-0007 (Accepted) — reopening it is part of the cost.</dd>
+    </div>
+  </dl>
+</section>
+
+<footer>
+  <!-- AGENT: name the candidates you considered and dropped, one line each,
+       so the next run doesn't rediscover them. Delete if there were none. -->
+  Also looked at, not proposed: —
+</footer>
+
+</main>
+</body>
+</html>

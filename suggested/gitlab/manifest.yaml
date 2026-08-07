@@ -1,0 +1,18 @@
+# A plugin, not a vendored block — no rules/skills content of our own to
+# ship, just the plugin_ref and settings_patch. It still gets a directory
+# because its tier is `suggested`; see docs/maintaining.md's "Where a new
+# entry's fragment goes".
+#
+# Project scope, single entry: MR/issue/pipeline access is a property of
+# the repository, identical for everyone who clones it, so there is no
+# project-vs-user choice to leave open.
+
+- id: gitlab
+  type: official-plugin
+  plugin_ref: "gitlab@claude-plugins-official"
+  scope: project
+  tier: suggested
+  summary: Official GitLab plugin - merge requests, issues, pipelines.
+  settings_patch:
+    enabledPlugins:
+      "gitlab@claude-plugins-official": true

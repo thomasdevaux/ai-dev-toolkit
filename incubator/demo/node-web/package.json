@@ -1,0 +1,9 @@
+{
+  "name": "demo-node-web",
+  "version": "0.1.0",
+  "description": "Dummy Node/web project for validating the stacks/nodejs block.",
+  "private": true,
+  "scripts": {
+    "build": "echo build-placeholder"
+  }
+}

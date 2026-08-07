@@ -1,0 +1,42 @@
+- id: common-rules
+  type: file
+  source: common
+  target: .claude/
+  scope: project
+  tier: baseline
+  summary: Org-wide rules and always-available skills - security, language, project-type profile, code navigation, output compression, codegraph setup and re-indexing, session usage reporting, commit message format, desktop stack selection.
+  settings_patch:
+    # Enforces commit-message-format's ban on AI-attribution trailers at the
+    # harness level: the skill only applies if it gets invoked, this always
+    # does. See common/skills/commit-message-format/SKILL.md.
+    includeCoAuthoredBy: false
+    hooks:
+      SessionStart:
+        - hooks:
+            - type: command
+              command: "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/codegraph-freshness.sh"
+
+- id: common-rules-user
+  type: file
+  source: common
+  target: ~/.claude/
+  scope: user
+  tier: baseline
+  summary: The same common block at user scope, so a session opened in any folder still has it.
+  settings_patch:
+    includeCoAuthoredBy: false
+    hooks:
+      SessionStart:
+        - hooks:
+            - type: command
+              command: "\"$HOME\"/.claude/hooks/codegraph-freshness.sh"
+        - hooks:
+            - type: command
+              command: "\"$HOME\"/.claude/hooks/style-prompt.sh"
+      # Persists the style choice as hook automation instead of an
+      # agent-issued Bash/Write call — see style-prompt.sh's header for why.
+      PostToolUse:
+        - matcher: "AskUserQuestion"
+          hooks:
+            - type: command
+              command: "\"$HOME\"/.claude/hooks/style-prompt-save.sh"

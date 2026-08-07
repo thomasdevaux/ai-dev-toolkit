@@ -1,0 +1,7 @@
+- id: project-type-embedded-fccu
+  type: file
+  source: project-type/embedded-fccu
+  target: .claude/
+  scope: project
+  tier: choice-group:project-type
+  summary: Embedded / safety-critical software (e.g. a fuel cell control unit) - extra rigor, not designed yet (stub).

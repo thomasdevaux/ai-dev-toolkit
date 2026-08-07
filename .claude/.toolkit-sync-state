@@ -1,0 +1,63 @@
+{
+  "dismissed": [],
+  "entries": {
+    "common-rules": {
+      "scope": "project",
+      "tier": "baseline"
+    },
+    "common-rules-user": {
+      "scope": "user",
+      "tier": "baseline"
+    },
+    "context-quality": {
+      "scope": "project",
+      "tier": "baseline"
+    },
+    "gitlab": {
+      "scope": "project",
+      "tier": "suggested"
+    },
+    "project-type-none": {
+      "scope": "project",
+      "tier": "choice-group:project-type"
+    },
+    "toolkit-self-check": {
+      "scope": "project",
+      "tier": "baseline"
+    }
+  },
+  "files": {
+    "agents/codegraph-reindex.md": "5d5ff7e16c519b3d863636584ce5968f5c1536695289285cb4477ccdefa57b71",
+    "commands/toolkit-features.md": "73065c5e5d150f4347b1076bff4b8f3be8ff67b1dd2358dec3f07aca4e1c7b20",
+    "commands/toolkit-help.md": "b4b56c3e82550109dd4680b959e3a910ef64140a0cc1d03535d3f04b09c2582e",
+    "commands/toolkit-sync.md": "4d037cef41ff80b945277735c4f6d63cc56b29c22da03b35b92fb2bc863ae135",
+    "hooks/codegraph-freshness.sh": "1ecda831f94a2284add7b8420366d6c31317179460282c82244ec5c012e9e7c2",
+    "hooks/context-check.sh": "19398915e2d620aed9608949d8bc8d899c9c9194276a23ec3c2ed933e1708bdc",
+    "hooks/resolve-toolkit-root.sh": "e10c390283ed662ed80dd5fc6614856ad40bd0e7f50e9906936ff0e6f6d8a63d",
+    "hooks/style-prompt-save.py": "1a75e1b0fdfc44e4c971a46a95ebd8ca31678fb1f6ceda16f8d15ffa6f8dbdf2",
+    "hooks/style-prompt-save.sh": "dc396a12eed2afa3ca62fdd28d9c8e3ba92d36f68f98e8d0d954cd39f75c4a4a",
+    "hooks/style-prompt.sh": "7d21213bdaadcb46c433acd3d0dbb07ee2f8f050cac3d1b9e46e0a491b2aa8d4",
+    "hooks/toolkit-drift-check.sh": "c911c63e4562e8339ff8f0b1c519d5d9e344e4b3cf1e7083a47712a4220021a0",
+    "hooks/toolkit-sync-save.sh": "13ff064c0bbf2dc50830a6516aa6a8c1c0b6a60ac49b0c347bcbff5c4962b487",
+    "rules/codegraph.md": "84d367c81585a92bf7ee4507f9a8245e602ac5e7177d175ce37ff7347ecdf137",
+    "rules/no-project-type.md": "8a5d035b6c7eb9a90e580291ab5f94e6a304995de474a09e3a857f40d3ec25a1",
+    "rules/project-context.md": "98900257916a9592140aa4222441fd04174793372b83b3df44cd3233acc57acb",
+    "rules/project-type-profile.md": "5a479c75dcc4cc76d14de3f115508acebbb2f2ddcb1496afef33a08d591f9ff2",
+    "rules/security.md": "37ad5fb41100acf46a060e0173c15f4623bbf1750ae97af1d4b9be9b5ad3ad8c",
+    "rules/toolkit-sync-manual.md": "1546cba87a68d9e6b18bfc9179dd132c0e3a00a399776f95681ef14344d17abf",
+    "skills/audit-project-context/SKILL.md": "2d029165e92599175b171407de3e0bdecaa248f673446b5ec6b66a6fb0438e9e",
+    "skills/caveman/LICENSE": "17a8a03e790cd0b662021daeefc008b0af05810c041215a95dfa19abc496d3b9",
+    "skills/caveman/SKILL.md": "335c52e71fdb6a864a8ee8b48898bf9045903708822e494f858f5e8e91b660ec",
+    "skills/caveman/SOURCE.md": "4b19ea0f8949c7ff818fd87362e96506e94a6aeacec6428ee0c324fa90bc947a",
+    "skills/codegraph-setup/SKILL.md": "2b9808d190e6ea5ae2b7f3e3edc958d3ba6c46ce6dc74866a8d47852d92d0f99",
+    "skills/commit-message-format/SKILL.md": "9e9476468a5f429d512cfba9cd724ad8a3c80723b96019ef6c4e4dee7fa36a0e",
+    "skills/desktop-app-architecture/SKILL.md": "a0d2148047bb92af93c2a347a3a84f45089a09caddc001fe841c950d1a2c5eef",
+    "skills/init-project-context/SKILL.md": "e3025b7f9834bc8d7fc62e2a229ea41acf7d3baa050bf521d304eba6593aa7cc",
+    "skills/session-report/LICENSE": "3ddf9be5c28fe27dad143a5dc76eea25222ad1dd68934a047064e56ed2fa40c5",
+    "skills/session-report/SKILL.md": "de9b1b4b0bd915d50507b86e4e2ffeae7819f7fd0b9021b2c3e9c91c244c42e8",
+    "skills/session-report/SOURCE.md": "cf491fb33859611d7c59223cabbbe7f25ad5db386edd96a97fd50b9a8d9a2ecc",
+    "skills/session-report/analyze-sessions.mjs": "7cd1c970411db0793a9fcee2936bfacb3d408418bbe8189dcea5fb6c59209b1c",
+    "skills/session-report/template.html": "b106abc8d1f6f8de4e86b2922a0614374aa547881309a357c03da404077bbe27"
+  },
+  "ref": "local"
+}

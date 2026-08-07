@@ -1,0 +1,11 @@
+- id: user-statusline
+  type: file
+  source: user-tools/statusline
+  target: ~/.claude/
+  scope: user
+  tier: baseline
+  summary: Status line showing model, context usage and rate limits - the one always-on token feedback.
+  settings_patch:
+    statusLine:
+      type: command
+      command: "python ~/.claude/statusline.py"

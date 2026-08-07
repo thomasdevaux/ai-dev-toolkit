@@ -1,0 +1,52 @@
+<!--
+  Shared .NET quality settings — place at the solution root. MSBuild walks
+  up from each project directory and applies the first Directory.Build.props
+  it finds, so one file covers every project in the tree with nothing to add
+  per .csproj. Tooling verified 2026-08-07.
+-->
+<Project>
+
+  <PropertyGroup>
+    <!-- Set to the version the solution actually targets. AnalysisLevel
+         follows it, so bumping the TFM also opts into that release's new
+         analyzer rules — deliberate, and worth doing in its own commit. -->
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+
+    <!-- Non-negotiable. A project that turns this off has opted out of the
+         standard, and should say why in a comment right here. -->
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- Code analysis: on by default for net5.0+, but the mode is not.
+         `Recommended` is the working default; `All` enables rules that
+         mostly produce noise in application code (globalization, some
+         design rules) and is worth it only for a library with external
+         consumers. -->
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisMode>Recommended</AnalysisMode>
+    <AnalysisLevel>latest</AnalysisLevel>
+
+    <!-- Without this, IDE style rules (IDExxxx) are IDE-only suggestions and
+         never fail a build or a CI run — the usual reason a solution "has an
+         .editorconfig" and still drifts. -->
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <!-- A warning nobody has to fix is a warning nobody reads. -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsNotAsErrors></WarningsNotAsErrors>
+
+    <!-- Public API documentation. Drop CS1591 from NoWarn on a library whose
+         consumers are outside the team. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <!-- Test projects: assertions and fixtures trip rules written for
+       production code. Scope the relaxation here rather than per project. -->
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
+    <AnalysisMode>Default</AnalysisMode>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+</Project>

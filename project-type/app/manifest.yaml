@@ -1,0 +1,17 @@
+- id: project-type-app
+  type: file
+  source: project-type/app
+  target: .claude/
+  scope: project
+  tier: choice-group:project-type
+  summary: The default discipline - doc map, requirements, ADRs, testing policy, git branch/merge workflow.
+  settings_patch:
+    hooks:
+      # Refuses `git commit` on an integration branch - the only half of
+      # git-workflow-app a script can decide without judgment. Silent on
+      # every other path, including a merge commit finishing a conflict.
+      PreToolUse:
+        - matcher: "Bash"
+          hooks:
+            - type: command
+              command: "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/git-branch-guard.sh"

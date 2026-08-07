@@ -1,0 +1,19 @@
+- id: tech-stack-go
+  type: file
+  source: tech-stacks/go
+  target: .claude/
+  scope: project
+  tier: tech-stack
+  # go.mod marks any Go module, which is the intended reach for this block's
+  # coding standards. Same reasoning as tech-stacks/rust — see that manifest.
+  detect: ["go.mod"]
+  summary: Go coding standards (gofmt, golangci-lint) plus the Wails 3 desktop architecture - the webview branch, React conventions included.
+  # React is the mandated frontend for both webview stacks, so this file
+  # is identical in each. It lives once in the checkout and is deployed
+  # into the block at sync time — the synced skill stays self-contained,
+  # the two copies cannot drift.
+  shared_files:
+    - source: tech-stacks/shared/react-conventions.md
+      target: skills/go-webview-desktop-architecture/references/react-conventions.md
+    - source: tech-stacks/shared/editorconfig.ini
+      target: skills/go-code-standards/references/editorconfig.ini

@@ -18,8 +18,9 @@ that runs, so it has to be worth running.
    `scope: map,adr`. It returns, as a plain findings list: which of the ten
    doc-map slots are present or missing; markdown files under `docs/` that
    belong to no slot; on-hold stubs whose guard line is gone; the
-   requirements table's structural validity (status vocabulary, unique ids,
-   duplicate rows); and `docs/adr/INDEX.md` drift against the files on disk.
+   requirements file's structural validity (status vocabulary, unique ids,
+   duplicate sections); and `docs/adr/INDEX.md` drift against the files on
+   disk.
 
    It runs on a cheaper model on purpose — those are file-presence tests and
    table parses, and none of them needs judgment. Invoking this skill is what

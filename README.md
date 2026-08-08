@@ -86,7 +86,7 @@ Two deployment scopes, synced independently — a project's `.claude/`
 | gitlab | `gitlab` | project | suggested | plugin | Merge requests, issues, and pipelines from inside the session. Opt-in — sync it by id if the project actually uses GitLab. |
 | project-type-none | `no-project-type` | project | choice-group: project-type | rule | No docs, requirements, or ADRs imposed — the common rules still apply, and switching to `project-type-app` is one `sync switch` away. |
 | project-type-app | `docs-map` | project | choice-group: project-type | rule | Ten fixed documentation slots; content that fits none is flagged to the user, never filed ad hoc. |
-|  | `requirements` | project | choice-group: project-type | rule | `docs/requirements.md` is one status table: id, one-line requirement, status. |
+|  | `requirements` | project | choice-group: project-type | rule | `docs/requirements.md` is one `##` section per requirement: id, status, free-form prose. |
 |  | `adr` | project | choice-group: project-type | rule | `docs/adr/` — what deserves an ADR, what binds, and what to do when a request conflicts with an accepted one. |
 |  | `testing-strategy` | project | choice-group: project-type | rule | Non-trivial features need at least one automated test of the main path; no numeric coverage threshold. |
 |  | `init-project-docs` | project | choice-group: project-type | skill | Scaffolds the `docs/` tree: the filled slots and the on-hold stubs. |

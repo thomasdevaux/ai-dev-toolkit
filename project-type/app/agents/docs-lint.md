@@ -1,6 +1,6 @@
 ---
 name: docs-lint
-description: Mechanical documentation checks for a project-type-app repository — doc-map slot presence, requirements-table validity, ADR status vocabulary and INDEX.md drift. Returns a findings list; judges nothing, ranks nothing, applies nothing. Serves audit-docs and adr-cleanup.
+description: Mechanical documentation checks for a project-type-app repository — doc-map slot presence, requirements-file validity, ADR status vocabulary and INDEX.md drift. Returns a findings list; judges nothing, ranks nothing, applies nothing. Serves audit-docs and adr-cleanup.
 model: haiku
 tools: Read, Grep, Glob, Bash
 ---
@@ -41,14 +41,14 @@ requested sections.
    "filled"; whether the fill was legitimate is the caller's judgment, not
    yours.
 
-4. **Requirements table validity** in `docs/requirements.md`, structural only:
-   - every row's status is one of `proposed`, `accepted`, `done`, `deferred`,
-     `rejected`, `superseded`;
-   - ids are unique and match `REQ-\d{3,}`;
-   - no duplicate rows.
+4. **Requirements file validity** in `docs/requirements.md`, structural only:
+   - every section's `Status:` is one of `proposed`, `accepted`, `done`,
+     `deferred`, `rejected`, `superseded`;
+   - heading ids are unique and match `REQ-\d{3,}`;
+   - no duplicate sections.
 
-   Never judge whether the code actually implements a `done` row — that needs
-   reading the code, and it is the caller's step.
+   Never judge whether the code actually implements a `done` requirement —
+   that needs reading the code, and it is the caller's step.
 
 ## Section `adr`
 

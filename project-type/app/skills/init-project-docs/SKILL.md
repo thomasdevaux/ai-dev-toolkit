@@ -32,24 +32,30 @@ Read-then-write: never overwrite an existing file. Report what you skipped.
    - `docs/adr/` — one `<NNNN>-<slug>.md` per decision plus `INDEX.md`, per
      the `adr` rule. Seed one ADR per decision already visible in the code or
      git history that's worth recording. An empty `INDEX.md` is fine.
-   - `docs/requirements.md` — the single table of the `requirements` rule,
+   - `docs/requirements.md` — the flat file of the `requirements` rule,
      nothing else: no frontmatter, no per-requirement file, and **no link to
      code or tests** (that link goes stale faster than it helps, and the
-     table would then vouch for coverage it can't see). Seed it with what the
-     code already does, one `REQ-00X` line per feature, status `done`. If the
-     code does nothing yet, an empty table is fine.
+     section would then vouch for coverage it can't see). Seed it with what
+     the code already does, one `## REQ-00X` section per feature, status
+     `done`. If the code does nothing yet, an empty file is fine.
 
      ```markdown
-     | ID      | Requirement              | Status   |
-     |---------|--------------------------|----------|
-     | REQ-001 | CSV export of the report | done     |
-     | REQ-002 | Offline mode             | deferred |
+     ## REQ-001 — CSV export of the report
+
+     Status: done
+
+     ## REQ-002 — Offline mode
+
+     Status: deferred
+
+     Needs a local cache layer — see ADR-0003. Out of scope until sync
+     conflicts have a resolution strategy.
      ```
 
-     A section below the table (`## REQ-002 — Offline mode`) is allowed only
-     when there's something a one-line entry can't carry — reasoning, a
-     pointer to an ADR. Most requirements never get one; that's the normal
-     case.
+     The prose under a heading can be one sentence or several — a short
+     requirement stays short, a requirement that needs reasoning or a
+     pointer to an ADR gets the room to carry it. Most requirements stay
+     one-liners; that's the normal case.
    - `AGENTS.md` — skip. Tell the user to run `init-project-context`.
 
 3. **Create the five on-hold stubs.** Exact shape, one per file:

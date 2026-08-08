@@ -3,7 +3,7 @@ from pathlib import Path
 
 from tools.sync.manifest import SyncEntry
 from tools.sync.state import SyncState
-from tools.sync.status import _missing_lines, build_hook_report, build_status_report
+from tools.sync.status import _missing_lines, build_hook_report, build_status_report, default_sync_entry_ids
 
 MANIFEST = """
 - id: common-rules
@@ -163,6 +163,63 @@ def test_status_reports_drift_on_changed_settings(tmp_path):
     report = build_status_report(toolkit_root, claude_dir, project_dir)
 
     assert "[gitlab] drift: settings changed" in report
+
+
+def test_default_sync_entry_ids_is_baseline_only_on_a_fresh_project(tmp_path):
+    toolkit_root = _make_toolkit(tmp_path)
+    claude_dir = tmp_path / "project" / ".claude"
+
+    ids = default_sync_entry_ids({}, SyncState(), toolkit_root, claude_dir, "project")
+
+    assert ids == []
+
+
+def test_default_sync_entry_ids_includes_baseline_even_when_unsynced(tmp_path):
+    from tools.sync.manifest import load_manifest
+
+    toolkit_root = _make_toolkit(tmp_path)
+    manifest = load_manifest(toolkit_root)
+    claude_dir = tmp_path / "project" / ".claude"
+
+    ids = default_sync_entry_ids(manifest, SyncState(), toolkit_root, claude_dir, "project")
+
+    assert ids == ["common-rules", "gitlab"]
+
+
+def test_default_sync_entry_ids_re_syncs_a_drifted_non_baseline_entry(tmp_path):
+    """The regression: 'Sync now' silently never cleared drift on an
+    already-adopted tech-stack/choice-group/suggested entry, because the
+    CLI's no-args default only ever expanded to tier:baseline entries."""
+    from tools.sync.manifest import load_manifest
+
+    toolkit_root = _make_toolkit(tmp_path)
+    (toolkit_root / "some-tool" / "extra.md").write_text("# extra\n", encoding="utf-8")
+    manifest = load_manifest(toolkit_root)
+    project_dir = tmp_path / "project"
+    claude_dir = project_dir / ".claude"
+    claude_dir.mkdir(parents=True)
+    (claude_dir / "extra.md").write_text("# stale\n", encoding="utf-8")
+    state = SyncState(entries={"some-tool": {"scope": "project", "tier": "suggested"}})
+
+    ids = default_sync_entry_ids(manifest, state, toolkit_root, claude_dir, "project")
+
+    assert "some-tool" in ids
+    assert set(ids) == {"common-rules", "gitlab", "some-tool"}
+
+
+def test_default_sync_entry_ids_ignores_a_non_baseline_entry_thats_never_been_adopted(tmp_path):
+    """Only re-syncing what's already there — adopting a brand new
+    tech-stack/choice-group/suggested entry still needs an explicit id."""
+    from tools.sync.manifest import load_manifest
+
+    toolkit_root = _make_toolkit(tmp_path)
+    manifest = load_manifest(toolkit_root)
+    claude_dir = tmp_path / "project" / ".claude"
+
+    ids = default_sync_entry_ids(manifest, SyncState(), toolkit_root, claude_dir, "project")
+
+    assert "tech-stack-python" not in ids
+    assert "some-tool" not in ids
 
 
 def test_status_reports_detected_stacks(tmp_path):

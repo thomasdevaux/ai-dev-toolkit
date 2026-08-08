@@ -6,9 +6,9 @@ import sys
 from pathlib import Path
 
 from .detect import detect_stacks
-from .manifest import ManifestError, baseline_entry_ids, load_manifest
+from .manifest import ManifestError, load_manifest
 from .state import load_state, save_state
-from .status import build_hook_report, build_status_report
+from .status import build_hook_report, build_status_report, default_sync_entry_ids
 from .sync import SyncBlocked, switch_choice_group, sync_entries
 
 
@@ -27,11 +27,12 @@ def _cmd_sync(args: argparse.Namespace) -> int:
         if not entry_ids:
             manifest = load_manifest(toolkit_root)
             scope = "user" if args.user else "project"
-            entry_ids = baseline_entry_ids(manifest, scope)
+            state = load_state(claude_dir)
+            entry_ids = default_sync_entry_ids(manifest, state, toolkit_root, claude_dir, scope)
             if not entry_ids:
                 print(f"error: no entry_ids given and no tier:baseline entries found for scope '{scope}'", file=sys.stderr)
                 return 1
-            print(f"no entry_ids given - syncing all baseline entries: {', '.join(entry_ids)}")
+            print(f"no entry_ids given - syncing every baseline entry plus anything already synced that has drifted: {', '.join(entry_ids)}")
         sync_entries(entry_ids, toolkit_root, claude_dir, auto_yes=args.yes, auto_yes_except_user_tools=args.yes_except_user_tools)
     except (ManifestError, SyncBlocked) as exc:
         print(f"error: {exc}", file=sys.stderr)

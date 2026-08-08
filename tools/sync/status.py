@@ -9,7 +9,7 @@ from pathlib import Path
 
 from .detect import detect_stacks
 from .diffing import plan_file_changes
-from .manifest import SyncEntry, load_manifest, resolve_shared_files
+from .manifest import SyncEntry, baseline_entry_ids, load_manifest, resolve_shared_files
 from .settings_patch import diff_settings, load_settings, merge_patch
 from .state import SyncState, is_onboardable_project, load_state
 from .sync import _resolve_target
@@ -40,6 +40,35 @@ def _entry_drift(entry: SyncEntry, toolkit_root: Path, claude_dir: Path) -> str 
     if settings_diff:
         detail.append("settings changed")
     return ", ".join(detail)
+
+
+def default_sync_entry_ids(
+    manifest: dict[str, SyncEntry],
+    state: SyncState,
+    toolkit_root: Path,
+    claude_dir: Path,
+    scope: str,
+) -> list[str]:
+    """The entry set `sync` touches when called with no explicit entry_ids:
+    every tier:baseline entry for the scope (the existing onboarding
+    default), plus every entry already recorded in `state` — any tier —
+    whose files or settings_patch have drifted. Without the second half, a
+    'Sync now' answer never clears drift on an already-adopted
+    choice-group/tech-stack/suggested entry (e.g. project-type-app picked up
+    a source change): the CLI's own default silently ignored it, no matter
+    how many times the question got answered. Adopting a *new*
+    non-baseline entry still needs an explicit id (or `switch`, for a
+    choice-group) — this only re-syncs what's already there."""
+    ids = set(baseline_entry_ids(manifest, scope))
+    for entry_id, recorded in state.entries.items():
+        if recorded.get("scope") != scope:
+            continue
+        entry = manifest.get(entry_id)
+        if entry is None:
+            continue
+        if _entry_drift(entry, toolkit_root, claude_dir) is not None:
+            ids.add(entry_id)
+    return sorted(ids)
 
 
 def _synced_lines(

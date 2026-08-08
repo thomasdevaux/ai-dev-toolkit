@@ -434,8 +434,10 @@ a `SOURCE.md` missing a field, or on MIT content shipped without its
   source checkout's own executable bit (this toolkit is developed on
   Windows).
 - `python -m tools.sync sync <id...>` with **no** ids expands to every
-  `tier: baseline` entry for the target scope; pass explicit ids for
-  `tech-stack`/`choice-group`/`suggested` entries.
+  `tier: baseline` entry for the target scope, plus every entry already
+  synced (any tier) that has drifted — so it also re-syncs an adopted
+  `tech-stack`/`choice-group`/`suggested` entry. Adopting a **new** one still
+  needs an explicit id (or `switch`, for a choice-group).
   `python -m tools.sync status --toolkit-root . --project-dir <path>`
   (add `--user` for `~/.claude`) is the read-only version — same report,
   no writes.

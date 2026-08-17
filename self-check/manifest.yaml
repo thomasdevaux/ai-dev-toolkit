@@ -5,6 +5,11 @@
   scope: project
   tier: baseline
   summary: The /toolkit-sync, /toolkit-feat and /toolkit-help commands — on-demand toolkit onboarding/drift status and opt-in block discovery for this project. Nothing runs automatically; every check and every sync is a command the user runs themselves.
+  group: Toolkit commands
+  features:
+    - /toolkit-sync
+    - /toolkit-feat
+    - /toolkit-help
   settings_patch:
     companyAnnouncements:
       - "ai-dev-toolkit v{{VERSION}} · handbook: https://github.com/thomasdevaux/ai-dev-toolkit/tree/main/handbook\n\nCommands:\n  /toolkit-sync   — check toolkit sync status\n  /toolkit-feat   — list available opt-in blocks not yet installed\n  /toolkit-help   — show the practices guide and handbook link\n\nToken-saving:\n  /model           — switch model\n  /effort          — reasoning effort\n  /autocompact     — context threshold\n  /caveman         — compressed replies\n  /session-report  — usage report"
@@ -16,6 +21,11 @@
   scope: user
   tier: baseline
   summary: The same commands at user scope, so /toolkit-sync, /toolkit-feat and /toolkit-help are also available in never-synced projects.
+  group: Toolkit commands
+  features:
+    - /toolkit-sync
+    - /toolkit-feat
+    - /toolkit-help
   settings_patch:
     companyAnnouncements:
       - "ai-dev-toolkit v{{VERSION}} · handbook: https://github.com/thomasdevaux/ai-dev-toolkit/tree/main/handbook\n\nCommands:\n  /toolkit-sync   — check toolkit sync status\n  /toolkit-feat   — list available opt-in blocks not yet installed\n  /toolkit-help   — show the practices guide and handbook link\n\nToken-saving:\n  /model           — switch model\n  /effort          — reasoning effort\n  /autocompact     — context threshold\n  /caveman         — compressed replies\n  /session-report  — usage report"

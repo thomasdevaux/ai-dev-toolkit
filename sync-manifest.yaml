@@ -28,6 +28,17 @@
 #                  suggested  listed as available, never pressed, never
 #                             installed unless explicitly synced by id
 #   summary        one line, shown in the status report and the user-guide
+#   group          category label `sync` prints a change under, e.g.
+#                  "Language servers" or "Rules" — omit to fall back to
+#                  `summary` (or the id) as that entry's own line. Entries of
+#                  type: official-plugin sharing a group are combined onto one
+#                  comma-joined line (the 13 language servers install as a
+#                  single "Language servers: ..." line); type: file entries
+#                  list each of their `features` on its own "<group>: <item>"
+#                  line instead, since a file block bundles named things a
+#                  reader picks individually, not a single mechanical toggle.
+#   features       named things this entry installs, shown one per line under
+#                  `group` for type: file entries (ignored without `group`)
 #   detect         marker filenames/globs/dirs, ANY of which suggests this
 #                  entry — for a block that is a language's entry point
 #   detect_all     markers, ALL of which must sit in the same directory —

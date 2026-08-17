@@ -239,12 +239,56 @@ def _is_user_tool(entry: SyncEntry) -> bool:
 
 
 def _feature_label(entry: SyncEntry) -> str:
-    """What sync shows the user for this entry instead of a file/JSON diff —
-    the manifest's own one-line `summary:`, falling back to the id for the
-    rare entry that hasn't got one yet. Deliberately never mentions file
+    """What sync shows the user for an entry with no `group`/`features` of its
+    own — the manifest's one-line `summary:`, falling back to the id for the
+    rare entry that hasn't got either yet. Deliberately never mentions file
     paths or settings.json keys: a consumer reviewing a sync run should see
     what feature is changing, not the toolkit's internal layout."""
     return entry.summary or entry.id
+
+
+class _SyncReport:
+    """Accumulates what a sync run changed, as feature lines rather than the
+    file tree or settings.json diff behind them — see `sync-manifest.yaml`'s
+    `group`/`features` fields. `type: official-plugin` entries sharing a
+    `group` are mechanical single-toggle installs (the 13 language servers),
+    so they collapse onto one comma-joined line; `type: file` entries list
+    each of their own `features` on its own line, since a file block bundles
+    named things worth seeing individually (common-rules' security/language/
+    project-type-profile/... rules). Entries with neither fall back to
+    `_feature_label`, one line each. Printed once, after every entry in the
+    run has been decided, so a run mixing auto-applied and confirmed entries
+    still reads as a single summary instead of scattered partial ones."""
+
+    def __init__(self) -> None:
+        self._plugin_groups: dict[str, list[str]] = {}
+        self._order: list[tuple[str, str]] = []  # ("group", name) | ("line", text)
+
+    def add(self, entry: SyncEntry) -> None:
+        if entry.group and entry.features:
+            if entry.type == "official-plugin":
+                if entry.group not in self._plugin_groups:
+                    self._plugin_groups[entry.group] = []
+                    self._order.append(("group", entry.group))
+                self._plugin_groups[entry.group].extend(entry.features)
+            else:
+                for feature in entry.features:
+                    self._order.append(("line", f"{entry.group}: {feature}"))
+        else:
+            self._order.append(("line", _feature_label(entry)))
+
+    def __bool__(self) -> bool:
+        return bool(self._order)
+
+    def print(self) -> None:
+        if not self:
+            return
+        print("Syncing:")
+        for kind, key in self._order:
+            if kind == "group":
+                print(f"  + {key}: {', '.join(self._plugin_groups[key])}")
+            else:
+                print(f"  + {key}")
 
 
 def sync_entries(
@@ -258,7 +302,7 @@ def sync_entries(
     state = load_state(claude_dir)
     project_dir = claude_dir.parent
     settings_path = claude_dir / "settings.json"
-    header_printed = False
+    report = _SyncReport()
 
     for entry_id in entry_ids:
         if entry_id not in manifest:
@@ -295,16 +339,16 @@ def sync_entries(
                 state.plugins[ref] = entry.id
             continue
 
-        label = _feature_label(entry)
-
         # A consumer reviewing a sync run wants to know which features are
         # changing, not the file tree or settings.json keys behind them —
-        # see _feature_label. Entries the caller already trusts (--yes /
-        # --yes-except-user-tools) are applied and reported together as one
-        # short list; anything still needing a real decision (e.g. the
-        # statusline under --yes-except-user-tools) gets its own line and
-        # its own prompt.
+        # see _SyncReport. Entries the caller already trusts (--yes /
+        # --yes-except-user-tools) are applied and reported together in one
+        # summary printed after the loop; anything still needing a real
+        # decision (e.g. the statusline under --yes-except-user-tools) gets
+        # its own prompt first, but still joins that same summary once
+        # accepted.
         if not entry_auto_yes:
+            label = _feature_label(entry)
             if not confirm(f"New feature available: {label}\nApply changes for '{entry_id}'?", False):
                 print(f"  - skipped: {label}")
                 continue
@@ -324,11 +368,9 @@ def sync_entries(
         if entry.id in state.dismissed:
             state.dismissed.remove(entry.id)
         state.ref = _toolkit_ref(toolkit_root)
+        report.add(entry)
 
-        if not header_printed:
-            print("Syncing:")
-            header_printed = True
-        print(f"  + {label}")
+    report.print()
 
     prune_auto_yes = auto_yes or auto_yes_except_user_tools
     _prune_stale_plugins(manifest, state, claude_dir, prune_auto_yes)

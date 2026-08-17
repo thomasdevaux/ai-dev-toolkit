@@ -31,6 +31,8 @@ class SyncEntry:
     target: str | None = None
     plugin_ref: str | None = None
     summary: str = ""
+    group: str = ""
+    features: list[str] = field(default_factory=list)
     detect: list[str] = field(default_factory=list)
     detect_all: list[str] = field(default_factory=list)
     shared_files: tuple[tuple[str, str], ...] = ()
@@ -117,6 +119,8 @@ def _entry_from_dict(raw: dict) -> SyncEntry:
         target=raw.get("target"),
         plugin_ref=raw.get("plugin_ref"),
         summary=raw.get("summary", ""),
+        group=raw.get("group", ""),
+        features=list(raw.get("features", [])),
         detect=list(raw.get("detect", [])),
         detect_all=list(raw.get("detect_all", [])),
         shared_files=_shared_files_from_raw(entry_id, raw.get("shared_files", [])),

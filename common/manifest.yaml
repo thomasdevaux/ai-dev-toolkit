@@ -5,6 +5,17 @@
   scope: project
   tier: baseline
   summary: Org-wide rules and always-available skills - security, language, project-type profile, code navigation, output compression, codegraph setup and re-indexing, session usage reporting, commit message format, desktop stack selection.
+  group: Rules
+  features:
+    - Security
+    - Language
+    - Project-type profile
+    - Code navigation
+    - Output compression
+    - Codegraph setup and re-indexing
+    - Session usage reporting
+    - Commit message format
+    - Desktop stack selection
   settings_patch:
     # Enforces commit-message-format's ban on AI-attribution trailers at the
     # harness level: the skill only applies if it gets invoked, this always
@@ -23,6 +34,17 @@
   scope: user
   tier: baseline
   summary: The same common block at user scope, so a session opened in any folder still has it.
+  group: Rules
+  features:
+    - Security
+    - Language
+    - Project-type profile
+    - Code navigation
+    - Output compression
+    - Codegraph setup and re-indexing
+    - Session usage reporting
+    - Commit message format
+    - Desktop stack selection
   settings_patch:
     includeCoAuthoredBy: false
     hooks:

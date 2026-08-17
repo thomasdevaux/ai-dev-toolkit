@@ -31,6 +31,8 @@
   scope: user
   tier: baseline
   summary: Official Python language server.
+  group: Language servers
+  features: ["Python"]
   settings_patch:
     enabledPlugins:
       "pyright-lsp@claude-plugins-official": true
@@ -41,6 +43,8 @@
   scope: user
   tier: baseline
   summary: Official TypeScript/JavaScript language server.
+  group: Language servers
+  features: ["TypeScript/JavaScript"]
   settings_patch:
     enabledPlugins:
       "typescript-lsp@claude-plugins-official": true
@@ -51,6 +55,8 @@
   scope: user
   tier: baseline
   summary: Official Rust language server.
+  group: Language servers
+  features: ["Rust"]
   settings_patch:
     enabledPlugins:
       "rust-analyzer-lsp@claude-plugins-official": true
@@ -61,6 +67,8 @@
   scope: user
   tier: baseline
   summary: Official Go language server.
+  group: Language servers
+  features: ["Go"]
   settings_patch:
     enabledPlugins:
       "gopls-lsp@claude-plugins-official": true
@@ -71,6 +79,8 @@
   scope: user
   tier: baseline
   summary: Official C# language server.
+  group: Language servers
+  features: ["C#"]
   settings_patch:
     enabledPlugins:
       "csharp-lsp@claude-plugins-official": true
@@ -81,6 +91,8 @@
   scope: user
   tier: baseline
   summary: Official C/C++ language server.
+  group: Language servers
+  features: ["C/C++"]
   settings_patch:
     enabledPlugins:
       "clangd-lsp@claude-plugins-official": true
@@ -91,6 +103,8 @@
   scope: user
   tier: baseline
   summary: Official Java language server.
+  group: Language servers
+  features: ["Java"]
   settings_patch:
     enabledPlugins:
       "jdtls-lsp@claude-plugins-official": true
@@ -101,6 +115,8 @@
   scope: user
   tier: baseline
   summary: Official Kotlin language server.
+  group: Language servers
+  features: ["Kotlin"]
   settings_patch:
     enabledPlugins:
       "kotlin-lsp@claude-plugins-official": true
@@ -111,6 +127,8 @@
   scope: user
   tier: baseline
   summary: Official Swift language server.
+  group: Language servers
+  features: ["Swift"]
   settings_patch:
     enabledPlugins:
       "swift-lsp@claude-plugins-official": true
@@ -121,6 +139,8 @@
   scope: user
   tier: baseline
   summary: Official Ruby language server.
+  group: Language servers
+  features: ["Ruby"]
   settings_patch:
     enabledPlugins:
       "ruby-lsp@claude-plugins-official": true
@@ -131,6 +151,8 @@
   scope: user
   tier: baseline
   summary: Official PHP language server.
+  group: Language servers
+  features: ["PHP"]
   settings_patch:
     enabledPlugins:
       "php-lsp@claude-plugins-official": true
@@ -141,6 +163,8 @@
   scope: user
   tier: baseline
   summary: Official Lua language server.
+  group: Language servers
+  features: ["Lua"]
   settings_patch:
     enabledPlugins:
       "lua-lsp@claude-plugins-official": true
@@ -151,6 +175,8 @@
   scope: user
   tier: baseline
   summary: Official Liquid language server.
+  group: Language servers
+  features: ["Liquid"]
   settings_patch:
     enabledPlugins:
       "liquid-lsp@claude-plugins-official": true

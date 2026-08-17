@@ -12,7 +12,7 @@
     - /toolkit-help
   settings_patch:
     companyAnnouncements:
-      - "ai-dev-toolkit v{{VERSION}} · handbook: https://github.com/thomasdevaux/ai-dev-toolkit/tree/main/handbook\n\nCommands:\n  /toolkit-sync   — check toolkit sync status\n  /toolkit-feat   — list available opt-in blocks not yet installed\n  /toolkit-help   — show the practices guide and handbook link\n\nToken-saving:\n  /model           — switch model\n  /effort          — reasoning effort\n  /autocompact     — context threshold\n  /caveman         — compressed replies\n  /session-report  — usage report"
+      - "ai-dev-toolkit v{{VERSION}} · handbook: https://github.com/thomasdevaux/ai-dev-toolkit/tree/main/handbook\n\nCommands:\n  /toolkit-sync   — sync the toolkit\n  /toolkit-feat   — list available opt-in blocks not yet installed\n  /toolkit-help   — show the practices guide and handbook link\n\nToken-saving:\n  /model           — switch model\n  /effort          — reasoning effort\n  /autocompact     — context threshold\n  /caveman         — compressed replies\n  /session-report  — usage report"
 
 - id: toolkit-self-check-user
   type: file
@@ -28,4 +28,4 @@
     - /toolkit-help
   settings_patch:
     companyAnnouncements:
-      - "ai-dev-toolkit v{{VERSION}} · handbook: https://github.com/thomasdevaux/ai-dev-toolkit/tree/main/handbook\n\nCommands:\n  /toolkit-sync   — check toolkit sync status\n  /toolkit-feat   — list available opt-in blocks not yet installed\n  /toolkit-help   — show the practices guide and handbook link\n\nToken-saving:\n  /model           — switch model\n  /effort          — reasoning effort\n  /autocompact     — context threshold\n  /caveman         — compressed replies\n  /session-report  — usage report"
+      - "ai-dev-toolkit v{{VERSION}} · handbook: https://github.com/thomasdevaux/ai-dev-toolkit/tree/main/handbook\n\nCommands:\n  /toolkit-sync   — sync the toolkit\n  /toolkit-feat   — list available opt-in blocks not yet installed\n  /toolkit-help   — show the practices guide and handbook link\n\nToken-saving:\n  /model           — switch model\n  /effort          — reasoning effort\n  /autocompact     — context threshold\n  /caveman         — compressed replies\n  /session-report  — usage report"

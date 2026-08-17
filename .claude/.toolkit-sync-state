@@ -32,8 +32,9 @@
   },
   "files": {
     "agents/codegraph-reindex.md": "5d5ff7e16c519b3d863636584ce5968f5c1536695289285cb4477ccdefa57b71",
-    "commands/toolkit-help.md": "b4b56c3e82550109dd4680b959e3a910ef64140a0cc1d03535d3f04b09c2582e",
-    "commands/toolkit-sync.md": "9aef07922331fe6307ca6400a1a201fc7ae85c80bf1a33b48c18b539c9c03330",
+    "commands/toolkit-feat.md": "b15a73b06679b83aad40bcac8b25935b0fe91605cd6d7aaf30fa1b790ff9284b",
+    "commands/toolkit-help.md": "f083891ea76dc1ab5445280dd8820b595d1ebf28d6ccdfdeb35ede793e8717b2",
+    "commands/toolkit-sync.md": "fa3fb09d28a8561c5f4f14cd1767f45e10da2fd8b1a45acdded8ade835e88caf",
     "hooks/codegraph-freshness.sh": "1ecda831f94a2284add7b8420366d6c31317179460282c82244ec5c012e9e7c2",
     "hooks/context-check.sh": "19398915e2d620aed9608949d8bc8d899c9c9194276a23ec3c2ed933e1708bdc",
     "hooks/resolve-toolkit-root.sh": "7ef443c7d7212e68275160bc866b329b5402b167169495fbd09fc5daf02efd61",
@@ -44,7 +45,7 @@
     "rules/project-context.md": "98900257916a9592140aa4222441fd04174793372b83b3df44cd3233acc57acb",
     "rules/project-type-profile.md": "5a479c75dcc4cc76d14de3f115508acebbb2f2ddcb1496afef33a08d591f9ff2",
     "rules/security.md": "37ad5fb41100acf46a060e0173c15f4623bbf1750ae97af1d4b9be9b5ad3ad8c",
-    "rules/toolkit-sync-manual.md": "264049246bab914ffd32d85887b75e2b39c5fe057727c184db12701a95dbf870",
+    "rules/toolkit-sync-auto-apply.md": "69b9cb6213d4dbe5344407ba9b8934fba4b8516a7429327d96a87d418b8f3c9c",
     "skills/audit-project-context/SKILL.md": "2d029165e92599175b171407de3e0bdecaa248f673446b5ec6b66a6fb0438e9e",
     "skills/caveman/LICENSE": "17a8a03e790cd0b662021daeefc008b0af05810c041215a95dfa19abc496d3b9",
     "skills/caveman/SKILL.md": "335c52e71fdb6a864a8ee8b48898bf9045903708822e494f858f5e8e91b660ec",
@@ -59,5 +60,6 @@
     "skills/session-report/analyze-sessions.mjs": "7cd1c970411db0793a9fcee2936bfacb3d408418bbe8189dcea5fb6c59209b1c",
     "skills/session-report/template.html": "b106abc8d1f6f8de4e86b2922a0614374aa547881309a357c03da404077bbe27"
   },
+  "plugins": {},
   "ref": "local"
 }

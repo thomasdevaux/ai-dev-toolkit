@@ -1,6 +1,6 @@
 {
   "companyAnnouncements": [
-    "ai-dev-toolkit v0.0.1 \u00b7 handbook: https://github.com/thomasdevaux/ai-dev-toolkit/tree/main/handbook\n\nCommands:\n  /toolkit-sync   \u2014 check toolkit sync status\n  /toolkit-feat   \u2014 list available opt-in blocks not yet installed\n  /toolkit-help   \u2014 show the practices guide and handbook link\n\nToken-saving:\n  /model           \u2014 switch model\n  /effort          \u2014 reasoning effort\n  /autocompact     \u2014 context threshold\n  /caveman         \u2014 compressed replies\n  /session-report  \u2014 usage report"
+    "ai-dev-toolkit v0.0.1 \u00b7 handbook: https://github.com/thomasdevaux/ai-dev-toolkit/tree/main/handbook\n\nCommands:\n  /toolkit-sync   \u2014 sync the toolkit\n  /toolkit-feat   \u2014 list available opt-in blocks not yet installed\n  /toolkit-help   \u2014 show the practices guide and handbook link\n\nToken-saving:\n  /model           \u2014 switch model\n  /effort          \u2014 reasoning effort\n  /autocompact     \u2014 context threshold\n  /caveman         \u2014 compressed replies\n  /session-report  \u2014 usage report"
   ],
   "enabledPlugins": {
     "gitlab@claude-plugins-official": true

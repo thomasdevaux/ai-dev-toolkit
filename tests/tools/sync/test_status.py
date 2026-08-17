@@ -70,7 +70,7 @@ def test_status_reports_missing_baseline_on_empty_project(tmp_path):
 
     assert "[common-rules] recommended (baseline), not yet synced" in report
     assert "[gitlab] recommended (baseline), not yet synced" in report
-    assert f"sync --toolkit-root {toolkit_root} --project-dir {project_dir}" in report
+    assert f"sync --project-dir {project_dir} --yes" in report
 
 
 def test_status_omits_hint_when_no_baseline_missing():

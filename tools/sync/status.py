@@ -252,12 +252,13 @@ def build_status_report(
         # Uses the /toolkit-sync wrapper (repo root's bin/), not
         # `python -m tools.sync` directly, since this hint is meant to be
         # copy-pasted from any cwd — see toolkit-sync's docstring comment for
-        # why that matters.
+        # why that matters. No --toolkit-root: the wrapper already knows its
+        # own location and defaults to it unless the caller overrides it.
         target_flag = "--user" if scope == "user" else f"--project-dir {project_dir}"
         lines.append(
-            f"hint: run '{toolkit_root}/bin/toolkit-sync sync --toolkit-root {toolkit_root} "
-            f"{target_flag} --yes' with no entry_ids to sync every "
-            "baseline entry above in one go. (on Windows cmd/PowerShell, use "
+            f"hint: run '{toolkit_root}/bin/toolkit-sync sync {target_flag} --yes' "
+            "with no entry_ids to sync every baseline entry above in one go. "
+            "(on Windows cmd/PowerShell, use "
             f"{toolkit_root}\\bin\\toolkit-sync.cmd instead)"
         )
     if scope == "project":

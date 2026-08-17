@@ -227,19 +227,22 @@ def build_status_report(
     ambient. Everything else — the up-to-date roll call, the 'nothing to
     report' line — is dropped, so an empty string means say nothing at all.
 
+    A non-git, never-synced folder is only exempt from the *ambient* hook —
+    the project-type-none premise that a one-off script session shouldn't get
+    nagged at every session start. An explicit status/`/toolkit-sync` call is
+    a deliberate ask, not an ambient interruption, so it reports normally
+    (and `sync` itself no longer refuses to write there either — see
+    `sync.sync_entries`): otherwise the report and what `sync` can actually
+    do would disagree, which is its own source of confusion.
+
     `scope="user"` reports on `~/.claude` instead: no git-repo/scratch-folder
     notion applies there (it's a machine, not a project), and stack detection
     is a project-only concept, so both are skipped."""
     manifest = load_manifest(toolkit_root)
     state = load_state(claude_dir)
 
-    if scope == "project" and not is_onboardable_project(project_dir, state):
-        if for_hook:
-            return ""
-        return (
-            "toolkit: this folder isn't a git repository and has never been synced, "
-            "nothing to report. Run 'toolkit-sync sync' here if it becomes a real project."
-        )
+    if scope == "project" and for_hook and not is_onboardable_project(project_dir, state):
+        return ""
 
     lines: list[str] = []
     lines.extend(_synced_lines(manifest, state, toolkit_root, claude_dir, include_clean=not for_hook))

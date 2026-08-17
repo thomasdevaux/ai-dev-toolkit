@@ -23,7 +23,7 @@ from .settings_patch import (
     save_settings,
     stale_hook_commands,
 )
-from .state import SyncState, is_onboardable_project, load_state, save_state
+from .state import SyncState, load_state, save_state
 
 
 class SyncBlocked(RuntimeError):
@@ -300,7 +300,6 @@ def sync_entries(
 ) -> None:
     manifest = load_manifest(toolkit_root)
     state = load_state(claude_dir)
-    project_dir = claude_dir.parent
     settings_path = claude_dir / "settings.json"
     report = _SyncReport()
 
@@ -309,15 +308,6 @@ def sync_entries(
             raise SyncBlocked(f"unknown entry id '{entry_id}' (not in sync-manifest.yaml)")
         entry = manifest[entry_id]
         entry_auto_yes = auto_yes or (auto_yes_except_user_tools and not _is_user_tool(entry))
-
-        if entry.scope == "project" and not is_onboardable_project(project_dir, state):
-            raise SyncBlocked(
-                f"'{project_dir}' isn't a git repository and has nothing synced yet — "
-                f"project-scope entry '{entry.id}' won't be written here. The "
-                "machine-wide user-scope entries (sync with --user) already cover a "
-                "scratch session; run 'git init' first if this is meant to become a "
-                "real project."
-            )
 
         _check_choice_group(entry, state)
 

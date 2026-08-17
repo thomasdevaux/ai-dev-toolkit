@@ -213,17 +213,19 @@ def test_sync_leaves_a_consumers_own_hook_alone(tmp_path):
     assert settings["hooks"]["SessionEnd"][0]["hooks"][0]["command"] == "./scripts/mine.sh"
 
 
-def test_sync_refuses_project_scope_entry_in_a_scratch_folder(tmp_path):
-    """No .git, nothing ever synced: process-none's whole premise is that
-    the user-scope entries already cover this session, so sync must not
-    write a project .claude/ here even with auto_yes."""
+def test_sync_writes_a_project_scope_entry_in_a_scratch_folder(tmp_path):
+    """No .git, nothing ever synced: sync no longer requires a repo to write
+    project-scope entries — asking it to sync somewhere is itself the
+    deliberate signal, same as `git init` used to be. The ambient
+    SessionStart hook still stays quiet there (see status.py's
+    build_status_report), only sync's own refusal is gone."""
     toolkit_root = _make_toolkit(tmp_path)
     claude_dir = tmp_path / "scratch" / ".claude"
 
-    with pytest.raises(SyncBlocked, match="isn't a git repository"):
-        sync_entries(["gitlab"], toolkit_root, claude_dir, auto_yes=True)
+    sync_entries(["gitlab"], toolkit_root, claude_dir, auto_yes=True)
 
-    assert not claude_dir.exists()
+    settings = json.loads((claude_dir / "settings.json").read_text(encoding="utf-8"))
+    assert settings["enabledPlugins"] == {"gitlab@claude-plugins-official": True}
 
 
 def test_sync_allows_project_scope_entry_once_a_git_repo(tmp_path):

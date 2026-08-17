@@ -234,18 +234,19 @@ def test_status_reports_detected_stacks(tmp_path):
     assert "  - tech-stack-python" in report
 
 
-def test_status_stays_quiet_in_a_scratch_folder(tmp_path):
-    """No .git, nothing ever synced: a session opened here to poke at a script
-    must not turn into an onboarding checklist."""
+def test_status_reports_normally_in_a_scratch_folder_when_asked_explicitly(tmp_path):
+    """No .git, nothing ever synced: the *ambient* hook stays quiet there (see
+    test_hook_report_stays_empty_in_a_scratch_folder), but an explicit status
+    call is a deliberate ask, and `sync` itself will happily write project-scope
+    entries into a non-git folder — the report has to agree, or "nothing to
+    report" would contradict what running sync there actually does."""
     toolkit_root = _make_toolkit(tmp_path)
     project_dir = tmp_path / "scratch"
     project_dir.mkdir()
 
     report = build_status_report(toolkit_root, project_dir / ".claude", project_dir)
 
-    assert "isn't a git repository" in report
-    assert "recommended (baseline)" not in report
-    assert "choice-group" not in report
+    assert "[common-rules] recommended (baseline), not yet synced" in report
 
 
 def test_status_speaks_in_a_synced_folder_even_without_git(tmp_path):

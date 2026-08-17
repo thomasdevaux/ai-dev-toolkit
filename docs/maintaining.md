@@ -463,13 +463,15 @@ a `SOURCE.md` missing a field, or on MIT content shipped without its
   Accepted for the same reason — which is why that hook has to stay cheap
   (its index lookup prunes `node_modules/` and friends) and silent when the
   index is fresh, so paying for it twice costs nothing worth removing.
-- **A toolkit-root-level script is a bare name plus a `.cmd` twin**, not a
-  `.sh`/`.ps1` pair: `toolkit-sync`/`toolkit-sync.cmd`,
-  `toolkit-status`/`toolkit-status.cmd`, `toolkit-help`/`toolkit-help.cmd`.
-  Each resolves its own directory as the toolkit root (`cd`s there before
-  invoking Python) so it works from any cwd once cloned — `install.sh`/
-  `install.ps1` are the one exception, since they exist specifically to be
-  curled before any checkout exists.
+- **A `bin/`-level script is a bare name plus a `.cmd` twin**, not a
+  `.sh`/`.ps1` pair: `bin/toolkit-sync`/`bin/toolkit-sync.cmd`,
+  `bin/toolkit-status`/`bin/toolkit-status.cmd`,
+  `bin/toolkit-help`/`bin/toolkit-help.cmd`. Each resolves its own directory
+  and takes the parent as the toolkit root (`cd`s there before invoking
+  Python) so it works from any cwd once cloned — `install.sh`/`install.ps1`
+  are the one exception, both in staying at the repo root and in resolving
+  themselves: they exist specifically to be curled before any checkout
+  exists, so they clone one instead of locating one.
 - `{{VERSION}}` in a manifest's `settings_patch` is expanded from the
   `VERSION` file when the manifest loads (the startup banner uses it). Write
   the placeholder, never the number — a hand-written version is one nobody

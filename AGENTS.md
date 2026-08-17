@@ -27,7 +27,7 @@ common/              # the baseline block: rules + always-available skills
 context-quality/  project-type/<none|app|embedded-fccu>/  tech-stacks/<lang>/
 tech-stacks/shared/  # files several stacks deploy verbatim, via `shared_files:`
 self-check/          # a block too: the /toolkit-sync, -features, -help commands
-toolkit-status(.cmd)  toolkit-help(.cmd)  # same, no Claude Code needed
+bin/                 # toolkit-sync/-status/-help(.cmd) — same, no Claude Code needed
 user-tools/          # blocks deployed to ~/.claude/ rather than a project
 suggested/<topic>/   # tier: suggested blocks — useful, opt-in, never imposed
 incubator/           # parked blocks, deliberately absent from the manifest

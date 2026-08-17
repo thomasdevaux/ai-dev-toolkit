@@ -1,2 +1,2 @@
 *.sh text eol=lf
-/toolkit-sync text eol=lf
+/bin/toolkit-sync text eol=lf

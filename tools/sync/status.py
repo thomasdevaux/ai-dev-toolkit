@@ -249,15 +249,16 @@ def build_status_report(
     missing_lines, has_missing_baseline = _missing_lines(manifest, state, scope=scope)
     lines.extend(missing_lines)
     if has_missing_baseline:
-        # Uses the /toolkit-sync wrapper (repo root), not `python -m tools.sync`
-        # directly, since this hint is meant to be copy-pasted from any cwd —
-        # see toolkit-sync's docstring comment for why that matters.
+        # Uses the /toolkit-sync wrapper (repo root's bin/), not
+        # `python -m tools.sync` directly, since this hint is meant to be
+        # copy-pasted from any cwd — see toolkit-sync's docstring comment for
+        # why that matters.
         target_flag = "--user" if scope == "user" else f"--project-dir {project_dir}"
         lines.append(
-            f"hint: run '{toolkit_root}/toolkit-sync sync --toolkit-root {toolkit_root} "
+            f"hint: run '{toolkit_root}/bin/toolkit-sync sync --toolkit-root {toolkit_root} "
             f"{target_flag} --yes' with no entry_ids to sync every "
             "baseline entry above in one go. (on Windows cmd/PowerShell, use "
-            f"{toolkit_root}\\toolkit-sync.cmd instead)"
+            f"{toolkit_root}\\bin\\toolkit-sync.cmd instead)"
         )
     if scope == "project":
         lines.extend(_stack_lines(project_dir, toolkit_root, state))

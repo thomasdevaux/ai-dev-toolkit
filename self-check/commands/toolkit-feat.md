@@ -14,7 +14,7 @@ check status:
 export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 source "$CLAUDE_PROJECT_DIR/.claude/hooks/resolve-toolkit-root.sh"
 TOOLKIT_ROOT="$(resolve_toolkit_root)"
-"$TOOLKIT_ROOT/toolkit-status" --project-dir "$CLAUDE_PROJECT_DIR"
+"$TOOLKIT_ROOT/bin/toolkit-status" --project-dir "$CLAUDE_PROJECT_DIR"
 ```
 
 From the output, keep only the "detected stack(s)" and "available, not

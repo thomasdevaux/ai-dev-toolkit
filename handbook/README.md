@@ -18,7 +18,7 @@ into any project, not loaded into any session: it's written for people.
 One command, once per machine:
 
 ```
-toolkit-sync sync --user --toolkit-root <checkout>
+bin/toolkit-sync sync --user --toolkit-root <checkout>
 ```
 
 That installs, under `~/.claude/`: the common block — rules, `caveman`,

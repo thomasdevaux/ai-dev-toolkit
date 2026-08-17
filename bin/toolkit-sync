@@ -5,9 +5,11 @@
 # (or PYTHONPATH) already contains the `tools` package, i.e. when the caller
 # has `cd`'d into the toolkit checkout first. Forgetting that step fails with
 # a cryptic `ModuleNotFoundError: No module named 'tools'` that looks
-# unrelated to the real cause. This wrapper resolves its own location and
-# `cd`s there before invoking Python, so it can be called from anywhere.
+# unrelated to the real cause. This wrapper resolves its own location — one
+# level below the toolkit root, since it lives in bin/ — and `cd`s to the
+# root before invoking Python, so it can be called from anywhere.
 set -e
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TOOLKIT_ROOT="$(dirname "$BIN_DIR")"
+cd "$TOOLKIT_ROOT"
 exec python -m tools.sync "$@"

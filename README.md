@@ -54,13 +54,13 @@ later to pull in toolkit updates.
 
 **No Claude Code session? Same check, plain script.** `/toolkit-sync` and
 `/toolkit-help` are thin wrappers around `toolkit-status` and `toolkit-help`
-— two scripts sitting at the root of the cloned checkout, runnable from any
+— two scripts sitting in `bin/` of the cloned checkout, runnable from any
 terminal (a CI job, a git hook, or just a shell) without ever opening Claude
 Code:
 
 ```
-~/.cache/ai-dev-toolkit/toolkit-status --project-dir /path/to/project
-~/.cache/ai-dev-toolkit/toolkit-help
+~/.cache/ai-dev-toolkit/bin/toolkit-status --project-dir /path/to/project
+~/.cache/ai-dev-toolkit/bin/toolkit-help
 ```
 
 (`.cmd` counterparts for cmd/PowerShell.) Same report, same handbook text —

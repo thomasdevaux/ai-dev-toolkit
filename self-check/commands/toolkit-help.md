@@ -21,7 +21,7 @@ checkout/GitHub repo:
 export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 source "$CLAUDE_PROJECT_DIR/.claude/hooks/resolve-toolkit-root.sh"
 TOOLKIT_ROOT="$(resolve_toolkit_root)"
-"$TOOLKIT_ROOT/toolkit-help"
+"$TOOLKIT_ROOT/bin/toolkit-help"
 ```
 
 A `Bash` result is only visible to you, not to the user, so something has to

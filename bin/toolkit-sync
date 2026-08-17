@@ -9,23 +9,39 @@
 # level below the toolkit root, since it lives in bin/ — and `cd`s to the
 # root before invoking Python, so it can be called from anywhere.
 #
+# CALLER_DIR is captured *before* that cd: `--project-dir` defaults to
+# Python's own cwd when omitted, and once we've cd'd into the toolkit root
+# that default silently becomes the toolkit root itself instead of wherever
+# the caller actually ran this from — a real footgun a project sync could
+# land in the wrong place. Passing it explicitly avoids relying on that
+# default at all.
+#
 # Every subcommand also requires `--toolkit-root`, which is exactly the path
 # this script just resolved — so unless the caller already passed one
-# (e.g. to point at a different checkout), append ours. That's what turns
-# `bin/toolkit-sync sync --project-dir <path> --yes` into a command short
-# enough to actually copy-paste, instead of repeating a path the wrapper
-# already knows.
+# (e.g. to point at a different checkout), append ours. Both defaults are
+# what turns `bin/toolkit-sync sync --yes` into a command short enough to
+# actually copy-paste, instead of repeating two paths the wrapper already
+# knows.
 set -e
 BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TOOLKIT_ROOT="$(dirname "$BIN_DIR")"
+CALLER_DIR="$(pwd)"
 cd "$TOOLKIT_ROOT"
 
-for arg in "$@"; do
-    if [ "$arg" = "--toolkit-root" ]; then
-        exec python -m tools.sync "$@"
-    fi
-done
 if [ "$#" -eq 0 ]; then
     exec python -m tools.sync "$@"
 fi
-exec python -m tools.sync "$@" --toolkit-root "$TOOLKIT_ROOT"
+
+extra_args=()
+has_toolkit_root=0
+has_project_dir=0
+for arg in "$@"; do
+    case "$arg" in
+        --toolkit-root) has_toolkit_root=1 ;;
+        --project-dir) has_project_dir=1 ;;
+    esac
+done
+[ "$has_toolkit_root" -eq 0 ] && extra_args+=(--toolkit-root "$TOOLKIT_ROOT")
+[ "$has_project_dir" -eq 0 ] && extra_args+=(--project-dir "$CALLER_DIR")
+
+exec python -m tools.sync "$@" "${extra_args[@]}"

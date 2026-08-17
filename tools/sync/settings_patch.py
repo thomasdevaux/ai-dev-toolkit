@@ -10,6 +10,7 @@ wholesale at the key it appears under.
 """
 from __future__ import annotations
 
+import difflib
 import json
 from pathlib import Path
 
@@ -42,7 +43,15 @@ def diff_settings(existing: dict, merged: dict) -> str | None:
     after = json.dumps(merged, indent=2, sort_keys=True)
     if before == after:
         return None
-    return f"settings.json before:\n{before}\n\nsettings.json after:\n{after}"
+    diff_text = "".join(
+        difflib.unified_diff(
+            before.splitlines(keepends=True),
+            after.splitlines(keepends=True),
+            fromfile="a/settings.json",
+            tofile="b/settings.json",
+        )
+    )
+    return diff_text.rstrip("\n")
 
 
 def save_settings(path: Path, settings: dict) -> None:

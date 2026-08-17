@@ -9,7 +9,6 @@ from .diffing import (
     apply_file_changes,
     confirm,
     plan_file_changes,
-    render_file_changes,
     sha256_bytes,
     source_relpaths,
 )
@@ -239,6 +238,15 @@ def _is_user_tool(entry: SyncEntry) -> bool:
     return bool(entry.source) and entry.source.startswith("user-tools/")
 
 
+def _feature_label(entry: SyncEntry) -> str:
+    """What sync shows the user for this entry instead of a file/JSON diff —
+    the manifest's own one-line `summary:`, falling back to the id for the
+    rare entry that hasn't got one yet. Deliberately never mentions file
+    paths or settings.json keys: a consumer reviewing a sync run should see
+    what feature is changing, not the toolkit's internal layout."""
+    return entry.summary or entry.id
+
+
 def sync_entries(
     entry_ids: list[str],
     toolkit_root: Path,
@@ -249,6 +257,8 @@ def sync_entries(
     manifest = load_manifest(toolkit_root)
     state = load_state(claude_dir)
     project_dir = claude_dir.parent
+    settings_path = claude_dir / "settings.json"
+    header_printed = False
 
     for entry_id in entry_ids:
         if entry_id not in manifest:
@@ -275,27 +285,29 @@ def sync_entries(
                 source_root, target_root, resolve_shared_files(entry, toolkit_root)
             )
 
-        settings_path = claude_dir / "settings.json"
         existing_settings = load_settings(settings_path)
         merged_settings = merge_patch(existing_settings, entry.settings_patch) if entry.settings_patch else existing_settings
         settings_diff = diff_settings(existing_settings, merged_settings) if entry.settings_patch else None
 
         if not file_changes and not settings_diff:
-            print(f"[{entry_id}] nothing to synchronize")
             state.entries[entry.id] = {"scope": entry.scope, "tier": entry.tier}
             for ref in _enabled_plugin_refs(entry):
                 state.plugins[ref] = entry.id
             continue
 
-        print(f"[{entry_id}] proposed changes:")
-        if file_changes:
-            print(render_file_changes(file_changes))
-        if settings_diff:
-            print(settings_diff)
+        label = _feature_label(entry)
 
-        if not confirm(f"Apply changes for '{entry_id}'?", entry_auto_yes):
-            print(f"[{entry_id}] cancelled, nothing written")
-            continue
+        # A consumer reviewing a sync run wants to know which features are
+        # changing, not the file tree or settings.json keys behind them —
+        # see _feature_label. Entries the caller already trusts (--yes /
+        # --yes-except-user-tools) are applied and reported together as one
+        # short list; anything still needing a real decision (e.g. the
+        # statusline under --yes-except-user-tools) gets its own line and
+        # its own prompt.
+        if not entry_auto_yes:
+            if not confirm(f"New feature available: {label}\nApply changes for '{entry_id}'?", False):
+                print(f"  - skipped: {label}")
+                continue
 
         apply_file_changes(file_changes)
         if settings_diff:
@@ -312,7 +324,11 @@ def sync_entries(
         if entry.id in state.dismissed:
             state.dismissed.remove(entry.id)
         state.ref = _toolkit_ref(toolkit_root)
-        print(f"[{entry_id}] applied")
+
+        if not header_printed:
+            print("Syncing:")
+            header_printed = True
+        print(f"  + {label}")
 
     prune_auto_yes = auto_yes or auto_yes_except_user_tools
     _prune_stale_plugins(manifest, state, claude_dir, prune_auto_yes)

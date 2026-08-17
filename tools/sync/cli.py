@@ -32,7 +32,7 @@ def _cmd_sync(args: argparse.Namespace) -> int:
             if not entry_ids:
                 print(f"error: no entry_ids given and no tier:baseline entries found for scope '{scope}'", file=sys.stderr)
                 return 1
-            print(f"no entry_ids given - syncing every baseline entry plus anything already synced that has drifted: {', '.join(entry_ids)}")
+            print("checking for toolkit updates...")
         sync_entries(entry_ids, toolkit_root, claude_dir, auto_yes=args.yes, auto_yes_except_user_tools=args.yes_except_user_tools)
     except (ManifestError, SyncBlocked) as exc:
         print(f"error: {exc}", file=sys.stderr)

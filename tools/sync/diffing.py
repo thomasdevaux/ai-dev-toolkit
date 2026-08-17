@@ -106,17 +106,6 @@ def plan_file_changes(
     return changes
 
 
-def render_file_changes(changes: list[FileChange]) -> str:
-    lines = []
-    for change in changes:
-        if change.is_new:
-            lines.append(f"NEW  {change.relpath}")
-        else:
-            lines.append(f"DIFF {change.relpath}")
-            lines.append(change.diff_text.rstrip("\n"))
-    return "\n".join(lines)
-
-
 def apply_file_changes(changes: list[FileChange]) -> None:
     for change in changes:
         change.target_path.parent.mkdir(parents=True, exist_ok=True)

@@ -37,7 +37,10 @@ def _make_project(tmp_path: Path, enabled_plugins: dict) -> Path:
     return claude_dir
 
 
-def test_sync_prunes_stale_plugin_with_auto_yes(tmp_path):
+def test_sync_never_touches_a_plugin_it_never_enabled(tmp_path):
+    """A plugin the user installed by hand from a marketplace was never
+    recorded in state.plugins, so it's not the toolkit's to remove — even
+    with auto_yes, which used to prune it unconditionally."""
     toolkit_root = _make_toolkit(tmp_path)
     claude_dir = _make_project(
         tmp_path,
@@ -50,27 +53,38 @@ def test_sync_prunes_stale_plugin_with_auto_yes(tmp_path):
     sync_entries(["gitlab"], toolkit_root, claude_dir, auto_yes=True)
 
     settings = json.loads((claude_dir / "settings.json").read_text(encoding="utf-8"))
-    assert settings["enabledPlugins"] == {"gitlab@claude-plugins-official": True}
-
-
-def test_sync_keeps_stale_plugin_when_declined(tmp_path, monkeypatch):
-    toolkit_root = _make_toolkit(tmp_path)
-    claude_dir = _make_project(
-        tmp_path,
-        {
-            "gitlab@claude-plugins-official": True,
-            "old-plugin@some-marketplace": True,
-        },
-    )
-    monkeypatch.setattr("builtins.input", lambda _prompt: "n")
-
-    sync_entries(["gitlab"], toolkit_root, claude_dir, auto_yes=False)
-
-    settings = json.loads((claude_dir / "settings.json").read_text(encoding="utf-8"))
     assert settings["enabledPlugins"] == {
         "gitlab@claude-plugins-official": True,
         "old-plugin@some-marketplace": True,
     }
+
+
+def test_sync_prunes_a_plugin_it_enabled_once_the_entry_stops_declaring_it(tmp_path):
+    """The other half: a plugin the toolkit itself turned on, whose owning
+    entry has since dropped it, is still a genuine prune candidate."""
+    toolkit_root = _make_toolkit(tmp_path)
+    claude_dir = _make_project(tmp_path, {"gitlab@claude-plugins-official": True})
+
+    sync_entries(["gitlab"], toolkit_root, claude_dir, auto_yes=True)
+
+    # The manifest entry stops enabling the plugin (e.g. upstream retired it).
+    (toolkit_root / "sync-manifest.yaml").write_text(
+        """
+- id: gitlab
+  type: official-plugin
+  plugin_ref: "gitlab@claude-plugins-official"
+  scope: project
+  tier: baseline
+""",
+        encoding="utf-8",
+    )
+
+    sync_entries(["gitlab"], toolkit_root, claude_dir, auto_yes=True)
+
+    settings = json.loads((claude_dir / "settings.json").read_text(encoding="utf-8"))
+    assert settings["enabledPlugins"] == {}
+    state = json.loads((claude_dir / ".toolkit-sync-state").read_text(encoding="utf-8"))
+    assert "gitlab@claude-plugins-official" not in state["plugins"]
 
 
 def test_sync_no_prune_output_when_nothing_stale(tmp_path, capsys):

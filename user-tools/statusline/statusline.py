@@ -40,9 +40,63 @@ RED = fg256(196)
 
 DEFAULT_MAX_SIZE = 200_000  # fallback window size when none is provided
 
-STYLE_STATE_FILE = os.path.expanduser("~/.ai-dev-toolkit/style-last")
-STYLE_LABELS = {"lite": "caveman lite", "full": "caveman full", "ultra": "caveman ultra"}
-STYLE_COLORS = {"lite": BLUE, "full": YELLOW, "ultra": ORANGE}
+STYLE_STATE_FILE = os.path.expanduser("~/.ai-dev-toolkit/active-style")
+STYLE_LABELS = {
+    "lite": "caveman lite",
+    "full": "caveman full",
+    "ultra": "caveman ultra",
+    "normal": "caveman off",
+}
+STYLE_COLORS = {"lite": YELLOW, "full": LIME, "ultra": GREEN, "normal": GRAY}
+
+# Model size gradient: smallest (Haiku) to largest (Fable), green to red.
+# Matched by substring against the model's display name, in order.
+MODEL_SIZE_ORDER = [
+    ("haiku", GREEN),
+    ("sonnet", ORANGE),
+    ("opus", RED),
+    ("fable", RED),
+]
+
+# Effort gradient: lowest to highest, green to red.
+EFFORT_COLORS = {
+    "low": GREEN,
+    "medium": ORANGE,
+    "high": RED,
+    "xhigh": RED,
+    "max": RED,
+}
+
+
+def color_for_model(display_name: str) -> str:
+    name = display_name.lower()
+    for needle, color in MODEL_SIZE_ORDER:
+        if needle in name:
+            return color
+    return CYAN
+
+
+def color_for_effort(level: str) -> str:
+    return EFFORT_COLORS.get(level.lower(), MAGENTA)
+
+
+def get_setting(key: str, project_dir: str):
+    """Look up a settings.json key with Claude Code's precedence: local
+    project settings, then shared project settings, then user settings."""
+    paths = (
+        os.path.join(project_dir, ".claude", "settings.local.json"),
+        os.path.join(project_dir, ".claude", "settings.json"),
+        os.path.expanduser("~/.claude/settings.json"),
+    )
+    for path in paths:
+        try:
+            with open(path, encoding="utf-8") as f:
+                obj = json.load(f)
+        except (OSError, json.JSONDecodeError):
+            continue
+        if key in obj:
+            return obj[key]
+    return None
 
 
 def read_active_style() -> tuple[str, str] | None:
@@ -133,13 +187,22 @@ def main() -> None:
 
     parts = []
 
-    # --- model / effort / thinking / fast mode ---
+    # --- model / effort / autocompact / thinking / fast mode ---
     model_name = (data.get("model") or {}).get("display_name") or "Claude"
-    head = f"{BOLD}{CYAN}{model_name}{RESET}"
+    head = f"{BOLD}{color_for_model(model_name)}{model_name}{RESET}"
 
     effort = (data.get("effort") or {}).get("level")
     if effort:
-        head += f" {GRAY}·{RESET} {MAGENTA}{effort}{RESET}"
+        head += f" {GRAY}·{RESET} {color_for_effort(effort)}{effort}{RESET}"
+
+    workspace = data.get("workspace") or {}
+    project_dir = workspace.get("project_dir") or workspace.get("current_dir") or os.getcwd()
+    autocompact_enabled = get_setting("autoCompactEnabled", project_dir)
+    if autocompact_enabled is None:
+        autocompact_enabled = True
+    autocompact_window = None
+    if autocompact_enabled:
+        autocompact_window = get_setting("autoCompactWindow", project_dir)
 
     if data.get("fast_mode"):
         head += f" {GRAY}·{RESET} {YELLOW}fast{RESET}"
@@ -169,11 +232,25 @@ def main() -> None:
             # color scale still reflects reality when max_size is missing.
             used_tokens = (used_pct / 100) * (max_size or DEFAULT_MAX_SIZE)
 
+        # When autocompact is on with a fixed threshold, that threshold is
+        # the practical ceiling (compaction fires there, not at the full
+        # window) — so "max" and the percentage shown track it instead of
+        # the raw context_window_size.
+        effective_max = autocompact_window if (autocompact_enabled and autocompact_window) else max_size
+        if effective_max:
+            used_pct = (used_tokens / effective_max) * 100
+
         c = color_for_context_tokens(used_tokens, max_size)
         bar = progress_bar(used_pct)
         piece = f"{c}[{bar}]{RESET} {c}{round(used_pct)}%{RESET}"
-        if max_size:
-            piece += f" {GRAY}({fmt_tokens(used_tokens)}/{fmt_tokens(max_size)}){RESET}"
+        if effective_max:
+            if effective_max <= 200_000:
+                max_color = GREEN
+            elif effective_max <= 500_000:
+                max_color = ORANGE
+            else:
+                max_color = RED
+            piece += f" {GRAY}({fmt_tokens(used_tokens)}/{RESET}{max_color}{fmt_tokens(effective_max)}{RESET}{GRAY}){RESET}"
         parts.append(piece)
 
     # --- rate limits (with time remaining before reset) ---

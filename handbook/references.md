@@ -11,8 +11,8 @@ a link list nobody trusts.
   https://docs.claude.com/en/docs/claude-code/settings
   This is what `settings_patch` in `sync-manifest.yaml` writes into.
 - **Hooks** — https://docs.claude.com/en/docs/claude-code/hooks
-  `SessionStart` is the one this toolkit uses, three times over: drift check,
-  context check, CodeGraph freshness.
+  `SessionStart` is the one this toolkit uses, twice over: context check,
+  CodeGraph freshness.
 - **Skills** — https://docs.claude.com/en/docs/claude-code/skills
   Frontmatter fields, when a skill triggers, `disable-model-invocation`.
 - **MCP** — https://docs.claude.com/en/docs/claude-code/mcp

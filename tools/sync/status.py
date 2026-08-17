@@ -9,10 +9,15 @@ from pathlib import Path
 
 from .detect import detect_stacks
 from .diffing import plan_file_changes
-from .manifest import SyncEntry, baseline_entry_ids, load_manifest, resolve_shared_files
-from .settings_patch import diff_settings, load_settings, merge_patch
+from .manifest import SyncEntry, baseline_entry_ids, load_manifest, official_plugin_refs, resolve_shared_files
+from .settings_patch import diff_settings, load_settings, merge_patch, stale_plugin_refs
 from .state import SyncState, is_onboardable_project, load_state
 from .sync import _resolve_target
+
+# Directories under .claude/ (or ~/.claude/) the toolkit ever writes into.
+# Anything found here that isn't in state.files came from somewhere else —
+# a hand-installed skill, a marketplace plugin's own files, a local hook.
+_MANAGED_DIRS = ("skills", "agents", "commands", "hooks", "rules")
 
 
 def _entry_drift(entry: SyncEntry, toolkit_root: Path, claude_dir: Path) -> str | None:
@@ -148,6 +153,48 @@ def _suggested_lines(manifest: dict[str, SyncEntry], state: SyncState, scope: st
     return lines
 
 
+def _unmanaged_file_entries(claude_dir: Path, state: SyncState) -> list[str]:
+    """Top-level items under a toolkit-managed directory (a skill's folder, a
+    lone hook script, ...) that the sync state never wrote. Reported whole
+    rather than file-by-file: 'skills/frontend-tricks/' says more at a glance
+    than every file inside it."""
+    found = []
+    for dirname in _MANAGED_DIRS:
+        base = claude_dir / dirname
+        if not base.is_dir():
+            continue
+        for child in sorted(base.iterdir()):
+            if child.is_dir():
+                relpaths = {
+                    str(path.relative_to(claude_dir)).replace("\\", "/")
+                    for path in child.rglob("*")
+                    if path.is_file()
+                }
+                label = str(child.relative_to(claude_dir)).replace("\\", "/") + "/"
+            else:
+                relpaths = {str(child.relative_to(claude_dir)).replace("\\", "/")}
+                label = next(iter(relpaths))
+            if relpaths and not (relpaths & set(state.files)):
+                found.append(label)
+    return found
+
+
+def _unmanaged_lines(claude_dir: Path, manifest: dict[str, SyncEntry], state: SyncState) -> list[str]:
+    """Things sitting in this .claude/ that the toolkit never put there and
+    never touches: a hand-installed skill, a marketplace plugin outside the
+    manifest's own catalog. Purely informational — never a sync target,
+    never pruned, never nagged about at session start."""
+    settings = load_settings(claude_dir / "settings.json")
+    foreign_plugins = stale_plugin_refs(settings, official_plugin_refs(manifest))
+    foreign_files = _unmanaged_file_entries(claude_dir, state)
+    if not foreign_plugins and not foreign_files:
+        return []
+    lines = ["installed outside the toolkit (not managed, never touched by sync):"]
+    lines.extend(f"  - plugin: {ref}" for ref in foreign_plugins)
+    lines.extend(f"  - {relpath}" for relpath in foreign_files)
+    return lines
+
+
 def _stack_lines(project_dir: Path, toolkit_root: Path, state: SyncState) -> list[str]:
     """A stack whose block is already synced — or explicitly dismissed — isn't
     'suggested for review' any more. Without these filters the report
@@ -212,6 +259,8 @@ def build_status_report(
     if scope == "project":
         lines.extend(_stack_lines(project_dir, toolkit_root, state))
     lines.extend(_suggested_lines(manifest, state, scope=scope))
+    if not for_hook:
+        lines.extend(_unmanaged_lines(claude_dir, manifest, state))
 
     if not lines:
         if for_hook:

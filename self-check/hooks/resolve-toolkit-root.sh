@@ -29,8 +29,8 @@ resolve_toolkit_root() {
 
     # The current project IS a toolkit checkout: use it directly instead of
     # the separately-cached clone, or local edits here would never take
-    # effect until pushed and re-pulled into the cache. Same two-file
-    # fingerprint toolkit-drift-check-impl.sh uses to recognize this case.
+    # effect until pushed and re-pulled into the cache. Recognized by the
+    # same two-file fingerprint no consumer project has.
     # Checked against both $CLAUDE_PROJECT_DIR and $PWD — PostToolUse hooks
     # aren't guaranteed to inherit the former, but do run with the project
     # directory as their working directory.
@@ -73,24 +73,4 @@ resolve_toolkit_root() {
 
     printf '%s\n' "$CACHE_DIR"
     return 0
-}
-
-# self-check's SessionStart and PostToolUse stubs are each deployed twice —
-# once at project scope (.claude/hooks/), once at user scope (~/.claude/hooks/)
-# — but their impl scripts already do combined project+user work in one call
-# (build_hook_report merges both scopes into one report; toolkit-sync-save.py
-# syncs both scopes from a single invocation whenever a project dir is known).
-# When both copies are installed, Claude Code fires both hook registrations in
-# the same session, so the user-scope copy would otherwise repeat work the
-# project-scope copy already did. Skip it there: true when this script is the
-# ~/.claude/hooks copy AND a same-named project-scope copy also exists.
-# Compared by basename, not full path — the two copies are byte-identical
-# files landing in two different targets, so the pairing is exact.
-is_redundant_user_scope_copy() {
-    local self_dir script_name
-    self_dir="$(cd "$(dirname "$1")" && pwd)"
-    script_name="$(basename "$1")"
-    [ "$self_dir" = "$HOME/.claude/hooks" ] || return 1
-    [ -n "${CLAUDE_PROJECT_DIR:-}" ] || return 1
-    [ -f "$CLAUDE_PROJECT_DIR/.claude/hooks/$script_name" ]
 }

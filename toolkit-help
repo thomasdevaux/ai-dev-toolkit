@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Location-independent handbook reader: same directory-resolution trick as
+# ./toolkit-sync (this file's own location is the toolkit root). Prints the
+# GitHub link, then the practices guide in full — unlike the /toolkit-help
+# Claude Code command, there's no reply-token budget to save here, so no
+# table-of-contents trimming.
+# Windows counterpart: toolkit-help.cmd — keep both in sync.
+set -e
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+echo "https://github.com/thomasdevaux/ai-dev-toolkit/tree/main/handbook"
+echo
+cat "$SCRIPT_DIR/handbook/practices.md"

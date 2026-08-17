@@ -150,7 +150,7 @@ python -m tools.sync sync --toolkit-root "$(resolve_toolkit_root)" \
   --project-dir "$CLAUDE_PROJECT_DIR" <entry-id>
 ```
 
-Don't reach for `/toolkit-features` here: it lists what stack *detection*
+Don't reach for `/toolkit-feat` here: it lists what stack *detection*
 found, and detection is exactly what hasn't fired yet — a project that has no
 `Cargo.toml`/`src-tauri/` pair yet won't see `tech-stack-rust` in that list.
 **Don't run the sync yourself** either; opt-in blocks are the user's call.

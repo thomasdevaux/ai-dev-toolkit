@@ -13,12 +13,11 @@ change. From that point on it's just files in the repo: any teammate who
 `git pull`s the project gets them automatically, nothing to install or
 run on their side.
 
-**Every session checks itself.** Each time Claude Code opens in a synced
-project (or in a fresh one), a session-start hook compares what's synced
-against what's currently expected and tells you — at the start of the
-conversation — if anything is missing or out of date, offering to sync
-it. Nothing is ever written without your confirmation; the check only
-ever *offers*, it never writes on its own.
+**Nothing runs automatically.** No session-start check, no proactive
+prompt. Run `/toolkit-sync` whenever you want to know whether a project
+is missing something or has drifted from what's currently expected — it's
+read-only, and if there's anything to apply it prints the exact command
+for you to run yourself.
 
 **Why not an internal plugin marketplace.** Claude Code supports
 installing plugins from a marketplace — one command, auto-updating,
@@ -43,17 +42,29 @@ or in PowerShell:
 irm https://raw.githubusercontent.com/thomasdevaux/ai-dev-toolkit/main/install.ps1 | iex
 ```
 
-That's the only command you need to run by hand — pick whichever shell
-you have open. It clones this repo into `~/.cache/ai-dev-toolkit` (or
-updates it if already there — the same cache path the session-start
-check reuses afterwards, so there's only ever one checkout on disk) and
-installs the check itself. From then on, opening a Claude Code session
-inside any project's git repository is enough: the check tells you
-what's missing (the common rules, and a project-type profile — pick
-`project-type-none` / `project-type-app` / `project-type-embedded-fccu`), and syncs it for you
-once you confirm. Commit what it writes. Re-run the install command
-later, or answer yes the next time a session flags a newer version
-pending, to pull in toolkit updates.
+It clones this repo into `~/.cache/ai-dev-toolkit` (or updates it if
+already there — the same cache path `/toolkit-sync` reuses afterwards, so
+there's only ever one checkout on disk) and syncs the user-scope baseline
+into `~/.claude/`. From then on, run `/toolkit-sync` inside any project's
+git repository to see what's missing (the common rules, and a
+project-type profile — pick `project-type-none` / `project-type-app` /
+`project-type-embedded-fccu`) and get the command to sync it yourself.
+Commit what it writes. Re-run the install command, or `/toolkit-sync`,
+later to pull in toolkit updates.
+
+**No Claude Code session? Same check, plain script.** `/toolkit-sync` and
+`/toolkit-help` are thin wrappers around `toolkit-status` and `toolkit-help`
+— two scripts sitting at the root of the cloned checkout, runnable from any
+terminal (a CI job, a git hook, or just a shell) without ever opening Claude
+Code:
+
+```
+~/.cache/ai-dev-toolkit/toolkit-status --project-dir /path/to/project
+~/.cache/ai-dev-toolkit/toolkit-help
+```
+
+(`.cmd` counterparts for cmd/PowerShell.) Same report, same handbook text —
+just no agent paraphrasing it for you.
 
 ## What it covers
 
@@ -74,14 +85,13 @@ Two deployment scopes, synced independently — a project's `.claude/`
 |  | `commit-message-format` | project / user | baseline | skill | Commit subject/body conventions, applied when writing a commit. The ban on AI-attribution trailers it states is also enforced by `includeCoAuthoredBy: false` in the same block's `settings_patch`, so it holds whether or not the skill is invoked. |
 |  | `desktop-app-architecture` | project / user | baseline | skill | Picks a stack for a new desktop app or internal tool, then hands off to the matching tech-stack block; also audits whether an existing choice still fits. |
 |  | `codegraph-freshness` | project / user | baseline | hook | At session start: warns when the code graph's index is behind the code, and — on a repo past 300 indexable sources with no index — offers to install it. Silent otherwise. |
-|  | `style-prompt` | user | baseline | hook | At session start: asks which communication style to use, remembering the last choice. Paired with a `PostToolUse` hook that persists the answer. |
+|  | `style-save` | user | baseline | hook | Persists the active caveman intensity to the statusline whenever the skill is invoked (manually or auto-triggered) — no session-start question. |
 | context-quality | `project-context` | project | baseline | rule | Fixes `AGENTS.md` to one skeleton; `CLAUDE.md` becomes a one-line `@AGENTS.md` pointer to it. |
 |  | `init-project-context` | project | baseline | skill | Bootstraps `AGENTS.md` from what the repository actually contains. |
 |  | `audit-project-context` | project | baseline | skill | Reviews `AGENTS.md` for accuracy, size, and skeleton conformance; `session` mode instead harvests what a session learned. |
 |  | `context-check` | project | baseline | hook | Flags a missing, oversized, or stale `AGENTS.md` at session start. |
-| toolkit-self-check | `toolkit-drift-check` | project / user | baseline | hook | Reports this project's onboarding/drift status against the manifest at session start — the message you see when a sync is pending. |
-|  | `/toolkit-sync` | project / user | baseline | command | Runs that same check on demand, instead of waiting for session start. |
-|  | `/toolkit-features` | project / user | baseline | command | Lists suggested-tier blocks and detected tech stacks not yet synced. |
+| toolkit-self-check | `/toolkit-sync` | project / user | baseline | command | On-demand, read-only onboarding/drift check against the manifest; prints the exact command to sync yourself. |
+|  | `/toolkit-feat` | project / user | baseline | command | Lists suggested-tier blocks and detected tech stacks not yet synced. |
 |  | `/toolkit-help` | project / user | baseline | command | Points at the handbook and README on GitHub. |
 | gitlab | `gitlab` | project | suggested | plugin | Merge requests, issues, and pipelines from inside the session. Opt-in — sync it by id if the project actually uses GitLab. |
 | project-type-none | `no-project-type` | project | choice-group: project-type | rule | No docs, requirements, or ADRs imposed — the common rules still apply, and switching to `project-type-app` is one `sync switch` away. |

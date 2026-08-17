@@ -6,14 +6,15 @@ model: haiku
 
 Discover what's available but not installed. `$CLAUDE_PROJECT_DIR` is only set
 by the harness for actual hook executions, not for a plain `Bash` call, so
-export it yourself first, then resolve the toolkit checkout and ask it for
-status:
+export it yourself first, then resolve the toolkit checkout and hand off to
+`toolkit-status` — the same script a plain terminal (no Claude Code) uses to
+check status:
 
 ```
 export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 source "$CLAUDE_PROJECT_DIR/.claude/hooks/resolve-toolkit-root.sh"
 TOOLKIT_ROOT="$(resolve_toolkit_root)"
-python -m tools.sync status --toolkit-root "$TOOLKIT_ROOT" --project-dir "$CLAUDE_PROJECT_DIR"
+"$TOOLKIT_ROOT/toolkit-status" --project-dir "$CLAUDE_PROJECT_DIR"
 ```
 
 From the output, keep only the "detected stack(s)" and "available, not
@@ -29,8 +30,7 @@ python -m tools.sync sync --toolkit-root "$TOOLKIT_ROOT" --project-dir "$CLAUDE_
 
 Do not run it yourself. Opt-in blocks are a deliberate, reviewed choice —
 same reasoning as the rest of this toolkit's sync-and-commit model, just not
-covered by the automatic `Sync the toolkit now?` flow (that one only ever
-syncs the baseline tier).
+covered by `/toolkit-sync` (that one only ever reports on the baseline tier).
 
 If the user says they don't want one of the listed entries, record it so the
 session-start report stops offering it — otherwise it reappears every session

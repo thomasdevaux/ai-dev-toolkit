@@ -14,6 +14,12 @@ class SyncState:
     ref: str | None = None
     files: dict[str, str] = field(default_factory=dict)  # target path -> sha256
     entries: dict[str, dict] = field(default_factory=dict)  # entry id -> {scope, tier}
+    # Plugin ref -> id of the entry whose settings_patch enabled it. The only
+    # record of "the toolkit itself turned this plugin on" — without it,
+    # pruning can't tell a plugin it enabled and later stopped declaring
+    # apart from one the user enabled by hand from a marketplace, and used to
+    # nag to remove the latter on every sync. See sync._prune_stale_plugins.
+    plugins: dict[str, str] = field(default_factory=dict)
     # Entry ids the project has been offered and declined. Purely a reporting
     # filter — a dismissed entry can still be synced by id at any time, and
     # syncing one clears it. Without this, the discovery sections re-offer the
@@ -27,6 +33,7 @@ class SyncState:
             "ref": self.ref,
             "files": self.files,
             "entries": self.entries,
+            "plugins": self.plugins,
             "dismissed": sorted(self.dismissed),
         }
 
@@ -36,6 +43,7 @@ class SyncState:
             ref=data.get("ref"),
             files=dict(data.get("files", {})),
             entries=dict(data.get("entries", {})),
+            plugins=dict(data.get("plugins", {})),
             dismissed=list(data.get("dismissed", [])),
         )
 

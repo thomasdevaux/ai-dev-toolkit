@@ -22,11 +22,12 @@ toolkit-sync sync --user --toolkit-root <checkout>
 ```
 
 That installs, under `~/.claude/`: the common block — rules, `caveman`,
-`codegraph-setup` — the status line, the drift check, and the 13 official
-language servers. All of it applies in *any* folder, which is what makes a
-throwaway session worth opening.
+`codegraph-setup` — the status line, and the 13 official language servers.
+All of it applies in *any* folder, which is what makes a throwaway session
+worth opening.
 
 After that, opening a session in a scratch folder just works — no `.claude/`
-is created, nothing nags you. The toolkit only becomes visible in a real git
-repository, where it offers the project baseline and asks which project-type
-profile applies. See [`../README.md`](../README.md) for the project side.
+is created, nothing nags you. In a real git repository, run `/toolkit-sync`
+to check and pull in the project baseline; the project-type-profile rule
+still asks which profile applies before non-trivial work. See
+[`../README.md`](../README.md) for the project side.

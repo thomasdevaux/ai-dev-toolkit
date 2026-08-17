@@ -13,7 +13,7 @@ from .diffing import (
     sha256_bytes,
     source_relpaths,
 )
-from .manifest import SyncEntry, load_manifest, official_plugin_refs, resolve_shared_files
+from .manifest import SyncEntry, load_manifest, resolve_shared_files
 from .settings_patch import (
     declared_hook_commands,
     diff_settings,
@@ -23,7 +23,6 @@ from .settings_patch import (
     remove_plugin,
     save_settings,
     stale_hook_commands,
-    stale_plugin_refs,
 )
 from .state import SyncState, is_onboardable_project, load_state, save_state
 
@@ -118,15 +117,42 @@ def switch_choice_group(
     sync_entries([target_id], toolkit_root, claude_dir, auto_yes=auto_yes)
 
 
-def _prune_stale_plugins(manifest: dict[str, SyncEntry], claude_dir: Path, auto_yes: bool) -> None:
+def _enabled_plugin_refs(entry: SyncEntry) -> set[str]:
+    return {ref for ref, value in entry.settings_patch.get("enabledPlugins", {}).items() if value}
+
+
+def _managed_plugin_refs(manifest: dict[str, SyncEntry], state: SyncState) -> set[str]:
+    """Plugin refs a currently-synced entry still enables. An entry dropped
+    from the manifest upstream contributes nothing here — its refs are only
+    still prune candidates through `state.plugins`, same as an orphaned
+    file's relpath survives in `state.files` after its entry disappears."""
+    managed: set[str] = set()
+    for entry_id in state.entries:
+        entry = manifest.get(entry_id)
+        if entry is not None:
+            managed |= _enabled_plugin_refs(entry)
+    return managed
+
+
+def _prune_stale_plugins(manifest: dict[str, SyncEntry], state: SyncState, claude_dir: Path, auto_yes: bool) -> None:
+    """Only ever removes a plugin the toolkit itself enabled (tracked in
+    `state.plugins`) whose owning entry no longer enables it. A plugin the
+    user installed by hand from a marketplace was never recorded there, so
+    it's never a prune candidate — it's not the toolkit's to remove."""
     settings_path = claude_dir / "settings.json"
     settings = load_settings(settings_path)
-    known = official_plugin_refs(manifest)
-    for ref in stale_plugin_refs(settings, known):
-        print(f"[prune] plugin '{ref}' is enabled but not referenced by any entry in sync-manifest.yaml")
+    managed = _managed_plugin_refs(manifest, state)
+    for ref in sorted(state.plugins):
+        if ref in managed:
+            continue
+        if not settings.get("enabledPlugins", {}).get(ref):
+            state.plugins.pop(ref, None)
+            continue
+        print(f"[prune] plugin '{ref}' was enabled by the toolkit but no synced entry enables it any more")
         if confirm(f"Remove '{ref}' from enabledPlugins?", auto_yes):
             settings = remove_plugin(settings, ref)
             save_settings(settings_path, settings)
+            state.plugins.pop(ref, None)
             print(f"[prune] removed '{ref}'")
         else:
             print(f"[prune] kept '{ref}'")
@@ -257,6 +283,8 @@ def sync_entries(
         if not file_changes and not settings_diff:
             print(f"[{entry_id}] nothing to synchronize")
             state.entries[entry.id] = {"scope": entry.scope, "tier": entry.tier}
+            for ref in _enabled_plugin_refs(entry):
+                state.plugins[ref] = entry.id
             continue
 
         print(f"[{entry_id}] proposed changes:")
@@ -276,6 +304,8 @@ def sync_entries(
         for change in file_changes:
             state.files[change.relpath] = sha256_bytes(change.content)
         state.entries[entry.id] = {"scope": entry.scope, "tier": entry.tier}
+        for ref in _enabled_plugin_refs(entry):
+            state.plugins[ref] = entry.id
         # Adopting an entry answers the offer it was dismissed from, so the
         # dismissal has nothing left to suppress. Leaving it would silently
         # re-hide the entry the day it's unsynced again.
@@ -285,7 +315,7 @@ def sync_entries(
         print(f"[{entry_id}] applied")
 
     prune_auto_yes = auto_yes or auto_yes_except_user_tools
-    _prune_stale_plugins(manifest, claude_dir, prune_auto_yes)
+    _prune_stale_plugins(manifest, state, claude_dir, prune_auto_yes)
     _prune_stale_hooks(manifest, claude_dir, prune_auto_yes)
     _prune_orphaned_files(manifest, state, toolkit_root, claude_dir, prune_auto_yes)
     save_state(claude_dir, state)

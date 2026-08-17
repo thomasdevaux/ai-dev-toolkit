@@ -499,6 +499,50 @@ def test_hook_report_is_empty_when_both_scopes_are_clean(tmp_path, monkeypatch):
     assert build_hook_report(toolkit_root, project_dir) == ""
 
 
+def test_status_reports_an_unmanaged_skill_and_plugin(tmp_path):
+    """A skill dropped by hand into .claude/skills/, and a marketplace
+    plugin the toolkit's manifest never declared, are both foreign to the
+    toolkit and must be called out — never as drift, never as a prune
+    candidate."""
+    toolkit_root = _make_toolkit(tmp_path)
+    project_dir = _make_project(tmp_path)
+    claude_dir = project_dir / ".claude"
+    skill_dir = claude_dir / "skills" / "frontend-tricks"
+    skill_dir.mkdir(parents=True)
+    (skill_dir / "SKILL.md").write_text("# frontend-tricks\n", encoding="utf-8")
+    (claude_dir / "settings.json").write_text(
+        json.dumps({"enabledPlugins": {"claude-in-chrome@some-marketplace": True}}), encoding="utf-8"
+    )
+
+    report = build_status_report(toolkit_root, claude_dir, project_dir)
+
+    assert "installed outside the toolkit (not managed, never touched by sync):" in report
+    assert "  - skills/frontend-tricks/" in report
+    assert "  - plugin: claude-in-chrome@some-marketplace" in report
+
+
+def test_status_does_not_report_toolkit_managed_files_or_plugins_as_unmanaged(tmp_path):
+    toolkit_root, project_dir, claude_dir = _fully_synced_project(tmp_path)
+
+    report = build_status_report(toolkit_root, claude_dir, project_dir)
+
+    assert "installed outside the toolkit" not in report
+
+
+def test_hook_report_never_shows_unmanaged_items(tmp_path):
+    """Informational only — never worth interrupting a session for."""
+    toolkit_root = _make_toolkit(tmp_path)
+    project_dir = _make_project(tmp_path)
+    claude_dir = project_dir / ".claude"
+    skill_dir = claude_dir / "skills" / "frontend-tricks"
+    skill_dir.mkdir(parents=True)
+    (skill_dir / "SKILL.md").write_text("# frontend-tricks\n", encoding="utf-8")
+
+    report = build_status_report(toolkit_root, claude_dir, project_dir, for_hook=True)
+
+    assert "installed outside the toolkit" not in report
+
+
 def test_status_stops_suggesting_a_stack_once_its_block_is_synced(tmp_path):
     """Otherwise the suggestion is permanent: it's printed every session of
     every Python project, including the ones that already took it."""

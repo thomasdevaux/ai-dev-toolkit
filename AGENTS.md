@@ -26,7 +26,8 @@ plugins.yaml          # official-plugin entries with no block directory of their
 common/              # the baseline block: rules + always-available skills
 context-quality/  project-type/<none|app|embedded-fccu>/  tech-stacks/<lang>/
 tech-stacks/shared/  # files several stacks deploy verbatim, via `shared_files:`
-self-check/          # a block too: the session-start drift-check stub
+self-check/          # a block too: the /toolkit-sync, -features, -help commands
+toolkit-status(.cmd)  toolkit-help(.cmd)  # same, no Claude Code needed
 user-tools/          # blocks deployed to ~/.claude/ rather than a project
 suggested/<topic>/   # tier: suggested blocks — useful, opt-in, never imposed
 incubator/           # parked blocks, deliberately absent from the manifest
@@ -70,9 +71,6 @@ artifact kept in sync with them, not a place to hand-edit. Don't apply
 `common/rules/*` conventions (branch-per-feature, PR review, etc.) to this
 repo's own workflow unless the user asks — that's a separate decision from
 syncing the files. It does, however, follow the doc map it publishes.
-
-The session-start drift check exits silently on any toolkit checkout —
-see [`docs/maintaining.md`](docs/maintaining.md#gotchas).
 
 ## Only if you need it
 

@@ -12,14 +12,16 @@ https://github.com/thomasdevaux/ai-dev-toolkit/tree/main/handbook
 
 Then resolve the checkout (same fallback the other toolkit commands use,
 since `$CLAUDE_PROJECT_DIR` is only set by the harness for real hook runs,
-not a plain `Bash` call) and read `practices.md` — it isn't synced into any
-project, it only exists in the toolkit's own checkout/GitHub repo:
+not a plain `Bash` call) and hand off to `toolkit-help` — the same script a
+plain terminal (no Claude Code) uses to read the handbook. `practices.md`
+isn't synced into any project, it only exists in the toolkit's own
+checkout/GitHub repo:
 
 ```
 export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 source "$CLAUDE_PROJECT_DIR/.claude/hooks/resolve-toolkit-root.sh"
 TOOLKIT_ROOT="$(resolve_toolkit_root)"
-cat "$TOOLKIT_ROOT/handbook/practices.md"
+"$TOOLKIT_ROOT/toolkit-help"
 ```
 
 A `Bash` result is only visible to you, not to the user, so something has to

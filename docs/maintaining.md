@@ -165,7 +165,7 @@ python -m tools.sync dismiss <id...> --toolkit-root . --project-dir <path>
 It records the ids under `dismissed` in `.toolkit-sync-state` and the two
 discovery sections skip them from then on. Purely a reporting filter: a
 dismissed entry is still syncable by id at any time, and syncing it clears
-the dismissal. `--undo` puts it back in the offer list. `/toolkit-features`
+the dismissal. `--undo` puts it back in the offer list. `/toolkit-feat`
 runs this when the user declines something it just listed — it's the one
 sync-adjacent command the agent may run itself, because it writes no files.
 
@@ -443,10 +443,7 @@ a `SOURCE.md` missing a field, or on MIT content shipped without its
   no writes.
 - **A hook must be silent when its check passes.** `context-check.sh`
   and `codegraph-freshness.sh` print nothing on a healthy project; a hook
-  that speaks every session stops being read. `style-prompt.sh` is the one
-  deliberate exception: it's not a health check, it's a UX prompt (asking
-  for this session's communication style), so it's meant to speak every
-  session by design — don't "fix" it into silence.
+  that speaks every session stops being read.
 - **`common/` is deployed at both scopes** (`common-rules` and
   `common-rules-user`). Anything added there runs in `~/.claude/` too, so
   it must make sense in a folder that is not a project — that's why a
@@ -466,47 +463,13 @@ a `SOURCE.md` missing a field, or on MIT content shipped without its
   Accepted for the same reason — which is why that hook has to stay cheap
   (its index lookup prunes `node_modules/` and friends) and silent when the
   index is fresh, so paying for it twice costs nothing worth removing.
-- A `SessionStart` hook that needs to evolve without requiring every
-  consumer to re-sync should follow `toolkit-self-check`'s pattern: keep
-  the deployed/synced file a thin stub that `exec`s a same-named "impl"
-  script living **outside** any block's `source:` path
-  (`tools/hooks/toolkit-drift-check-impl.sh`), so it's never itself
-  synced — the stub always runs the impl script from the freshly
-  resolved checkout, not its own deployed copy. This is also why the
-  drift check exits silently on a toolkit checkout of itself (detected
-  by the presence of both `sync-manifest.yaml` and
-  `tools/sync/manifest.py`): the report would otherwise come from a
-  cached checkout lagging the working copy being edited, listing entries
-  this repo already deleted.
-- **A stub that resolves a checkout must gate on the cheap thing first.**
-  Resolving means a possible `git clone`/`git pull`, and the `PostToolUse`
-  stub fires on *every* `AskUserQuestion` in every session — so it matches
-  the question text against the raw stdin payload before sourcing anything
-  (a ~4x saving on the overwhelmingly common non-matching call, and no
-  network attached to an unrelated question). Both git calls are wrapped in
-  `timeout` with `GIT_TERMINAL_PROMPT=0`: unbounded, either one holds a
-  session open on a machine that's offline or behind a proxy.
-- **Never key a hook on question text.** The agent writes an
-  `AskUserQuestion`'s wording in the user's own language, so an English
-  string means the hook silently never fires for anyone else —
-  `style-prompt-save.py` shipped that bug once already. Match on what the
-  contract dictates verbatim: the option *labels*. For a hook that only
-  persists a preference, one label is enough (that's what `style-prompt-save`
-  settled on); for one that mutates a filesystem, require the whole offered
-  option set on the question that was actually answered, so a stray
-  "Sync now" elsewhere can't trigger it. `tool_input` carries `questions`
-  (with `options[].label`) alongside `answers`, which is keyed by question
-  text — that pairing is what makes the check possible.
-  Changing that pre-filter is a **bootstrap step**: the gate that decides
-  whether the hook runs lives in the *deployed* stub, not in the impl, so a
-  new gate only takes effect after one sync performed under the old one. Land
-  the change, sync it the old way, and only then use the new contract — a
-  payload the deployed gate rejects never reaches the fixed code at all.
-- **A hook that applies a change must say whether it worked.** The agent was
-  told not to run the sync itself, so with no output it can only assume the
-  answer it collected was honoured — and announce a success that never
-  happened. `toolkit-sync-save.py` prints either an applied line or a FAILED
-  line telling the agent outright not to claim otherwise.
+- **A toolkit-root-level script is a bare name plus a `.cmd` twin**, not a
+  `.sh`/`.ps1` pair: `toolkit-sync`/`toolkit-sync.cmd`,
+  `toolkit-status`/`toolkit-status.cmd`, `toolkit-help`/`toolkit-help.cmd`.
+  Each resolves its own directory as the toolkit root (`cd`s there before
+  invoking Python) so it works from any cwd once cloned — `install.sh`/
+  `install.ps1` are the one exception, since they exist specifically to be
+  curled before any checkout exists.
 - `{{VERSION}}` in a manifest's `settings_patch` is expanded from the
   `VERSION` file when the manifest loads (the startup banner uses it). Write
   the placeholder, never the number — a hand-written version is one nobody

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # One-time per-machine bootstrap: clone (or update) ai-dev-toolkit into the
-# same cache path the session-start check reuses afterwards (so there's only
-# ever one checkout on disk), then sync every user-scope baseline entry into
+# same cache path /toolkit-sync reuses afterwards (so there's only ever one
+# checkout on disk), then sync every user-scope baseline entry into
 # ~/.claude/. See README.md for what that installs.
 set -euo pipefail
 

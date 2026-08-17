@@ -4,23 +4,10 @@
   target: .claude/
   scope: project
   tier: baseline
-  summary: SessionStart hook reporting toolkit onboarding and drift for this project, plus the /toolkit-sync, /toolkit-features and /toolkit-help commands.
+  summary: The /toolkit-sync, /toolkit-feat and /toolkit-help commands — on-demand toolkit onboarding/drift status and opt-in block discovery for this project. Nothing runs automatically; every check and every sync is a command the user runs themselves.
   settings_patch:
-    hooks:
-      SessionStart:
-        - hooks:
-            - type: command
-              command: "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/toolkit-drift-check.sh"
-      # Applies a pending "Sync now" answer as hook automation instead of
-      # an agent-issued Bash call — see toolkit-drift-check-impl.sh's
-      # ACTION line and toolkit-sync-save.py for the full mechanism.
-      PostToolUse:
-        - matcher: "AskUserQuestion"
-          hooks:
-            - type: command
-              command: "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/toolkit-sync-save.sh"
     companyAnnouncements:
-      - "ai-dev-toolkit v{{VERSION}} · handbook: https://github.com/thomasdevaux/ai-dev-toolkit/tree/main/handbook\n\nCommands:\n  /toolkit-sync — force a toolkit sync check\n  /toolkit-features — list available opt-in blocks not yet installed\n  /toolkit-help — show the practices guide and handbook link\n\nToken-saving: /caveman (compressed replies) · session-report skill (session usage report)"
+      - "ai-dev-toolkit v{{VERSION}} · handbook: https://github.com/thomasdevaux/ai-dev-toolkit/tree/main/handbook\n\nCommands:\n  /toolkit-sync   — check toolkit sync status\n  /toolkit-feat   — list available opt-in blocks not yet installed\n  /toolkit-help   — show the practices guide and handbook link\n\nToken-saving:\n  /model           — switch model\n  /effort          — reasoning effort\n  /autocompact     — context threshold\n  /caveman         — compressed replies\n  /session-report  — usage report"
 
 - id: toolkit-self-check-user
   type: file
@@ -28,17 +15,7 @@
   target: ~/.claude/
   scope: user
   tier: baseline
-  summary: The same drift check at user scope, plus the /toolkit-sync, /toolkit-features and /toolkit-help commands, so both also fire in never-synced projects.
+  summary: The same commands at user scope, so /toolkit-sync, /toolkit-feat and /toolkit-help are also available in never-synced projects.
   settings_patch:
-    hooks:
-      SessionStart:
-        - hooks:
-            - type: command
-              command: "\"$HOME\"/.claude/hooks/toolkit-drift-check.sh"
-      PostToolUse:
-        - matcher: "AskUserQuestion"
-          hooks:
-            - type: command
-              command: "\"$HOME\"/.claude/hooks/toolkit-sync-save.sh"
     companyAnnouncements:
-      - "ai-dev-toolkit v{{VERSION}} · handbook: https://github.com/thomasdevaux/ai-dev-toolkit/tree/main/handbook\n\nCommands:\n  /toolkit-sync — force a toolkit sync check\n  /toolkit-features — list available opt-in blocks not yet installed\n  /toolkit-help — show the practices guide and handbook link\n\nToken-saving: /caveman (compressed replies) · session-report skill (session usage report)"
+      - "ai-dev-toolkit v{{VERSION}} · handbook: https://github.com/thomasdevaux/ai-dev-toolkit/tree/main/handbook\n\nCommands:\n  /toolkit-sync   — check toolkit sync status\n  /toolkit-feat   — list available opt-in blocks not yet installed\n  /toolkit-help   — show the practices guide and handbook link\n\nToken-saving:\n  /model           — switch model\n  /effort          — reasoning effort\n  /autocompact     — context threshold\n  /caveman         — compressed replies\n  /session-report  — usage report"

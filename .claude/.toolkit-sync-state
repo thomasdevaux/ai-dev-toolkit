@@ -24,27 +24,27 @@
     "toolkit-self-check": {
       "scope": "project",
       "tier": "baseline"
+    },
+    "toolkit-self-check-user": {
+      "scope": "user",
+      "tier": "baseline"
     }
   },
   "files": {
     "agents/codegraph-reindex.md": "5d5ff7e16c519b3d863636584ce5968f5c1536695289285cb4477ccdefa57b71",
-    "commands/toolkit-features.md": "73065c5e5d150f4347b1076bff4b8f3be8ff67b1dd2358dec3f07aca4e1c7b20",
     "commands/toolkit-help.md": "b4b56c3e82550109dd4680b959e3a910ef64140a0cc1d03535d3f04b09c2582e",
-    "commands/toolkit-sync.md": "4d037cef41ff80b945277735c4f6d63cc56b29c22da03b35b92fb2bc863ae135",
+    "commands/toolkit-sync.md": "9aef07922331fe6307ca6400a1a201fc7ae85c80bf1a33b48c18b539c9c03330",
     "hooks/codegraph-freshness.sh": "1ecda831f94a2284add7b8420366d6c31317179460282c82244ec5c012e9e7c2",
     "hooks/context-check.sh": "19398915e2d620aed9608949d8bc8d899c9c9194276a23ec3c2ed933e1708bdc",
-    "hooks/resolve-toolkit-root.sh": "e10c390283ed662ed80dd5fc6614856ad40bd0e7f50e9906936ff0e6f6d8a63d",
-    "hooks/style-prompt-save.py": "1a75e1b0fdfc44e4c971a46a95ebd8ca31678fb1f6ceda16f8d15ffa6f8dbdf2",
-    "hooks/style-prompt-save.sh": "dc396a12eed2afa3ca62fdd28d9c8e3ba92d36f68f98e8d0d954cd39f75c4a4a",
-    "hooks/style-prompt.sh": "7d21213bdaadcb46c433acd3d0dbb07ee2f8f050cac3d1b9e46e0a491b2aa8d4",
-    "hooks/toolkit-drift-check.sh": "c911c63e4562e8339ff8f0b1c519d5d9e344e4b3cf1e7083a47712a4220021a0",
-    "hooks/toolkit-sync-save.sh": "13ff064c0bbf2dc50830a6516aa6a8c1c0b6a60ac49b0c347bcbff5c4962b487",
+    "hooks/resolve-toolkit-root.sh": "7ef443c7d7212e68275160bc866b329b5402b167169495fbd09fc5daf02efd61",
+    "hooks/style-save.py": "d353e0f45cedb60c61a221b5bad5cc1a7ecfcdebc11a3e0668589428a694a522",
+    "hooks/style-save.sh": "0b4c9877d8b2d969d08197463e569298220cb34dcc82a79cb760668cfbd71d3f",
     "rules/codegraph.md": "84d367c81585a92bf7ee4507f9a8245e602ac5e7177d175ce37ff7347ecdf137",
     "rules/no-project-type.md": "8a5d035b6c7eb9a90e580291ab5f94e6a304995de474a09e3a857f40d3ec25a1",
     "rules/project-context.md": "98900257916a9592140aa4222441fd04174793372b83b3df44cd3233acc57acb",
     "rules/project-type-profile.md": "5a479c75dcc4cc76d14de3f115508acebbb2f2ddcb1496afef33a08d591f9ff2",
     "rules/security.md": "37ad5fb41100acf46a060e0173c15f4623bbf1750ae97af1d4b9be9b5ad3ad8c",
-    "rules/toolkit-sync-manual.md": "1546cba87a68d9e6b18bfc9179dd132c0e3a00a399776f95681ef14344d17abf",
+    "rules/toolkit-sync-manual.md": "264049246bab914ffd32d85887b75e2b39c5fe057727c184db12701a95dbf870",
     "skills/audit-project-context/SKILL.md": "2d029165e92599175b171407de3e0bdecaa248f673446b5ec6b66a6fb0438e9e",
     "skills/caveman/LICENSE": "17a8a03e790cd0b662021daeefc008b0af05810c041215a95dfa19abc496d3b9",
     "skills/caveman/SKILL.md": "335c52e71fdb6a864a8ee8b48898bf9045903708822e494f858f5e8e91b660ec",

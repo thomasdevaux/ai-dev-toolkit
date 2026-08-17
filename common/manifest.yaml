@@ -30,13 +30,11 @@
         - hooks:
             - type: command
               command: "\"$HOME\"/.claude/hooks/codegraph-freshness.sh"
-        - hooks:
-            - type: command
-              command: "\"$HOME\"/.claude/hooks/style-prompt.sh"
-      # Persists the style choice as hook automation instead of an
-      # agent-issued Bash/Write call — see style-prompt.sh's header for why.
+      # Persists the active caveman intensity whenever the skill is invoked,
+      # as hook automation instead of an agent-issued Bash/Write call — see
+      # style-save.py's header for why.
       PostToolUse:
-        - matcher: "AskUserQuestion"
+        - matcher: "Skill"
           hooks:
             - type: command
-              command: "\"$HOME\"/.claude/hooks/style-prompt-save.sh"
+              command: "\"$HOME\"/.claude/hooks/style-save.sh"

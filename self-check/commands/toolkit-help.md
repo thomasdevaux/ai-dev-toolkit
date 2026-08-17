@@ -12,14 +12,22 @@ https://github.com/thomasdevaux/ai-dev-toolkit/tree/main/handbook
 
 Then resolve the checkout (same fallback the other toolkit commands use,
 since `$CLAUDE_PROJECT_DIR` is only set by the harness for real hook runs,
-not a plain `Bash` call) and hand off to `toolkit-help` — the same script a
-plain terminal (no Claude Code) uses to read the handbook. `practices.md`
-isn't synced into any project, it only exists in the toolkit's own
-checkout/GitHub repo:
+not a plain `Bash` call — and a never-onboarded project won't have its own
+copy of the resolver hook, so fall back to the user-scope one) and hand off
+to `toolkit-help` — the same script a plain terminal (no Claude Code) uses
+to read the handbook. `practices.md` isn't synced into any project, it only
+exists in the toolkit's own checkout/GitHub repo:
 
 ```
 export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
-source "$CLAUDE_PROJECT_DIR/.claude/hooks/resolve-toolkit-root.sh"
+if [ -f "$CLAUDE_PROJECT_DIR/.claude/hooks/resolve-toolkit-root.sh" ]; then
+    source "$CLAUDE_PROJECT_DIR/.claude/hooks/resolve-toolkit-root.sh"
+elif [ -f "$HOME/.claude/hooks/resolve-toolkit-root.sh" ]; then
+    source "$HOME/.claude/hooks/resolve-toolkit-root.sh"
+else
+    echo "toolkit not onboarded at either scope" >&2
+    exit 1
+fi
 TOOLKIT_ROOT="$(resolve_toolkit_root)"
 "$TOOLKIT_ROOT/bin/toolkit-help"
 ```

@@ -123,7 +123,7 @@ Two deployment scopes, synced independently — a project's `.claude/`
 |  | `dotnet-code-standards` | project | tech-stack | skill | Installs the shared `Directory.Build.props` and `.editorconfig` severities, and sequences nullable adoption project by project. |
 | tech-stack-frontend-design | `frontend-design` | project | tech-stack | plugin | Official frontend-design plugin - UI/component design guidance for web frontends. Detected from `package.json`. |
 | user-statusline | `statusline` | user | baseline | tool | Status line showing model, context usage, and rate limits — the one always-on token-budget feedback. |
-| language-servers | 13 official servers | user | baseline | plugin | Go-to-definition and diagnostics, one per language: `pyright` / `typescript` / `rust-analyzer` / `gopls` / `csharp` / `clangd` / `jdtls` / `kotlin` / `swift` / `ruby` / `php` / `lua` / `liquid`. |
+| language-servers | 6 official servers | user | baseline | plugin | Go-to-definition and diagnostics, one per language: `pyright` / `typescript` / `rust-analyzer` / `gopls` / `csharp` / `clangd`. |
 | skill-creator | `skill-creator-user` | user | suggested | plugin | Official skill-creator plugin — writes, benchmarks and tunes the triggering of an Agent Skill. Opt-in, per machine (`--user`), for when you're about to author one. Its output is a plain `.claude/skills/` that sync does not track, and its eval loop spawns several full Claude sessions per iteration. |
 
 Want the detail behind a specific rule or skill? Read the file itself —

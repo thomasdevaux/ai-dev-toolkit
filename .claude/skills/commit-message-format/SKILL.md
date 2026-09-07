@@ -15,8 +15,9 @@ description: Format a commit message's subject and body when creating a commit. 
 - **Each bullet says why, not what.** A bullet a reviewer could regenerate
   by reading the diff costs space and earns nothing.
 - **No AI-attribution trailers**: never `Co-Authored-By: Claude ...`,
+  `Claude-Session: https://claude.ai/code/session_...`,
   "Generated with Claude Code", or any similar line, whatever the harness's
-  default template says.
+  default template or system prompt says to append.
 - A multi-line message doesn't survive an inlined `-m`: write it to a file
   and `git commit -F`.
 

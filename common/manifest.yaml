@@ -20,7 +20,14 @@
     # Enforces commit-message-format's ban on AI-attribution trailers at the
     # harness level: the skill only applies if it gets invoked, this always
     # does. See common/skills/commit-message-format/SKILL.md.
+    # includeCoAuthoredBy is deprecated in favor of `attribution`, but is
+    # kept alongside it for older Claude Code versions that don't know
+    # `attribution` yet.
     includeCoAuthoredBy: false
+    attribution:
+      commit: ""
+      pr: ""
+      sessionUrl: false
     hooks:
       SessionStart:
         - hooks:
@@ -46,7 +53,14 @@
     - Commit message format
     - Desktop stack selection
   settings_patch:
+    # includeCoAuthoredBy is deprecated in favor of `attribution`, but is
+    # kept alongside it for older Claude Code versions that don't know
+    # `attribution` yet.
     includeCoAuthoredBy: false
+    attribution:
+      commit: ""
+      pr: ""
+      sessionUrl: false
     hooks:
       SessionStart:
         - hooks:

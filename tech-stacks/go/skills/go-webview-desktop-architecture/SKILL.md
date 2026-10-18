@@ -122,5 +122,6 @@ Three points need surfacing, because none are covered by W1–W6 and all three a
 
 - `references/architecture.md` — folder trees per profile, the six decisions in detail, the anti-pattern checklist, evolution path, server-evolution detail, standalone prompts.
 - `references/react-conventions.md` — frontend conventions for the React side: folder shape, server state, error handling layers, state management default, testing approach.
+- The front end's tooling (Prettier, ESLint, `tsc`, Vitest) is the `frontend-code-standards` skill of the `tech-stack-web-frontend` block, offered on any Wails project.
 
 For scaffolding, architecture.md §3/§5 plus the React reference are usually enough. For an audit, §6/§4 plus the React reference's §8.

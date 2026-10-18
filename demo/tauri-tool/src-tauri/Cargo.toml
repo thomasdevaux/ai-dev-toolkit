@@ -1,0 +1,7 @@
+[package]
+name = "demo-tauri-tool"
+version = "0.1.0"
+edition = "2021"
+
+# Dummy Tauri backend for validating detection: src-tauri/ alone offers
+# tech-stack-web-frontend, the Cargo.toml one level down tech-stack-rust.

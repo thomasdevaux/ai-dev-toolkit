@@ -47,8 +47,8 @@
 #                  Mutually exclusive with detect. Both are searched at the
 #                  project root and one level below, never deeper.
 #                  No entry uses it today: the tech-stack blocks each cover
-#                  a whole language now, so the language marker is exactly
-#                  the right trigger. It stays supported and tested
+#                  a whole language (or, for web-frontend, a whole front
+#                  end), so any one marker is exactly the right trigger. It stays supported and tested
 #                  (tests/tools/sync/test_detect.py) for the first block
 #                  that is genuinely framework-scoped — it is not dead code.
 #   plugin_ref     "<plugin>@<marketplace>" (type: official-plugin only)
@@ -67,6 +67,7 @@
 - include: tech-stacks/rust/manifest.yaml
 - include: tech-stacks/go/manifest.yaml
 - include: tech-stacks/dotnet/manifest.yaml
+- include: tech-stacks/web-frontend/manifest.yaml
 - include: user-tools/statusline/manifest.yaml
 - include: self-check/manifest.yaml
 - include: plugins.yaml

@@ -137,8 +137,8 @@ Once a branch is chosen, tell the user which block to sync:
 | Branch | Block | Skill it brings |
 | --- | --- | --- |
 | Python | `tech-stack-python` | `python-desktop-architecture` |
-| Web-based + Rust | `tech-stack-rust` | `rust-webview-desktop-architecture` |
-| Web-based + Go | `tech-stack-go` | `go-webview-desktop-architecture` |
+| Web-based + Rust | `tech-stack-rust`, `tech-stack-web-frontend` | `rust-webview-desktop-architecture`, `frontend-code-standards` |
+| Web-based + Go | `tech-stack-go`, `tech-stack-web-frontend` | `go-webview-desktop-architecture`, `frontend-code-standards` |
 | .NET | `tech-stack-dotnet` | `dotnet-desktop-architecture` |
 
 Give the user the command to run themselves, with the entry id from the table:

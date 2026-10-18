@@ -87,8 +87,8 @@ ai-dev-toolkit/
 ├── project-type/             # bounded: one subdir per choice-group variant
 │   └── none/  app/  embedded-fccu/
 │
-├── tech-stacks/             # grows HERE: one subdir per language
-│   └── python/  rust/  go/  dotnet/  ...
+├── tech-stacks/             # grows HERE: one subdir per language or front end
+│   └── python/  rust/  go/  dotnet/  web-frontend/  ...
 │       shared/              # not a block: files two stacks deploy verbatim,
 │                            # pulled in via a `shared_files:` entry field
 │
@@ -349,6 +349,13 @@ a `SOURCE.md` missing a field, or on MIT content shipped without its
    frontmatter if it should only apply to matching files. Add on-demand
    skills under `skills/` only for genuine procedures.
 
+   **Name every file after the block, not after its kind** —
+   `rules/rust-style.md`, never `rules/style.md`. Blocks share a target
+   (`.claude/`), so two blocks that a project can sync together and that
+   deploy the same path overwrite each other on every sync and never
+   settle. The four tech stacks did exactly that with `style.md` until
+   `tools/audit` learned to report it.
+
    A block may also carry `commands/<name>.md` (a slash command the user
    types) and `agents/<name>.md` (a sub-task the session delegates). Both
    **must** declare `model:` — see "Which model a block's entry point runs
@@ -384,7 +391,7 @@ a `SOURCE.md` missing a field, or on MIT content shipped without its
    sub-project under `../demo/` if the block needs one — see
    [`../demo/README.md`](../demo/README.md).
 5. Run `python -m tools.audit --toolkit-root .` — checks `paths:`
-   overlap, the rule character budgets, choice-group integrity,
+   overlap, two blocks deploying the same file, the rule character budgets, choice-group integrity,
    third-party provenance, missing `summary:`, and the frontmatter of every
    skill, command and agent (including their `model:`).
 

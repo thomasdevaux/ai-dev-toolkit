@@ -7,7 +7,7 @@ description: Set up or repair the team's Go quality tooling in a module - gofump
 
 Install the team's Go lint configuration in a module, or bring an existing
 one back in line. The day-to-day rules — run the tools, how to write a
-legitimate `//nolint` — live in `rules/style.md` and load on their own; this
+legitimate `//nolint` — live in `rules/go-style.md` and load on their own; this
 skill is the setup procedure.
 
 ## The stack, and why

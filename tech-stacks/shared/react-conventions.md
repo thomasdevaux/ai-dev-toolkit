@@ -79,6 +79,8 @@ Two layers, not one:
 
 ## 5. TypeScript strictness
 
+Formatting and lint are not settled here: Prettier, ESLint (type-aware, with the `ipc/`-only bindings import rule of §2) and the scripts that run them come from the `frontend-code-standards` skill of the `tech-stack-web-frontend` block.
+
 Strict mode on. No `any` at the `ipc/` boundary specifically — that's the one place where a loosely-typed call silently defeats the whole point of generating types from the backend. `any` elsewhere in the frontend is a normal code-review conversation; `any` in `ipc/` is a structural regression.
 
 ## 6. Testing

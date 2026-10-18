@@ -7,6 +7,7 @@ from tools.audit.checks import (
     MAX_SKILL_DESCRIPTION_CHARS,
     check_agents,
     check_commands,
+    check_deploy_collisions,
     check_entry_id_references,
     check_rule_file_size,
     check_session_rules_size,
@@ -166,6 +167,39 @@ def _rules_toolkit(tmp_path: Path, files: dict[str, str]) -> Path:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content, encoding="utf-8")
     return tmp_path
+
+
+def test_two_blocks_deploying_the_same_file_are_reported(tmp_path):
+    """The four tech stacks once all shipped `rules/style.md`: a project with
+    two of them kept one style rule and re-synced both forever."""
+    _rules_toolkit(
+        tmp_path,
+        {"stack-a/rules/style.md": "a", "stack-b/rules/style.md": "b"},
+    )
+    result = AuditResult()
+    check_deploy_collisions(tmp_path, result)
+    assert len(result.findings) == 1
+    message = result.findings[0].message
+    assert "stack-a" in message and "stack-b" in message
+    assert ".claude/rules/style.md" in message
+
+
+def test_deploy_collisions_spare_one_source_in_two_scopes_and_choice_group_members(tmp_path):
+    """`base` reaches both scopes from one source, and only one member of a
+    choice-group is ever adopted: neither is a collision."""
+    _rules_toolkit(
+        tmp_path,
+        {
+            "base/rules/common.md": "x",
+            "light/rules/profile.md": "light",
+            "heavy/rules/profile.md": "heavy",
+            "stack-a/rules/a-style.md": "a",
+            "stack-b/rules/b-style.md": "b",
+        },
+    )
+    result = AuditResult()
+    check_deploy_collisions(tmp_path, result)
+    assert result.findings == []
 
 
 def test_oversized_rule_file_is_reported(tmp_path):

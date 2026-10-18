@@ -7,7 +7,7 @@ description: Set up or repair the team's Python quality tooling in a project - r
 
 Install the team's Python quality configuration in a project, or bring an
 existing one back in line. The day-to-day rules — run the tools, how to
-silence a finding legitimately — live in `rules/style.md` and load on their
+silence a finding legitimately — live in `rules/python-style.md` and load on their
 own; this skill is the setup procedure.
 
 ## The stack, and why

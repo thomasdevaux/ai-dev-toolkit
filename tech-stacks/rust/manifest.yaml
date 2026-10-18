@@ -11,7 +11,7 @@
   # its `description:` sits in context. A project that has no src-tauri/ yet
   # and wants one gets there through desktop-app-architecture.
   detect: ["Cargo.toml"]
-  summary: Rust coding standards (rustfmt, clippy) plus the Tauri desktop architecture - the webview branch, React conventions included.
+  summary: Rust coding standards (rustfmt, clippy) plus the Tauri desktop architecture - the webview branch, React conventions included - and hands-on feedback sessions on the running app.
   # React is the mandated frontend for both webview stacks, so this file
   # is identical in each. It lives once in the checkout and is deployed
   # into the block at sync time — the synced skill stays self-contained,

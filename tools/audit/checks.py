@@ -8,7 +8,8 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from tools.sync.manifest import VALID_SCOPES, SyncEntry, load_manifest
+from tools.sync.diffing import source_relpaths
+from tools.sync.manifest import VALID_SCOPES, SyncEntry, load_manifest, resolve_shared_files
 
 # Characters, not lines. A blank line or a re-wrapped paragraph costs a full
 # line of budget but almost no context, so a line cap taxes readable
@@ -584,9 +585,44 @@ def check_entry_id_references(toolkit_root: Path, result: AuditResult) -> None:
                 )
 
 
+def check_deploy_collisions(toolkit_root: Path, result: AuditResult) -> None:
+    """Two blocks that can be synced into the same project must never deploy
+    the same file. Each sync of one would overwrite the other's copy, the
+    next sync of the other would flip it back, and neither would ever settle —
+    the four tech stacks once all shipped `rules/style.md`, so a Go + Rust
+    project kept only one style rule and re-synced both forever. Members of
+    one choice-group are exempt: exactly one of them is ever adopted."""
+    owners: dict[tuple[str, str, str], SyncEntry] = {}
+    seen: set[tuple[str, str]] = set()
+    for entry in _block_entries(toolkit_root):
+        if (entry.scope, entry.source) in seen:
+            continue
+        seen.add((entry.scope, entry.source))
+        try:
+            relpaths = source_relpaths(
+                toolkit_root / entry.source, resolve_shared_files(entry, toolkit_root)
+            )
+        except FileNotFoundError:
+            continue
+        for relpath in sorted(relpaths):
+            key = (entry.scope, entry.target, relpath)
+            other = owners.setdefault(key, entry)
+            if other is entry or (
+                entry.choice_group is not None and entry.choice_group == other.choice_group
+            ):
+                continue
+            result.add(
+                "deploy-collision",
+                f"{other.id} and {entry.id} both deploy {entry.target}{relpath} "
+                f"({entry.scope} scope) — a project syncing both keeps only one, "
+                f"and every sync flips it. Give the file a name of its own.",
+            )
+
+
 def run_all(toolkit_root: Path) -> AuditResult:
     result = AuditResult()
     check_paths_overlap(toolkit_root, result)
+    check_deploy_collisions(toolkit_root, result)
     check_rule_file_size(toolkit_root, result)
     check_session_rules_size(toolkit_root, result)
     check_choice_groups(toolkit_root, result)

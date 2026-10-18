@@ -131,10 +131,15 @@ python -m tools.sync detect --toolkit-root . --project-dir demo/go-tool
 python -m tools.sync detect --toolkit-root . --project-dir demo/rust-tool
 python -m tools.sync detect --toolkit-root . --project-dir demo/dotnet-tool
 python -m tools.sync detect --toolkit-root . --project-dir demo/frontend-design-tool
+python -m tools.sync detect --toolkit-root . --project-dir demo/tauri-tool
 ```
 
-Expected: `tech-stack-go`, `tech-stack-rust`, `tech-stack-dotnet` and
-`tech-stack-frontend-design` respectively. `sync <id> --toolkit-root .
+Expected: `tech-stack-go`, `tech-stack-rust`, `tech-stack-dotnet`,
+`tech-stack-frontend-design` with `tech-stack-web-frontend` (both read
+`package.json`), and `tech-stack-rust` with `tech-stack-web-frontend` for
+`tauri-tool` — its only markers are `src-tauri/` and the `Cargo.toml`
+inside it, the shape of a Tauri app whose `package.json` sits deeper than
+detection looks. `sync <id> --toolkit-root .
 --project-dir demo/<fixture>` works the same way as the Python example
 above for each.
 

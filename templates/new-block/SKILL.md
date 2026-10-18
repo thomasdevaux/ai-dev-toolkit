@@ -23,7 +23,8 @@ you want it to auto-trigger in a session.
    - Location: `common/` (org-wide, singleton), `project-type/<variant>/` (a
      new mutually-exclusive project-type profile — confirm the full set of
      variants and their shared choice-group name now), or
-     `tech-stacks/<lang>/` (one language/tech stack).
+     `tech-stacks/<lang>/` (one language/tech stack, or a front end such as
+     `web-frontend/`).
    - `tier` for its manifest entry: `baseline` (expected everywhere),
      `choice-group:<name>` (project-type variants), `tech-stack` (with a
      `detect` marker-file list), `suggested` (useful and listed once as
@@ -59,7 +60,8 @@ you want it to auto-trigger in a session.
 
 3. **Write passive rules as native `.claude/rules/*.md`, not a wrapper
    skill**: put the concrete, verifiable rule text directly in
-   `rules/<topic>.md`. Add `paths:` YAML frontmatter only if the rule
+   `rules/<topic>.md`, the topic naming the block (`rust-style.md`, never a
+   generic `style.md` another block could also ship). Add `paths:` YAML frontmatter only if the rule
    should apply to a subset of files; leave it unscoped otherwise. Claude
    Code loads `.claude/rules/*.md` natively (confirmed against the
    `.claude/rules/` mechanism in Claude Code's own docs) — there is no
@@ -110,7 +112,8 @@ you want it to auto-trigger in a session.
    - Does every skill have a `description` specific enough that Claude
      would actually invoke it for the right task?
    - Run `python -m tools.audit --toolkit-root .` from the repo root —
-     it checks `paths:` overlap against every other block, the character
+     it checks `paths:` overlap against every other block, files two blocks
+     would both deploy (name rules after the block: `<lang>-style.md`), the character
      budgets on `rules/*.md` (per file, and across the set a project
      syncs), and choice-group integrity in `sync-manifest.yaml`. Fix
      anything it reports.

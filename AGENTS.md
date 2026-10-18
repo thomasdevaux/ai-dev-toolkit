@@ -13,7 +13,7 @@ consumer of them.
 |---------|-------------|
 | `python -m tools.sync sync <id...> --toolkit-root . --project-dir <path>` | Sync manifest entries into a project's `.claude/`. |
 | `python -m tools.sync switch <group> <id> --toolkit-root . --project-dir <path>` | Adopt a different member of a choice-group (e.g. `project-type`). |
-| `python -m tools.audit --toolkit-root .` | Lint: `paths:` overlap, rule character budgets, choice-group integrity, third-party provenance, missing `summary:`, skill/command/agent frontmatter. |
+| `python -m tools.audit --toolkit-root .` | Lint: `paths:` overlap, two blocks deploying the same file, rule character budgets, choice-group integrity, third-party provenance, missing `summary:`, skill/command/agent frontmatter. |
 | `python -m pytest` | The test suite for `tools/`. |
 
 No build step — markdown + YAML + two small Python packages under `tools/`.

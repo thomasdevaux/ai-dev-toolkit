@@ -7,7 +7,7 @@ description: Set up or repair the team's .NET quality tooling in a solution - Di
 
 Install the team's .NET quality configuration in a solution, or bring an
 existing one back in line. The day-to-day rules — nullable discipline, async
-discipline, how to suppress a warning legitimately — live in `rules/style.md`
+discipline, how to suppress a warning legitimately — live in `rules/dotnet-style.md`
 and load on their own; this skill is the setup procedure.
 
 ## The stack, and why

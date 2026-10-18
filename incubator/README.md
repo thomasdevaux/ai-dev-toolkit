@@ -20,7 +20,7 @@ their unvalidated content is parked here, the desktop-architecture skill
 that composes them in v1 stays in place.
 
 The `style.md` rules that used to sit under `stacks/python/` and
-`stacks/rust/` are gone: `tech-stacks/<lang>/rules/style.md` supersedes
+`stacks/rust/` are gone: `tech-stacks/<lang>/rules/<lang>-style.md` supersedes
 them, alongside a `<lang>-code-standards` skill carrying the linter
 configuration. Keeping a second, diverging copy parked here would have been
 worse than deleting it — `git log` still has the original.

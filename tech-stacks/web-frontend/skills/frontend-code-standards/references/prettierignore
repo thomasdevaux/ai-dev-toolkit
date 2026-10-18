@@ -1,0 +1,6 @@
+# Copy to the front-end package as `.prettierignore`.
+# Build output, generated code and the backend's folder are never formatted.
+dist
+src/bindings
+src-tauri
+package-lock.json

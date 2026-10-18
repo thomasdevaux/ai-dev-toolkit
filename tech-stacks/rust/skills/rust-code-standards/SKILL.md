@@ -7,7 +7,7 @@ description: Set up or repair the team's Rust quality tooling in a crate or work
 
 Install the team's Rust lint configuration in a crate or workspace, or bring
 an existing one back in line. The day-to-day rules — run the tools, how to
-allow a lint legitimately — live in `rules/style.md` and load on their own;
+allow a lint legitimately — live in `rules/rust-style.md` and load on their own;
 this skill is the setup procedure.
 
 ## The stack, and why

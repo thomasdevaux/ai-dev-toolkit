@@ -17,8 +17,25 @@ The folder tree is a **consequence**, not a decision. What actually determines a
 
 Two failure modes to guard against, because both are common and both are expensive:
 
-- **Over-structuring**: crates, monorepo, and shared packages created for a single frontend with a single consumer. This costs build time, dependency pain, and onboarding friction, and buys nothing.
+- **Over-structuring**: more crates, shared packages or apps than there are consumers — a `core`/`domain`/`<capability>` crate split, a `packages/` folder or an `apps/cli` created for a single frontend. This costs build time, dependency pain, and onboarding friction, and buys nothing. The fixed layout below is not over-structuring: it is one frontend, one core crate, one workspace, the same in every project.
 - **Leaky boundary**: business logic scattered across React components and Tauri commands, with no layer that can be tested on its own. This is the one that gets expensive later, because fixing it means redesigning the boundary rather than moving files.
+
+## The layout (the same for every profile)
+
+Every Tauri app of the portfolio has the same top-level shape, whatever its profile:
+
+```text
+my-app/
+├── apps/desktop/            # the frontend package, with src-tauri/ inside it
+├── crates/<name>-core/      # logic that does not need Tauri (profiles B and C)
+├── Cargo.toml               # root [workspace]: members, profiles, [workspace.lints]
+├── package.json             # npm workspace; forwards format/lint/typecheck/test to apps/desktop
+└── rust-toolchain.toml
+```
+
+Why one layout rather than one per profile: scripts, CI jobs, the build profiles and the docs are then copied between projects unchanged, and a colleague moving between apps finds things in the same place. It also turns "`domain/` must not depend on Tauri" from a review rule into a compiler guarantee: the core crate has no Tauri dependency to reach for. Adding a CLI or a server later is an addition (`apps/cli`, `apps/server`), never a move.
+
+The profile decides **what goes where inside that layout** — how much logic is in React, how much in the core crate, whether further crates or apps exist — not the top-level folders. Full trees are in `references/architecture.md` §3.
 
 ## The three profiles
 
@@ -27,8 +44,8 @@ Use the evocative names when talking to the user — they carry the intuition wi
 | Profile | Idea | Business logic | Use when |
 |---|---|---|---|
 | **A. The Storefront** | You look through it; nothing is made on site | React | UI over a remote API, little or no system access |
-| **B. The Workshop** | Someone works at a bench with the machine's tools | React (workflows) + Rust (system) | Files, Git, processes, local DB — **default choice** |
-| **C. The Engine** | Self-contained mechanics that can power several vehicles | Rust, in crates | A real second consumer exists (CLI, server, other frontend) |
+| **B. The Workshop** | Someone works at a bench with the machine's tools | React (workflows) + Rust (system), in `crates/<name>-core` | Files, Git, processes, local DB — **default choice** |
+| **C. The Engine** | Self-contained mechanics that can power several vehicles | Rust, in several crates | A real second consumer exists (CLI, server, other frontend) |
 
 Decision rules:
 
@@ -43,10 +60,10 @@ Decision rules:
 | What ships | One executable — runs as CLI with arguments, opens the window with none | Two executables |
 | CLI weight | Carries the GUI framework compiled in, even when running as CLI | Lean — the CLI binary doesn't depend on Tauri at all |
 | Guarantee against GUI code leaking into CLI logic | None but discipline — same compilation unit | Enforced by the compiler — the CLI crate has no Tauri dependency, so it can't happen |
-| Folder shape needed | None beyond profile B's — see `references/architecture.md` §3.B-CLI | Profile C's workspace shape — see §3.C |
+| Folder shape needed | None beyond profile B's — see `references/architecture.md` §3.B-CLI | An added `apps/cli` over the core crate — see §3.C |
 | Fits best | Simple distribution, no heavy scripted/looped use | CLI invoked repeatedly in scripts or CI, where startup weight matters |
 
-This matters structurally, not just for naming: the single-binary option doesn't need profile C's workspace/crates shape at all — it stays inside profile B with one added module. The heavier multi-crate structure below is specifically what the two-binaries choice requires.
+This matters structurally, not just for naming: the single-binary option needs no second app at all — it stays inside profile B with one added module. A second binary under `apps/` is specifically what the two-binaries choice requires.
 
 A note on scope: a local HTTP sidecar (Rust process exposing HTTP instead of Tauri's `invoke()`) is occasionally seen in the wild, but it's rare enough, and different enough in its concerns (port management, process lifecycle, no mobile path), that it isn't documented here as a profile. If the user's project genuinely needs one, treat it as a one-off design problem rather than reaching for a template.
 
@@ -62,7 +79,7 @@ Settle these before creating folders. Full detail is in `references/architecture
 | D4 | Error boundary | Typed serializable enum, never `String` |
 | D5 | Long-running work | Events or channels beyond ~500 ms |
 | D6 | Shared typing | Generated from Rust (`tauri-specta` / `ts-rs`) |
-| D7 | Frontend location | Root for A and B, `apps/*` for C |
+| D7 | Frontend location | `apps/desktop/`, every profile (see "The layout") |
 
 D2 is the structuring one. When in doubt, spend the effort there.
 
@@ -81,7 +98,7 @@ D2 is the structuring one. When in doubt, spend the effort there.
 ## Workflow: auditing an existing project
 
 1. **Read `references/architecture.md`** (§6 anti-patterns, §4 decisions).
-2. **Identify the actual profile** the codebase implements, and the gap with the profile it should have. A project claiming to be an Engine with one frontend and no CLI is really a Workshop carrying monorepo overhead.
+2. **Identify the actual profile** the codebase implements, and the gap with the profile it should have. A project claiming to be an Engine with one frontend and no CLI is really a Workshop carrying extra crates. A project that is not on the common layout (frontend at the root, no workspace) is a layout finding too, ranked low: moving it is mechanical.
 3. **Walk the anti-pattern checklist**, marking each present / absent / not applicable, with file and line as evidence. Evidence matters — an audit without file references can't be acted on.
 4. **Assess D1–D7 as actually implemented**, not as documented.
 5. **Rank findings by increasing cost to fix**, so the user can start with what's cheap.
@@ -93,7 +110,7 @@ Priority when reporting: leaky boundaries (anti-patterns 1, 2, 3, 11) matter mor
 
 Correct a common misconception here: **there is no easy migration from B to C.** What changes is not where code sits but the shape of the boundary. So:
 
-1. **Check the prerequisite first**: is `domain/` free of any Tauri dependency? If not, list the dependencies to break before extracting anything. Extraction before this is done is what makes the operation expensive.
+1. **Check the prerequisite first**: is the logic already in `crates/<name>-core`, free of any Tauri dependency? On a project still on the older layout (logic in `src-tauri/src/domain/`), list the Tauri dependencies to break before extracting anything. Extraction before this is done is what makes the operation expensive.
 2. **Describe the target boundary before moving code** — commands, payloads, errors, progress reporting. Get agreement on the boundary, then implement.
 3. **Extract module by module**, never wholesale.
 4. **Justify each new crate**: size, boundary stability, and consumers. A crate under ~200 lines with one consumer is premature.

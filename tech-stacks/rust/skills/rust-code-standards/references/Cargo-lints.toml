@@ -23,7 +23,7 @@ pedantic = { level = "warn", priority = -1 }
 
 # Deny, not warn: these are correctness, not taste.
 undocumented_unsafe_blocks = "deny"
-unwrap_used = "deny"          # see rules/style.md for where unwrap is fine
+unwrap_used = "deny"          # see rules/rust-style.md for where unwrap is fine
 panic = "deny"
 
 # Pedantic rules that cost more than they return in application code.

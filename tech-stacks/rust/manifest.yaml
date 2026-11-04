@@ -21,3 +21,5 @@
       target: skills/rust-webview-desktop-architecture/references/react-conventions.md
     - source: tech-stacks/shared/editorconfig.ini
       target: skills/rust-code-standards/references/editorconfig.ini
+    - source: tech-stacks/shared/corporate-proxy.md
+      target: skills/rust-code-standards/references/corporate-proxy.md

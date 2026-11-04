@@ -19,7 +19,9 @@ What tooling cannot decide, and this file does:
 - **Silencing needs a named lint and a why.** `#[allow(clippy::too_many_arguments)]`
   alone is not acceptable; the same line with a comment saying what makes it
   the right call is. Crate-wide `#![allow(...)]` for anything other than a
-  deliberate, documented team decision is not acceptable.
+  deliberate, documented team decision is not acceptable. One such decision:
+  `#![allow(clippy::needless_pass_by_value)]` on a Tauri `commands/` module,
+  whose signatures `#[tauri::command]` imposes.
 - **Errors propagate as `Result`, not panics.** `?` is the default.
   `.unwrap()` and `.expect()` belong in tests, in `main` where the failure is
   genuinely terminal, and where an invariant makes the failure impossible —

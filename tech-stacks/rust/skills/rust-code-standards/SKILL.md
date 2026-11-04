@@ -32,6 +32,12 @@ accumulates.
 codebase looks the same; a project with an opinionated `rustfmt.toml` has
 traded that away for preferences. Pin the edition, stop there.
 
+**The build is standardised too, not just the lint.** A pinned toolchain,
+the `rust-lld.exe` linker, shared dev and release profiles and a capped
+`target/` (`scripts/clean.ps1`) are what keep builds fast and the disk
+usable across several projects on one machine. `references/build-and-disk.md`
+explains each file and what stays machine-local.
+
 ## Procedure
 
 ### A workspace or crate with no configuration
@@ -50,10 +56,18 @@ traded that away for preferences. Pin the edition, stop there.
 3. Create `rustfmt.toml` at the project root with the edition pinned.
 4. Copy `references/editorconfig.ini` to the project root as `.editorconfig`
    if there is none. It is the same baseline in every stack and settles what
-   an editor decides before any formatter runs.
-5. Run `cargo fmt`, and commit that as one mechanical commit, separate from
+   an editor decides before any formatter runs. If there is one, diff it
+   against the reference and report the differences rather than overwriting
+   it — a project's own sections would be lost.
+5. Build configuration: copy `references/rust-toolchain.toml` to the root
+   and `references/cargo-config.toml` to `.cargo/config.toml`, merge
+   `references/Cargo-profiles.toml` into the root `Cargo.toml`, and copy
+   `references/clean.ps1` and `clean.test.ps1` into `scripts/`, called first
+   by the dev and build scripts. Existing settings are diffed and reported,
+   as for lints.
+6. Run `cargo fmt`, and commit that as one mechanical commit, separate from
    any behaviour change.
-6. Run `cargo clippy --all-targets -- -D warnings` and deal with the output
+7. Run `cargo clippy --all-targets -- -D warnings` and deal with the output
    per the section below.
 
 ### A crate that already has a configuration
@@ -89,7 +103,9 @@ gets ignored wholesale and the standard dies on day one. Instead:
 
 ## Changing the standard
 
-The reference configuration is the team's, not the crate's. A lint worth
+The reference configuration is the team's, not the crate's — the build
+references included: a project that needs another profile setting records
+it as an exception next to the setting, with its reason. A lint worth
 enabling or denying everywhere is changed in
 `tech-stacks/rust/skills/rust-code-standards/references/` in the toolkit
 checkout, and reaches projects at their next sync. Editing one crate's

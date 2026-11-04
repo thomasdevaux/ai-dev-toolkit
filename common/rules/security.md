@@ -16,7 +16,9 @@
   it through the project's incident channel.
 - Do not disable or bypass security tooling (dependency scanners, secret
   scanners, pre-commit hooks) to unblock a commit. Fix the underlying issue
-  or get an explicit, documented exception.
+  or get an explicit, documented exception. On Windows that includes the
+  execution policy: run scripts with `powershell -NoProfile -File`, never
+  `-ExecutionPolicy Bypass`, which the EDR flags as an attack technique.
 - Review third-party dependencies before adding them: prefer actively
   maintained packages, and check for known vulnerabilities (e.g.
   `pip-audit`, `npm audit`) before merging a new dependency.

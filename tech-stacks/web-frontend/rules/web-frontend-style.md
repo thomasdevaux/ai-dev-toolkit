@@ -29,7 +29,10 @@ What tooling cannot decide, and this file does:
 - **Silencing needs a named rule and a why.** `// eslint-disable-next-line`
   alone is not acceptable; `// eslint-disable-next-line
   react-hooks/exhaustive-deps -- runs once, the dialog is keyed by its
-  device` is. Never a file-wide `/* eslint-disable */`.
+  device` is. Never a file-wide `/* eslint-disable */`. For
+  `react-hooks/set-state-in-effect`, try a `key` or a value derived during
+  render first; the disable is right when the effect resets local state on a
+  prop change or mirrors a store that has no subscription API.
 - **Generated files are neither formatted nor linted.** The backend's
   bindings (`src/bindings/`) and build output stay in `.prettierignore` and
   the ESLint `ignores`; a hand edit there is lost on the next generation.

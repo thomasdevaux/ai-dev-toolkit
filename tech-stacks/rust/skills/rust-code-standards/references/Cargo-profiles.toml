@@ -1,0 +1,25 @@
+# Merge into the workspace root's Cargo.toml (profiles are only read there).
+# A project exception goes next to the setting it changes, with its reason, e.g.
+#   [profile.dev.package.my-core]  opt-level = 3   # salsa/blake3 are 10-100x slower unoptimised
+
+# Line tables keep backtraces and panics readable without the size of full debug
+# info (full info can make the .pdb files half of target/debug).
+# To step through code with variables in a debugger, set
+# CARGO_PROFILE_DEV_DEBUG=full for that session instead of changing this file.
+[profile.dev]
+debug = "line-tables-only"
+
+# Dependencies: optimised (they are rebuilt rarely and run often) and without
+# debug info. Only the workspace's own crates stay at opt-level 0.
+[profile.dev.package."*"]
+debug = false
+opt-level = 2
+
+# Smallest binary for the installer. panic = "abort" drops the unwinding tables;
+# a panic is a bug to fix, not an error path to recover from.
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

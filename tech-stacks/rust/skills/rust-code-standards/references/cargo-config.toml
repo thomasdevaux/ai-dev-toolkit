@@ -1,0 +1,11 @@
+# Copy to the project as .cargo/config.toml (versioned: it applies to everyone).
+# Machine-local settings — check-revoke behind a proxy, sccache, a shared
+# target-dir — go in %USERPROFILE%\.cargo\config.toml instead, never here.
+
+# rust-lld ships inside the toolchain (lib/rustlib/<target>/bin/) and links
+# noticeably faster than the default MSVC linker, which matters because
+# `cargo test --workspace` links one binary per test crate. Nothing to install:
+# it works on any machine with the toolchain pinned by rust-toolchain.toml.
+# Name the exe as written: it is what stable rustc finds without nightly flags.
+[target.x86_64-pc-windows-msvc]
+linker = "rust-lld.exe"

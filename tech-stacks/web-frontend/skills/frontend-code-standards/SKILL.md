@@ -6,8 +6,8 @@ description: Set up or repair the team's web front-end quality tooling in a pack
 # Front-end Code Standards
 
 Install the team's front-end tooling in the package that holds the front end
-(the root of a Tauri app, `frontend/` in a Wails app, `apps/<name>/` in a
-monorepo), or bring an existing setup back in line. The day-to-day rules —
+(`apps/desktop/` in a Tauri app, `frontend/` in a Wails app, `apps/<name>/`
+in a monorepo), or bring an existing setup back in line. The day-to-day rules —
 run the tools, how to silence a finding legitimately — live in
 `rules/web-frontend-style.md` and load on their own; this skill is the setup procedure.
 The React structure itself (`ipc/`, `bindings/`, server state) is the
@@ -39,6 +39,17 @@ unsafe `any` flows and needless conditions, which a syntax-only config cannot
 see. It costs a slower lint — `eslint --cache` for the inner loop is the
 answer, not a weaker preset.
 
+**The reference relaxes a few strict rules on purpose**, each commented in
+`references/eslint.config.js`: async event-handler props
+(`no-misused-promises` attributes), numbers in template literals,
+arrow-shorthand void calls (`onClick={() => setOpen(false)}`), `_`-prefixed
+unused bindings, plain-object rejections inside `src/ipc/` (the backend's
+typed error), and in test files the `require-await` / `no-unsafe-*` family
+and non-null assertions (`items[0]!`: an absent value fails the test anyway).
+These are React and Vitest idioms the strict preset reports in every
+project; they make up most of a strict backlog and catch no bug. They are not a licence for more: anything beyond them is still a
+project deviation, recorded as a comment next to the setting.
+
 **The `ipc/` boundary is enforced, not just documented.** A
 `no-restricted-imports` rule lets only `src/ipc/` import the generated
 bindings — the rule `react-conventions.md` §2 calls the one that matters most.
@@ -49,7 +60,10 @@ bindings — the rule `react-conventions.md` §2 calls the one that matters most
 
 1. Install the tools as devDependencies:
    `npm install -D prettier eslint @eslint/js typescript-eslint eslint-plugin-react-hooks typescript vitest`.
-   Check them first per the security rule (`npm audit`).
+   Check them first per the security rule (`npm audit`). Behind the
+   corporate proxy, npm needs the machine-local setting in
+   `references/corporate-proxy.md`. Pin `@types/node` to the major of the
+   Node runtime in use, not the newest one.
 2. Copy `references/prettierrc.json` to `.prettierrc.json`,
    `references/prettierignore` to `.prettierignore`, and
    `references/eslint.config.js` to `eslint.config.js`. Adjust the generated
@@ -59,12 +73,23 @@ bindings — the rule `react-conventions.md` §2 calls the one that matters most
    root scripts that forward to the front-end package
    (`npm run lint --workspace=<package>`), so the gate calls one place.
 4. Copy `references/editorconfig.ini` to the project root as `.editorconfig`
-   if there is none. It is the same baseline in every stack.
-5. Run `npm run format`, and commit that as one mechanical commit, separate
+   if there is none. It is the same baseline in every stack. If there is one,
+   diff it against the reference and report the differences rather than
+   overwriting it.
+5. TypeScript: from TypeScript 6, `tsc` no longer loads every installed
+   `@types` package — list them in `tsconfig.json`
+   (`"types": ["node"]`, plus `"vitest/globals"` if the tests use globals).
+   Turn on `noUncheckedIndexedAccess`: without it an index read is typed as
+   always present, and `no-unnecessary-condition` then reports the very
+   guard that protects it.
+   Include `vite.config.ts` **and** `vitest.config.ts` in
+   `tsconfig.node.json`: a config file outside every tsconfig is reported by
+   the type-aware lint, and `allowDefaultProject` is only the workaround.
+6. Run `npm run format`, and commit that as one mechanical commit, separate
    from any behaviour change.
-6. Run `npm run lint` and `npm run typecheck` and deal with the output per the
+7. Run `npm run lint` and `npm run typecheck` and deal with the output per the
    section below.
-7. Wire `format:check`, `lint`, `typecheck` and `test` into the project's gate
+8. Wire `format:check`, `lint`, `typecheck` and `test` into the project's gate
    script, next to the backend's tools, and the changed-files variant
    (`prettier --check <files>`, `eslint --cache`) into its inner loop if it
    has one.
@@ -80,7 +105,9 @@ differences, grouped:
   or no type information) — the most common divergence; sequence it per the
   section below.
 - **No bindings import restriction** — add it; it is cheap and it guards the
-  architecture.
+  architecture. An app without generated bindings uses the alternative block
+  commented at the end of `references/eslint.config.js`: it restricts
+  `invoke` itself to the IPC module.
 - **Rules the project enables that the reference does not** — a candidate to
   propose upstream, not to delete.
 
@@ -98,6 +125,10 @@ ignored wholesale. Instead:
    (stale closures, effects that never re-run), not taste.
 3. Never adopt by adding `/* eslint-disable */` to files or turning rules
    off globally. That records the backlog as permanent.
+4. Run `npm run typecheck` after every `eslint --fix`. Removing an assertion
+   that `no-unnecessary-type-assertion` calls redundant can be right for
+   ESLint and still break `tsc`, typically where the assertion narrowed a
+   string to a literal union.
 
 ## Changing the standard
 

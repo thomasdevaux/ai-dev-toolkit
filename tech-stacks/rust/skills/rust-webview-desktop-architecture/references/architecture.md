@@ -29,7 +29,7 @@ The folder tree is a **consequence**, not a decision. The real decisions, to set
 | D4 | Error boundary | `String` / typed serializable enum | Whether the frontend can react precisely |
 | D5 | Long-running / progress | blocking commands / events / channels | UX on heavy tasks |
 | D6 | Shared typing | manual / generated (`tauri-specta`, `ts-rs`) | Front/back drift over time |
-| D7 | Frontend location | root (Tauri default) / `apps/*` (two-binaries variant) | Configuration cost |
+| D7 | Frontend location | `apps/desktop/` in every profile (§3, common layout) | One-off configuration, then identical across projects |
 
 **D2 is the structuring decision.** A badly shaped IPC boundary is not fixed by reorganizing folders.
 
@@ -67,36 +67,65 @@ A Rust process exposing HTTP locally instead of using Tauri's `invoke()` shows u
 
 ## 3. Profiles and folder structures
 
-### A. The Storefront
-
-Rust limited to bootstrapping. Frontend at root (Tauri default, zero extra configuration).
+### Common layout (every profile)
 
 ```text
 my-app/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   ├── hooks/
-│   ├── api/                  # remote HTTP calls
-│   ├── lib/
-│   ├── App.tsx
-│   └── main.tsx
-├── public/
-├── index.html
-├── vite.config.ts
-├── tsconfig.json
-├── package.json
-│
-├── src-tauri/
+├── apps/
+│   └── desktop/                  # the frontend package
+│       ├── src/
+│       ├── index.html
+│       ├── vite.config.ts        # server.port = this app's port, strictPort: true
+│       ├── package.json          # format, format:check, lint, typecheck, test
+│       └── src-tauri/            # workspace member
+├── crates/                       # profiles B and C only
+├── Cargo.toml                    # root [workspace]: members, profiles, [workspace.lints]
+├── Cargo.lock                    # one lockfile, at the root
+├── package.json                  # npm workspace ["apps/desktop"], forwarding scripts
+├── package-lock.json
+├── rust-toolchain.toml
+├── .env.example
+└── README.md
+```
+
+Configuration this costs once, the same in every project:
+
+- `src-tauri` is a member of the root workspace; `cargo` builds into the root `target/`.
+- `tauri.conf.json`: `frontendDist: "../dist"`, `devUrl: "http://localhost:<port>"` with a port of its own per app (two apps on the same port end up showing each other's dev server), `beforeDevCommand` / `beforeBuildCommand` run in `apps/desktop`.
+- The root `package.json` forwards each script: `"lint": "npm run lint --workspace=apps/desktop"`, so the gate calls one place.
+
+### A. The Storefront
+
+Rust limited to bootstrapping. No core crate: there is no Rust logic to put in one.
+
+```text
+my-app/
+├── apps/desktop/
 │   ├── src/
-│   │   ├── lib.rs            # Tauri setup, plugins, builder
-│   │   └── main.rs           # calls lib.rs, nothing else
-│   ├── capabilities/
-│   │   └── default.json
-│   ├── icons/
-│   ├── tauri.conf.json
-│   └── Cargo.toml
-│
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── hooks/
+│   │   ├── api/              # remote HTTP calls
+│   │   ├── lib/
+│   │   ├── App.tsx
+│   │   └── main.tsx
+│   ├── public/
+│   ├── index.html
+│   ├── vite.config.ts
+│   ├── tsconfig.json
+│   ├── package.json
+│   └── src-tauri/
+│       ├── src/
+│       │   ├── lib.rs        # Tauri setup, plugins, builder
+│       │   └── main.rs       # calls lib.rs, nothing else
+│       ├── capabilities/
+│       │   └── default.json
+│       ├── icons/
+│       ├── tauri.conf.json
+│       └── Cargo.toml
+├── Cargo.toml                # [workspace] members = ["apps/desktop/src-tauri"]
+├── package.json
+├── rust-toolchain.toml
 ├── .env.example
 └── README.md
 ```
@@ -106,6 +135,7 @@ my-app/
 **Constraints**:
 - `main.rs` contains only the call into `lib.rs` (mobile targets, testability).
 - Don't create `commands/` until there are at least 2–3 real commands.
+- Create `crates/<name>-core` the day Rust holds logic beyond bootstrapping — that is the moment the app becomes a Workshop.
 
 ---
 
@@ -115,53 +145,62 @@ React handles UI and workflows. Rust handles system access, persistence, and hea
 
 ```text
 my-app/
-├── src/                          # frontend (at root, Tauri default)
-│   ├── components/               # pure presentation, no IPC
-│   ├── features/                 # split by business domain
-│   │   └── <feature>/
-│   │       ├── components/
-│   │       ├── hooks/
-│   │       └── index.ts
-│   ├── pages/
-│   ├── ipc/                      # THE ONLY place invoke() is called
-│   │   ├── client.ts             # typed wrapper + error mapping
-│   │   └── <domain>.ts
-│   ├── store/                    # global state (zustand / jotai / redux)
-│   ├── bindings/                 # types generated from Rust — do not edit
-│   ├── lib/                      # pure utilities
-│   ├── App.tsx
-│   └── main.tsx
-├── public/
-├── index.html
-├── vite.config.ts
+├── apps/desktop/
+│   ├── src/                          # frontend
+│   │   ├── components/               # pure presentation, no IPC
+│   │   ├── features/                 # split by business domain
+│   │   │   └── <feature>/
+│   │   │       ├── components/
+│   │   │       ├── hooks/
+│   │   │       └── index.ts
+│   │   ├── pages/
+│   │   ├── ipc/                      # THE ONLY place invoke() is called
+│   │   │   ├── client.ts             # typed wrapper + error mapping
+│   │   │   └── <domain>.ts
+│   │   ├── store/                    # global state (zustand / jotai / redux)
+│   │   ├── bindings/                 # types generated from Rust — do not edit
+│   │   ├── lib/                      # pure utilities
+│   │   ├── App.tsx
+│   │   └── main.tsx
+│   ├── public/
+│   ├── index.html
+│   ├── vite.config.ts
+│   ├── package.json
+│   └── src-tauri/
+│       ├── src/
+│       │   ├── commands/             # thin IPC boundary, no logic
+│       │   │   ├── mod.rs
+│       │   │   └── <domain>.rs
+│       │   ├── state.rs              # AppState + locking policy
+│       │   ├── error.rs              # serializable error enum (D4)
+│       │   ├── lib.rs                # Tauri builder, manage(), handlers
+│       │   └── main.rs
+│       ├── capabilities/
+│       │   └── default.json
+│       ├── icons/
+│       ├── tauri.conf.json
+│       └── Cargo.toml                # depends on <name>-core
+│
+├── crates/
+│   └── <name>-core/                  # no Tauri dependency
+│       ├── src/
+│       │   ├── domain/               # business logic
+│       │   │   └── <domain>/
+│       │   ├── infra/                # adapters: fs, git, process, http
+│       │   ├── db/
+│       │   │   └── migrations/
+│       │   └── lib.rs
+│       ├── tests/                    # integration tests
+│       └── Cargo.toml
+│
+├── Cargo.toml                        # root [workspace]
 ├── package.json
-│
-├── src-tauri/
-│   ├── src/
-│   │   ├── commands/             # thin IPC boundary, no logic
-│   │   │   ├── mod.rs
-│   │   │   └── <domain>.rs
-│   │   ├── domain/               # business logic, testable without Tauri
-│   │   │   ├── mod.rs
-│   │   │   └── <domain>/
-│   │   ├── infra/                # adapters: fs, git, process, http
-│   │   ├── db/
-│   │   │   ├── mod.rs
-│   │   │   └── migrations/
-│   │   ├── state.rs              # AppState + locking policy
-│   │   ├── error.rs              # serializable error enum (D4)
-│   │   ├── lib.rs                # Tauri builder, manage(), handlers
-│   │   └── main.rs
-│   ├── tests/                    # integration tests
-│   ├── capabilities/
-│   │   └── default.json
-│   ├── icons/
-│   ├── tauri.conf.json
-│   └── Cargo.toml
-│
+├── rust-toolchain.toml
 ├── .env.example
 └── README.md
 ```
+
+**One core crate, not several.** `domain/`, `infra/` and `db/` are modules of the same crate. Splitting them into crates of their own is profile C, and needs C's justification (§3.C constraints).
 
 **Split of responsibilities**:
 
@@ -172,7 +211,9 @@ my-app/
 | Display validation | Authoritative business validation |
 | — | CPU-bound processing, heavy parsing |
 
-**`domain/` vs `infra/`**: this split replaces the generic `services/`, which is ambiguous because a `services/` folder often exists on both sides with two different roles. It makes explicit what is testable without I/O (`domain/`) and what touches the outside world (`infra/`). It's also the split that survives best if the code is later extracted into crates.
+**`domain/` vs `infra/`**: this split replaces the generic `services/`, which is ambiguous because a `services/` folder often exists on both sides with two different roles. It makes explicit what is testable without I/O (`domain/`) and what touches the outside world (`infra/`). It's also the split that survives best if the core crate is later divided.
+
+**Why the core crate from day one**: `cargo test -p <name>-core` builds and runs without linking Tauri or a webview, which is faster and smaller, and a Tauri type cannot leak into `domain/` because the crate has no Tauri dependency to import.
 
 **Target**: IDEs, developer tooling, document management, classic desktop apps.
 
@@ -180,15 +221,13 @@ my-app/
 
 ### B — variant: CLI access without a second binary
 
-When a CLI companion is wanted but the single-binary, dual-mode option was chosen (see the decision table in `SKILL.md`), this stays entirely inside profile B's shape — no workspace, no `crates/`. Only `src-tauri/` changes:
+When a CLI companion is wanted but the single-binary, dual-mode option was chosen (see the decision table in `SKILL.md`), this stays entirely inside profile B's shape — no second app, no further crate. Only `apps/desktop/src-tauri/` changes:
 
 ```text
 src-tauri/
 ├── src/
 │   ├── commands/          # unchanged — Tauri commands, GUI path only
-│   ├── domain/             # unchanged — shared by both paths
-│   ├── infra/               # unchanged
-│   ├── cli.rs                # argument parsing (clap) and CLI-mode dispatch
+│   ├── cli.rs                # argument parsing (clap) and CLI-mode dispatch, over <name>-core
 │   ├── state.rs
 │   ├── error.rs
 │   ├── lib.rs
@@ -206,13 +245,13 @@ fn main() {
 }
 ```
 
-Both paths call the same `domain/` functions. Nothing here needs Tauri's builder to run for the CLI path, so no window is created in that mode. The trade-off from the decision table still applies: the compiled binary includes Tauri regardless of which path executes, and nothing but code review stops CLI code from accidentally reaching into `commands/` or GUI-only state.
+Both paths call the same `<name>-core` functions. Nothing here needs Tauri's builder to run for the CLI path, so no window is created in that mode. The trade-off from the decision table still applies: the compiled binary includes Tauri regardless of which path executes, and nothing but code review stops CLI code from accidentally reaching into `commands/` or GUI-only state.
 
 ---
 
 ### C. The Engine — variant: two separate binaries
 
-Business logic entirely in Rust, organized into crates, consumed by genuinely separate binaries. This is the heavier structure — only reach for it when the two-separate-binaries choice was made deliberately (see the decision table in `SKILL.md`), not merely because a CLI was wanted at all.
+Business logic entirely in Rust, organized into several crates, consumed by genuinely separate binaries. Same top-level layout as A and B; what is added is a second app under `apps/` and, on evidence, a split of the core crate. Only reach for it when the two-separate-binaries choice was made deliberately (see the decision table in `SKILL.md`), not merely because a CLI was wanted at all.
 
 ```text
 my-app/
@@ -237,8 +276,8 @@ my-app/
 │       └── Cargo.toml
 │
 ├── crates/
-│   ├── core/                     # types, errors, traits, config
-│   ├── domain/                   # pure business rules
+│   ├── <name>-core/              # types, errors, traits, config — profile B's core crate
+│   ├── domain/                   # pure business rules, split out on evidence
 │   └── <capability>/             # git, filesystem, ai... on evidence
 │
 ├── packages/                     # ONLY if ≥ 2 frontends
@@ -255,14 +294,13 @@ my-app/
 **`apps/`**: follows the JS-monorepo convention (Turborepo, Nx) that Tauri's own multi-app examples already lean on, since a Tauri project is a hybrid Rust+JS project rather than a pure Rust one. Each subfolder is a separate compiled binary with its own `Cargo.toml`.
 
 **Constraints**:
-- Only create a crate when a module exceeds ~500 lines **and** has a stable boundary. Start with `core` alone. A set of 200-line crates degrades build times and creates circular dependency pain while buying nothing.
+- Only create a crate beyond `<name>-core` when a module exceeds ~500 lines **and** has a stable boundary. A set of 200-line crates degrades build times and creates circular dependency pain while buying nothing.
 - `packages/ui/` is only justified with two real frontends. Otherwise it's abstraction debt.
-- The `src-tauri` crate must be a workspace member; check path resolution in `tauri.conf.json` and the `Cargo.lock` location.
 - `apps/cli` (or equivalent) must exist or be planned: without a second consumer, this variant isn't justified. And it must actually be the *two-binaries* choice — if a single dual-mode binary would do, use the lighter §3.B variant above instead.
 
 **Target**: complex software, platforms, multi-frontend apps, reusable engines.
 
-**Second consumer is a server**: when the identified second consumer is a server exposing the same business logic to remote clients (rather than a CLI), swap `apps/cli/` for `apps/server/` (an axum binary, or equivalent), consuming the same `crates/domain` and `crates/core`. This is the standard shape for "desktop app today, multi-client server later" — see §9 for what this migration involves beyond the folder move.
+**Second consumer is a server**: when the identified second consumer is a server exposing the same business logic to remote clients (rather than a CLI), swap `apps/cli/` for `apps/server/` (an axum binary, or equivalent), consuming the same crates. This is the standard shape for "desktop app today, multi-client server later" — see §9 for what this migration involves beyond the folder move.
 
 ---
 
@@ -295,8 +333,8 @@ Explicit minimal permissions in `src-tauri/capabilities/`. Never widen "to unblo
 Anything prefixed `VITE_` is in plain text in the bundle: never a secret. API keys live on the Rust side and are not returned through `invoke()`. Version `.env.example`, gitignore `.env`.
 
 ### Testing
-- Rust: co-located unit tests (`#[cfg(test)]`) on `domain/`; integration tests in `src-tauri/tests/`.
-- `domain/` must be testable **without** a Tauri dependency. If it isn't, logic has leaked into `commands/`.
+- Rust: co-located unit tests (`#[cfg(test)]`) on `domain/`; integration tests in `crates/<name>-core/tests/`.
+- `domain/` must be testable **without** a Tauri dependency — guaranteed by the core crate having none. Logic found in `commands/` has leaked there.
 - Frontend: vitest on `features/` and `lib/`, with `ipc/` mocked.
 
 ---
@@ -324,16 +362,30 @@ the dependency that stops it being testable without Tauri.
 3. `main.rs`: bootstrap only; all setup logic in `lib.rs`.
 4. Create `error.rs` and `state.rs` from profile B onward, even minimal: these are the boundaries most expensive to introduce late.
 5. Create `capabilities/default.json` with minimal permissions, never a broad capability.
-6. Don't move the frontend out of the root for profiles A and B unless explicitly requested: the configuration cost (`frontendDist`, `devUrl`, build command cwd) isn't justified with a single frontend.
-7. Don't create `crates/` or `packages/` without an identified second consumer.
+6. Use the common layout (§3) in every profile: frontend in `apps/desktop/`, root Cargo and npm workspaces. Its configuration (`frontendDist`, `devUrl`, build command cwd) is paid once and copied between projects.
+7. `crates/<name>-core` from profile B onward; no further crate, no `packages/` and no second app without an identified second consumer or the §3.C split threshold.
 8. Generate nothing tied to a forge or CI system.
 9. Document the chosen D1–D7 values in the project `README.md`.
 10. **Leave build artifacts where Cargo and Tauri put them.** The other stacks in this portfolio route their output to `dist/release/` and `dist/debug/`; this branch deliberately opts out, for two reasons specific to it:
 
     - Cargo owns `target/` as an incremental build cache and offers no "final artifact goes here" setting, so the convention would only hold via a post-build copy — extra machinery, a duplicated artifact, and a `cp`/`copy` split to maintain.
-    - `dist/` is already taken. Vite's default `build.outDir` is `dist/`, and profiles A and B put the frontend at the repository root, so the name would refer to the frontend bundle and the shipped executable at the same path.
+    - `dist/` is already taken. Vite's default `build.outDir` is `dist/` (in `apps/desktop/`), so the name would refer to the frontend bundle and to the shipped executable.
 
     So: `target/release/<name>` for the binary, `target/release/bundle/<format>/` for the installers `tauri build` produces, and `dist/` left to Vite. Say this plainly in the project README, since someone arriving from the Python, Go or .NET tools in this portfolio will look for `dist/` first.
+11. **Scripts keep the same names in every project**, under `scripts/`, so a colleague moving between apps does not guess:
+
+    | Script | Means |
+    |---|---|
+    | `dev.ps1` | the desktop dev loop (`tauri dev`), after `clean.ps1` |
+    | `check.ps1` | the full gate: fmt, clippy, tests, then the front end's `format:check`, `lint`, `typecheck`, `test` (`references/check.ps1`, copied as-is unless the gate needs more) |
+    | `build.ps1` | the release build |
+    | `package.ps1` | the installer, with hand-out copies if the project ships any |
+    | `release.ps1` | publishing what `package.ps1` produced |
+    | `clean.ps1` | the `target/` cap (`rust-code-standards` references) |
+
+    Other scripts are fine (`dev-web.ps1`, `sign.ps1`...); these six names always mean the same thing. The npm scripts `dev` and `build` stay the frontend's own (Vite), not the app's.
+12. **One dev port per app.** Pick a port no other app of the portfolio uses, set it in `vite.config.ts` with `server.strictPort: true` and in `devUrl`, and record it in the README. Without `strictPort`, Vite moves to the next free port while `devUrl` still names the old one, so two apps running side by side can show each other's dev server.
+13. **`@tauri-apps/api` and `@tauri-apps/cli` track the minor of the `tauri` crate** (`^2.12.3` with `tauri = "2.12.3"`). The CLI warns, and some APIs fail, when the npm and Rust minors drift apart.
 
 ---
 
@@ -366,13 +418,15 @@ the dependency that stops it being testable without Tauri.
 
 Important point: **you don't "migrate" easily from B to C.** What changes isn't where the code sits but the **shape of the boundary**. The strategy that works:
 
-1. Start with **B**, with `domain/` already separated from `commands/` and no Tauri dependency inside `domain/`.
+1. Start with **B**: `domain/` in `crates/<name>-core`, separated from `commands/`, with no Tauri dependency (the crate has none).
 2. Keep logic in React as long as it's purely UI-related.
 3. Put every authoritative business rule in `domain/`, even when the code is short.
-4. Introduce a Cargo workspace when a `domain/` module has a stable boundary **and** a second consumer exists.
-5. Extract into `crates/` module by module — the operation is mechanical **if** step 1 was respected, expensive otherwise.
+4. Add a second app (`apps/cli`, `apps/server`) when a second consumer exists; it depends on the core crate as the desktop app does.
+5. Split the core crate module by module, only past the §3.C threshold — the operation is mechanical **if** step 1 was respected, expensive otherwise.
 
-Don't move to C without a real second consumer: monorepo tooling cost isn't amortized by a single frontend.
+Don't move to C without a real second consumer: further crates and apps are not amortized by a single frontend.
+
+**A project still on the older layout** (frontend at the root, logic in `src-tauri/src/domain/`): moving to the common layout is a mechanical change — `git mv` of the frontend into `apps/desktop/`, `src-tauri/src/{domain,infra,db}` into `crates/<name>-core/src/`, a root workspace, then fixing paths in `tauri.conf.json` and the scripts. Do it in its own branch, one commit per move, before any behaviour change.
 
 ---
 
@@ -415,15 +469,17 @@ Give a verdict per command and an ordered remediation plan.
 
 **Profile justification check**
 ```
-This project uses a monorepo with crates/ and packages/.
+This project has several crates and/or packages/.
 Per §2 and §3.C, is this profile justified? Check: real second consumer?
-crates above the split threshold? packages/ with ≥ 2 consumers?
-If not justified, propose a simplification plan toward profile B.
+crates beyond <name>-core above the split threshold? packages/ with ≥ 2 consumers?
+If not justified, propose a simplification plan toward profile B
+(one core crate, apps/desktop, root workspace).
 ```
 
 **Moving from B to C**
 ```
-Assess extracting src-tauri/src/domain/ into crates/ per §7.
+Assess splitting crates/<name>-core (or, on the older layout, extracting
+src-tauri/src/domain/) per §7.
 Check the prerequisite first: is domain/ independent of Tauri?
 If not, list the dependencies to break before any extraction.
 If yes, propose a crate split with per-module justification

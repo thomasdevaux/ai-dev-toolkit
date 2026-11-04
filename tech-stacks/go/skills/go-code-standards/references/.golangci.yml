@@ -41,7 +41,7 @@ linters:
   settings:
     errcheck:
       # Deliberately dropping an error is written `_ = f()`, never an
-      # ignored return value — see rules/style.md.
+      # ignored return value — see rules/go-style.md.
       check-blank: true
     govet:
       enable:

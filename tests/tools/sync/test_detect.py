@@ -168,7 +168,7 @@ def test_detect_and_detect_all_on_the_same_entry_is_rejected(tmp_path):
   scope: project
   tier: tech-stack
   detect: ["go.mod"]
-  detect_all: ["go.mod", "wails.json"]
+  detect_all: ["go.mod", "frontend"]
 """,
         encoding="utf-8",
     )

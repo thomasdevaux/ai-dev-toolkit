@@ -1,11 +1,7 @@
 # Shared Python quality configuration — merge these sections into the
-# project's own pyproject.toml. Tooling verified 2026-08-07: ruff is the
-# single linter+formatter (it replaces black, isort, flake8 and its plugins,
-# pyupgrade), mypy is the type checker.
-#
-# Astral's `ty` is 10-100x faster and deliberately NOT the default here: it
-# was still beta as of this date, with a 1.0 targeted for later in 2026.
-# Revisit once it ships stable.
+# project's own pyproject.toml. ruff is the single linter+formatter (it
+# replaces black, isort, flake8 and its plugins, pyupgrade), mypy is the type
+# checker.
 
 [tool.ruff]
 # Match the oldest interpreter the project actually supports — ruff uses this

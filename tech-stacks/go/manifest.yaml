@@ -7,7 +7,7 @@
   # go.mod marks any Go module, which is the intended reach for this block's
   # coding standards. Same reasoning as tech-stacks/rust — see that manifest.
   detect: ["go.mod"]
-  summary: Go coding standards (gofmt, golangci-lint) plus the Wails 3 desktop architecture - the webview branch, React conventions included.
+  summary: Go coding standards (gofumpt, golangci-lint) plus the Wails 3 desktop architecture - the webview branch, React conventions included.
   # React is the mandated frontend for both webview stacks, so this file
   # is identical in each. It lives once in the checkout and is deployed
   # into the block at sync time — the synced skill stays self-contained,
@@ -17,3 +17,5 @@
       target: skills/go-webview-desktop-architecture/references/react-conventions.md
     - source: tech-stacks/shared/editorconfig.ini
       target: skills/go-code-standards/references/editorconfig.ini
+    - source: tech-stacks/shared/corporate-proxy.md
+      target: skills/go-code-standards/references/corporate-proxy.md

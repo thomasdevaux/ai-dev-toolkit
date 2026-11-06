@@ -82,10 +82,10 @@ Present both, don't decide silently. The interface side is identical either way 
 |---|---|---|
 | Learning curve | Steeper. Rust's memory-ownership rules are a real climb — and notably the kind of friction AI assistance handles least reliably, so "AI will help us" discounts this less than it does elsewhere | Gentler. Closer to C in feel: static typing, explicit error returns, no ownership model, automatic memory management |
 | Build speed | Noticeably slower. Rust does far more work at compile time; clean builds can run into minutes. Mitigable (`cargo check`, a faster linker, frontend-only changes skip Rust) but the gap stays | Fast by design — compilation speed was an explicit goal of the language. Usually seconds |
-| Ecosystem | Larger community, more plugins, more prior art | Smaller but solid. v3 is in beta with a stable desktop API and production apps on it; that's the version the specialized skill covers |
+| Ecosystem | Larger community, more plugins, more prior art | Smaller but solid. Wails 3, stable since October 2026, is the only version the team supports and the one the specialized skill covers |
 | Shared types between interface and logic | Needs an added plugin | Built into the tool by default |
 | Permission model | Explicit sandbox: you declare what the interface is allowed to do | None. Anything you expose is fully privileged, so what you expose *is* the security boundary |
-| Mobile | Supported | Supported in v3 (iOS and Android build targets), newer and less proven than Tauri's |
+| Mobile | Supported | Experimental (iOS and Android targets, outside upstream's stable contract); less proven than Tauri's |
 
 If the team is closer to C and wants minimal new-language friction, say that Wails is the lower-friction pick — but let the user confirm rather than deciding for them. If mobile is a firm requirement rather than a maybe, Tauri's support is the more proven of the two. Note that learning curve and build speed compound for a team still learning: more failed attempts, each costing a slower rebuild.
 

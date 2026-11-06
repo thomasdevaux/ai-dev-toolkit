@@ -2,5 +2,6 @@
 # Build output, generated code and the backend's folder are never formatted.
 dist
 src/bindings
+bindings
 src-tauri
 package-lock.json

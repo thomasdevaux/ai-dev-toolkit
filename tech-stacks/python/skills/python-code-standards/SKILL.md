@@ -24,11 +24,9 @@ binary, configured in one place. A project that still runs black + isort +
 flake8 separately is maintaining four configurations that can disagree with
 each other.
 
-**`ty` is not the default yet.** Astral's type checker is far faster than
-mypy and was still beta as of 2026-08-07, with 1.0 targeted for later in the
-year. Use it if the project's owner wants the speed and accepts beta
-software; the configuration below stays valid either way, since both read
-the same annotations.
+**`mypy` is the type checker.** Astral's `ty` is far faster, and a project's
+owner who wants that speed can adopt it as a recorded decision, after checking
+its current maturity. The annotations stay the same either way.
 
 **`uv` for environments** if the project has a choice. It is out of scope
 here — this skill configures quality tooling, not packaging — but it is what

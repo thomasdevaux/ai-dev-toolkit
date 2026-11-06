@@ -403,6 +403,10 @@ a `SOURCE.md` missing a field, or on MIT content shipped without its
   --toolkit-root .` — it checks for new overlap with other blocks, and
   adding or removing `paths:` also moves the file between the two session
   budgets.
+- Feedback from a session goes into a block only if it reproduces on a clean
+  machine, or the tool's code or documentation confirms it. Then keep what fails
+  silently or misleadingly: an error the gate already reports clearly needs no
+  line, and one machine's `PATH` or one session's setup is not guidance.
 - Re-test the affected manifest entry end to end (sync into a scratch
   project, confirm idempotence) before committing.
 

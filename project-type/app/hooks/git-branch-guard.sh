@@ -1,8 +1,8 @@
 #!/bin/bash
 # PreToolUse hook (matcher: Bash): refuses `git commit` while HEAD sits on an
 # integration branch. This is the one half of git-workflow-app a script can
-# decide without judgment — "never push without acceptance" and "run the tests
-# first" both need a human, so they stay in the rule and the skill.
+# decide from a tool call. "Never push without acceptance" needs a human, so it
+# stays in the rule; the merge gate is a native Git hook (the skill's references).
 #
 # Deliberately self-contained: unlike self-check's hooks it needs no toolkit
 # checkout, only git, so it does not go through resolve-toolkit-root.sh. One
@@ -16,9 +16,11 @@
 #
 # Known gaps, accepted rather than papered over. It matches a substring of the
 # raw payload, so `git -C <path> commit` and a `git commit` reached through a
-# script or an alias slip past; and it only sees git run through the Bash tool,
-# never what the user types in their own terminal. It guards the agent's common
-# path, not the repository.
+# script or an alias slip past; it reads HEAD before the command runs, so
+# `git checkout main && git commit` slips past and `git switch -c x && git commit`
+# on main is refused; and it only sees git run through the Bash tool, never what
+# the user types in their own terminal. It guards the agent's common path, not
+# the repository.
 set -u
 
 PAYLOAD="$(cat)"

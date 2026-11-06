@@ -1,0 +1,35 @@
+#!/bin/sh
+# Ship tier: the project's full gate, run by `git merge` on the tree about to
+# land. Copy to .githooks/ with pre-commit, set FULL_GATE, then once per clone:
+#   git config core.hooksPath .githooks
+#
+# It runs the gate rather than checking evidence that the gate ran. A marker
+# file can go stale, can be written by anything, and needs a Claude Code hook
+# to read it, which sees neither a merge typed in a terminal nor the real HEAD
+# of `git checkout main && git merge ...`, the usual way a branch lands.
+#
+# Known gaps, accepted: `--no-verify`; a fast-forward, which fires no hook, so
+# --no-ff stays mandatory; a clone where core.hooksPath was never set, which the
+# merge-gate-check session hook reports; untracked files, which the gate sees and
+# the merge commit does not contain. A green gate proves only what the gate runs.
+
+FULL_GATE='<the `full` command from AGENTS.md>'
+
+case "$(git symbolic-ref --short -q HEAD)" in
+    main|master|develop) ;;
+    *) exit 0 ;;
+esac
+
+refuse() {
+    echo "Merge not landed: $1" >&2
+    echo 'Run `git merge --abort`, fix it on the branch, and merge again.' >&2
+    exit 1
+}
+
+# Git exports GIT_DIR and friends to hooks. A test that creates its own temporary
+# repository would otherwise operate on this one.
+unset $(git rev-parse --local-env-vars)
+
+git diff --quiet || refuse 'unstaged changes: the gate would not be testing what lands.'
+sh -c "$FULL_GATE" || refuse 'the full gate failed.'
+git diff --quiet || refuse 'the gate changed tracked files, so they differ from what would land.'

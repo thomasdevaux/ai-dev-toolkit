@@ -1,12 +1,14 @@
 #Requires -Version 5.1
 <#
 The gate: the backend's and the front end's formatters, linters, type checker and tests, in
-order, stopping at the first failure. Run it before landing a branch; CI runs the same file.
+order, stopping at the first failure. The merge runs it (git-workflow-app), or CI does.
 The same file in every project: copied from the toolkit's go-webview-desktop-architecture
 references, not forked. A project whose gate needs more (slow suites, e2e, a timing table)
 writes its own check.ps1 under the same name, and keeps these steps in it.
 
-  scripts/check.ps1
+  scripts/check.ps1          the `full` command
+  scripts/check.ps1 -Fast    the `fast` command: the same checks, minus go test, the bindings
+                             regeneration and the front end's tests
 
 Steps:
   1. frontend/dist exists: main.go embeds it and it is gitignored, so on a fresh clone every Go
@@ -22,7 +24,7 @@ Windows PowerShell 5.1 compatible (no ternary, no `&&`).
 #>
 
 [CmdletBinding()]
-param()
+param([switch]$Fast)
 
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
@@ -47,7 +49,7 @@ try {
 
     Invoke-Step 'golangci-lint fmt' { golangci-lint fmt --diff }
     Invoke-Step 'golangci-lint run' { golangci-lint run }
-    Invoke-Step 'go test' { go test ./... }
+    if (-not $Fast) { Invoke-Step 'go test' { go test ./... } }
 
     if (Test-Path (Join-Path $repoRoot 'internal/domain')) {
         Write-Host '==> internal/domain is free of Wails' -ForegroundColor Cyan
@@ -65,11 +67,11 @@ try {
     }
 
     if (Test-Path (Join-Path $repoRoot 'frontend/package.json')) {
-        Invoke-Step 'wails3 generate bindings' { wails3 task common:generate:bindings }
+        if (-not $Fast) { Invoke-Step 'wails3 generate bindings' { wails3 task common:generate:bindings } }
         Invoke-Step 'npm run format:check' { npm.cmd --prefix frontend run format:check }
         Invoke-Step 'npm run lint' { npm.cmd --prefix frontend run lint }
         Invoke-Step 'npm run typecheck' { npm.cmd --prefix frontend run typecheck }
-        Invoke-Step 'npm test' { npm.cmd --prefix frontend test }
+        if (-not $Fast) { Invoke-Step 'npm test' { npm.cmd --prefix frontend test } }
     }
     Write-Host 'All checks passed.' -ForegroundColor Green
 }

@@ -13,9 +13,13 @@ once and offer to run that skill.
 
 What tooling cannot decide, and this file does:
 
-- **Run the tools before handing work back.** `cargo fmt`, then
-  `cargo clippy --all-targets -- -D warnings`, then `cargo test`. A finding
-  is either fixed or allowed with a reason — never left reported.
+- **Run the tools once per task, not per edit.** While working: `cargo fmt` and
+  the targeted `cargo test <module>` of what changed, which also compiles it.
+  When the task's code is finished, and unless a project gate runs them
+  (`verification-tiers`): `cargo clippy --all-targets -- -D warnings`, then
+  `cargo test`. That clippy command is the same whenever it runs: dropping
+  `--all-targets` or `-D warnings` to go faster is not allowed. A finding is
+  either fixed or allowed with a reason — never left reported.
 - **Silencing needs a named lint and a why.** `#[allow(clippy::too_many_arguments)]`
   alone is not acceptable; the same line with a comment saying what makes it
   the right call is. Crate-wide `#![allow(...)]` for anything other than a

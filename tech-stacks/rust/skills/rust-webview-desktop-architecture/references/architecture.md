@@ -383,7 +383,7 @@ the dependency that stops it being testable without Tauri.
     | `release.ps1` | publishing what `package.ps1` produced |
     | `clean.ps1` | the `target/` cap (`rust-code-standards` references) |
 
-    Other scripts are fine (`dev-web.ps1`, `sign.ps1`...); these six names always mean the same thing. The npm scripts `dev` and `build` stay the frontend's own (Vite), not the app's.
+    Other scripts are fine (`dev-web.ps1`, `sign.ps1`...); these six names always mean the same thing, and the first five match the Wails and Python branches'. The npm scripts `dev` and `build` stay the frontend's own (Vite), not the app's.
 12. **One dev port per app.** Pick a port no other app of the portfolio uses, set it in `vite.config.ts` with `server.strictPort: true` and in `devUrl`, and record it in the README. Without `strictPort`, Vite moves to the next free port while `devUrl` still names the old one, so two apps running side by side can show each other's dev server.
 13. **`@tauri-apps/api` and `@tauri-apps/cli` track the minor of the `tauri` crate** (`^2.12.3` with `tauri = "2.12.3"`). The CLI warns, and some APIs fail, when the npm and Rust minors drift apart.
 

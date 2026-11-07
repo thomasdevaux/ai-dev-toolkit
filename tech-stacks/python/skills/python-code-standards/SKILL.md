@@ -1,6 +1,6 @@
 ---
 name: python-code-standards
-description: Set up or repair the team's Python quality tooling in a project - ruff (format + lint), mypy, and the shared configuration they read. Use when a Python project has no ruff/mypy configuration, has one that diverges from the team's, when adopting the standards on an existing codebase with a backlog of findings, or when deciding whether a lint rule is worth turning on.
+description: Set up or repair the team's Python quality tooling in a project - ruff (format + lint), mypy, pytest, the shared configuration they read, and the uv environment pinning (.python-version, uv.lock). Use when a Python project has no ruff/mypy configuration, has one that diverges from the team's, when adopting the standards on an existing codebase with a backlog of findings, or when deciding whether a lint rule is worth turning on.
 ---
 
 # Python Code Standards
@@ -17,6 +17,8 @@ own; this skill is the setup procedure.
 | Format | `ruff format` |
 | Lint | `ruff check` |
 | Types | `mypy` |
+| Test | `pytest` |
+| Environment | `uv` |
 
 **One linter, not a stack of plugins.** Ruff implements the rule sets of
 flake8 and its plugin ecosystem, black, isort and pyupgrade in a single
@@ -28,10 +30,12 @@ each other.
 owner who wants that speed can adopt it as a recorded decision, after checking
 its current maturity. The annotations stay the same either way.
 
-**`uv` for environments** if the project has a choice. It is out of scope
-here — this skill configures quality tooling, not packaging — but it is what
-the reference `pyproject.toml` assumes when it says "install the dev
-dependencies".
+**The build is standardised too, not just the lint.** `uv` manages the
+environment, `.python-version` pins the interpreter and a committed `uv.lock`
+pins every dependency: that is what makes the same command mean the same thing
+on every machine, and what a PyInstaller build needs to be reproducible.
+`references/build-and-disk.md` explains each setting, what stays
+machine-local, and why Python needs no equivalent of Rust's `clean.ps1`.
 
 ## Procedure
 
@@ -45,14 +49,19 @@ dependencies".
    interpreter the project actually supports. Both default to `py312` in the
    reference; a project on 3.11 that leaves them will get suggestions it
    cannot apply.
-3. Add `ruff` and `mypy` to the project's dev dependencies.
+3. Add `ruff`, `mypy` and `pytest` to the `dev` dependency group
+   (`uv add --dev ruff mypy pytest`).
 4. Copy `references/editorconfig.ini` to the project root as `.editorconfig`
    if there is none. It is the same baseline in every stack and settles what
    an editor decides before any formatter runs.
-5. Run `ruff format` then `ruff check --fix`, and commit that as one
+5. Build configuration: `.python-version` and `requires-python` on the same
+   minor as step 2, and `uv.lock` committed (`build-and-disk.md`). Existing
+   settings are diffed and reported, as for lints. Behind the corporate proxy,
+   uv may need the machine-local setting in `references/corporate-proxy.md`.
+6. Run `ruff format` then `ruff check --fix`, and commit that as one
    mechanical commit, separate from any behaviour change. A formatting
    commit mixed into a feature commit makes the feature unreviewable.
-6. Run `mypy` and deal with the output per the section below.
+7. Run `mypy` and deal with the output per the section below.
 
 ### A project that already has a configuration
 
@@ -89,7 +98,9 @@ gets ignored wholesale and the standard dies on day one. Instead:
 
 ## Changing the standard
 
-The reference configuration is the team's, not the project's. A rule worth
+The reference configuration is the team's, not the project's — the build
+settings included: a project that needs another one records it as an exception
+next to the setting, with its reason. A rule worth
 enabling or disabling everywhere is changed in
 `tech-stacks/python/skills/python-code-standards/references/` in the toolkit
 checkout, and reaches projects at their next sync. Editing one project's

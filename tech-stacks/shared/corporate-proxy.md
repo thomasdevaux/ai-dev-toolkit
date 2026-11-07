@@ -9,6 +9,7 @@ outside the network, or CI, must not inherit them.
 |---|---|---|
 | Cargo | `CRYPT_E_NO_REVOCATION_CHECK` when fetching from crates.io | `[http] check-revoke = false` in `%USERPROFILE%\.cargo\config.toml` (or `CARGO_HTTP_CHECK_REVOKE=false` for one shell). TLS itself is still verified |
 | Go | `x509: certificate signed by unknown authority`, or a fetch that times out | On Windows, Go verifies against the system store, where the proxy's root lives, so usually nothing is needed. If the network requires it, `go env -w GOPROXY=<internal proxy>,direct`, and `HTTPS_PROXY` in the user environment. `GOPRIVATE` for private modules only |
+| uv (Python) | `invalid peer certificate: UnknownIssuer` when fetching from PyPI or downloading an interpreter | `UV_SYSTEM_CERTS=true` (user environment variable): uv trusts the Windows store instead of its bundled roots. Older uv releases name it `UV_NATIVE_TLS` |
 | npm / Node | `UNABLE_TO_GET_ISSUER_CERT_LOCALLY`, `SELF_SIGNED_CERT_IN_CHAIN` | `NODE_OPTIONS=--use-system-ca` (user environment variable): Node trusts the Windows store, where the proxy's root lives. Where that flag is unavailable, export the root as PEM and set `NODE_EXTRA_CA_CERTS` to its path |
 | PowerShell | a script is refused by the execution policy | the CurrentUser policy is `RemoteSigned`: run `powershell -NoProfile -File scripts\<name>.ps1`. **Never** `-ExecutionPolicy Bypass` — the EDR flags it |
 

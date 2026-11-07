@@ -23,8 +23,6 @@ Web-based (interface built with web technology, shown in a desktop window)
 ├── Logic: Rust or Go
 └── Shipping: Tauri (with Rust) or Wails (with Go)
     → skills: rust-webview-desktop-architecture / go-webview-desktop-architecture
-
-Outside the tree: C++/Qt — a deliberate exception, no detailed skill
 ```
 
 **"Webview" in two of the skill names** means the interface is a web page rendered by a component the operating system already provides, inside an ordinary desktop window. Nothing is downloaded from the internet and no browser opens — it's a local application that happens to use web technology to draw itself. This is what keeps these apps small: the rendering engine is already on the machine.
@@ -63,8 +61,6 @@ Secondary, when relevant:
 
 **Web-based** when the app should feel polished, or when small size and instant startup matter, or when the team is willing to invest in a compiled backend. This branch is often the right answer for tools distributed outside the organisation, even when the interface itself is simple.
 
-**C++/Qt** only as a deliberate exception: an existing C/C++ codebase to link against directly, a hard real-time constraint, or a domain where Qt/C++ is already the established norm (automotive diagnostics tooling, for instance). Say plainly that no detailed skill covers it.
-
 ## Within the web-based branch: Rust or Go
 
 Present both, don't decide silently. The interface side is identical either way — only the backend language and packaging tool differ.
@@ -89,8 +85,7 @@ If the team is closer to C and wants minimal new-language friction, say that Wai
 3. **Recommend one branch**, stated plainly, with the reasoning tied to what the user told you — not a hedge across both.
 4. **If web-based**, present Rust vs Go using the table and let the user choose.
 5. **Hand off explicitly** — see "Handing off to the specialized skill" below.
-6. **If the answer is C++/Qt**, say plainly that no specialized skill exists and give a brief honest pointer instead of inventing detail.
-7. **Don't re-litigate a settled choice.** If the user already named a stack, go straight to the matching skill.
+6. **Don't re-litigate a settled choice.** If the user already named a stack, go straight to the matching skill.
 
 ## Workflow: auditing a single project's stack fit
 

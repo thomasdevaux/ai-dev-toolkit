@@ -73,18 +73,6 @@
     enabledPlugins:
       "gopls-lsp@claude-plugins-official": true
 
-- id: csharp-lsp-user
-  type: official-plugin
-  plugin_ref: "csharp-lsp@claude-plugins-official"
-  scope: user
-  tier: baseline
-  summary: Official C# language server.
-  group: Language servers
-  features: ["C#"]
-  settings_patch:
-    enabledPlugins:
-      "csharp-lsp@claude-plugins-official": true
-
 - id: clangd-lsp-user
   type: official-plugin
   plugin_ref: "clangd-lsp@claude-plugins-official"

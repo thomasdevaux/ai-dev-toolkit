@@ -129,19 +129,18 @@ desktop app for this" *before* syncing any stack — the
 branches, ask what matters, and hand off with an explicit sync command
 rather than answering the structural question itself.
 
-The other three tech-stacks and the frontend-design plugin have their own
+The other tech-stacks and the frontend-design plugin have their own
 minimal fixtures, one marker file each:
 
 ```
 python -m tools.sync detect --toolkit-root . --project-dir demo/go-tool
 python -m tools.sync detect --toolkit-root . --project-dir demo/rust-tool
-python -m tools.sync detect --toolkit-root . --project-dir demo/dotnet-tool
 python -m tools.sync detect --toolkit-root . --project-dir demo/frontend-design-tool
 python -m tools.sync detect --toolkit-root . --project-dir demo/tauri-tool
 python -m tools.sync detect --toolkit-root . --project-dir demo/wails-tool
 ```
 
-Expected: `tech-stack-go`, `tech-stack-rust`, `tech-stack-dotnet`,
+Expected: `tech-stack-go`, `tech-stack-rust`,
 `tech-stack-frontend-design` with `tech-stack-web-frontend` (both read
 `package.json`), and `tech-stack-rust` with `tech-stack-web-frontend` for
 `tauri-tool` — its only markers are `src-tauri/` and the `Cargo.toml`

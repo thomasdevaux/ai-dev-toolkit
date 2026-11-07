@@ -371,7 +371,7 @@ the dependency that stops it being testable without Tauri.
     - Cargo owns `target/` as an incremental build cache and offers no "final artifact goes here" setting, so the convention would only hold via a post-build copy — extra machinery, a duplicated artifact, and a `cp`/`copy` split to maintain.
     - `dist/` is already taken. Vite's default `build.outDir` is `dist/` (in `apps/desktop/`), so the name would refer to the frontend bundle and to the shipped executable.
 
-    So: `target/release/<name>` for the binary, `target/release/bundle/<format>/` for the installers `tauri build` produces, and `dist/` left to Vite. Say this plainly in the project README, since someone arriving from the Python, Go or .NET tools in this portfolio will look for `dist/` first.
+    So: `target/release/<name>` for the binary, `target/release/bundle/<format>/` for the installers `tauri build` produces, and `dist/` left to Vite. Say this plainly in the project README, since someone arriving from the Python or Go tools in this portfolio will look for `dist/` first.
 11. **Scripts keep the same names in every project**, under `scripts/`, so a colleague moving between apps does not guess:
 
     | Script | Means |

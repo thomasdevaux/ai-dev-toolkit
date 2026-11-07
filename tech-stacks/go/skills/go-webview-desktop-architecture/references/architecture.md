@@ -398,7 +398,7 @@ which is what couples it to the desktop binary and breaks the moment
     go build -o dist/release/<name> ./cmd/cli
     ```
 
-    The NSIS task works in `build/windows/nsis/` and reads the binary from `BIN_DIR`; MSIX writes beside the binary. `frontend/dist` is Vite's output and is unrelated — it gets embedded into the binary rather than shipped. The Python and .NET stacks in this portfolio use the same `dist/release` + `dist/debug` destination; the Tauri branch deliberately opts out and keeps Cargo's `target/` layout, for reasons given in that skill's reference.
+    The NSIS task works in `build/windows/nsis/` and reads the binary from `BIN_DIR`; MSIX writes beside the binary. `frontend/dist` is Vite's output and is unrelated — it gets embedded into the binary rather than shipped. The Python stack in this portfolio uses the same `dist/release` + `dist/debug` destination; the Tauri branch deliberately opts out and keeps Cargo's `target/` layout, for reasons given in that skill's reference.
 13. **Scripts keep the same names in every project**, under `scripts/`, so a colleague moving between apps does not guess:
 
     | Script | Means |

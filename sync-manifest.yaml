@@ -66,7 +66,6 @@
 - include: tech-stacks/python/manifest.yaml
 - include: tech-stacks/rust/manifest.yaml
 - include: tech-stacks/go/manifest.yaml
-- include: tech-stacks/dotnet/manifest.yaml
 - include: tech-stacks/web-frontend/manifest.yaml
 - include: user-tools/statusline/manifest.yaml
 - include: self-check/manifest.yaml

@@ -7,7 +7,7 @@ Two shapes, because two kinds of stack exist:
 
 - `detect:` — any one marker is enough. Right when the marker names a
   language and the block is that language's entry point (`pyproject.toml`,
-  `*.csproj`).
+  `go.mod`).
 - `detect_all:` — every marker must be present, in the same directory. Right
   when the block is about one framework inside a language, where the language
   marker alone would fire on every project (`Cargo.toml` **and** `src-tauri/`).

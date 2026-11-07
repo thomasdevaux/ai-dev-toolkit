@@ -88,7 +88,7 @@ ai-dev-toolkit/
 │   └── none/  app/  embedded-fccu/
 │
 ├── tech-stacks/             # grows HERE: one subdir per language or front end
-│   └── python/  rust/  go/  dotnet/  web-frontend/  ...
+│   └── python/  rust/  go/  web-frontend/  ...
 │       shared/              # not a block: files two stacks deploy verbatim,
 │                            # pulled in via a `shared_files:` entry field
 │

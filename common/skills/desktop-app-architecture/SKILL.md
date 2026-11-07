@@ -7,7 +7,7 @@ description: Choose a technical stack for a new desktop application or internal 
 
 Help pick a stack for a desktop app, then hand off to a specialized skill that covers that stack in depth. This skill decides *what to build with* and *whether an existing choice still holds* — it never decides folder structure or internals.
 
-## The three branches
+## The two branches
 
 Each branch is a coherent bundle: a way to build the interface, a language for the logic behind it, and a way to ship it to users.
 
@@ -24,31 +24,24 @@ Web-based (interface built with web technology, shown in a desktop window)
 └── Shipping: Tauri (with Rust) or Wails (with Go)
     → skills: rust-webview-desktop-architecture / go-webview-desktop-architecture
 
-.NET-based
-├── Interface: Avalonia (XAML)
-├── Logic: C# / .NET
-└── Shipping: dotnet publish, Native AOT by default
-    → skill: dotnet-desktop-architecture
-
 Outside the tree: C++/Qt — a deliberate exception, no detailed skill
 ```
 
 **"Webview" in two of the skill names** means the interface is a web page rendered by a component the operating system already provides, inside an ordinary desktop window. Nothing is downloaded from the internet and no browser opens — it's a local application that happens to use web technology to draw itself. This is what keeps these apps small: the rendering engine is already on the machine.
 
-**Each branch here is one chosen path, not the whole ecosystem.** Python can also build interfaces with Kivy or wxPython; Rust and Go both have native (non-webview) UI toolkits; .NET has WPF, WinUI and MAUI alongside Avalonia. The skills cover the paths selected as standards, deliberately — if a user asks about one of the alternatives, say plainly that it's outside what these skills cover rather than bending the guidance to fit.
+**Each branch here is one chosen path, not the whole ecosystem.** Python can also build interfaces with Kivy or wxPython; Rust and Go both have native (non-webview) UI toolkits. The skills cover the paths selected as standards, deliberately — if a user asks about one of the alternatives, say plainly that it's outside what these skills cover rather than bending the guidance to fit.
 
 ## Present the options before narrowing
 
 **Do not jump straight to whatever the user already knows.** Someone who writes Python daily will often assume Python is the answer and never learn that a different branch would have solved their actual problem better — that's the failure mode this skill exists to prevent. Equally, don't push someone toward an unfamiliar stack just because it's technically stronger.
 
-So: give a short, plain-language tour of all three branches first, framed around what each one is *good at* rather than what it's built with. Then ask what matters most for their case. Then narrow. Two or three sentences per branch is enough — the goal is that the user knows the options exist, not that they become an expert before choosing.
+So: give a short, plain-language tour of both branches first, framed around what each one is *good at* rather than what it's built with. Then ask what matters most for their case. Then narrow. Two or three sentences per branch is enough — the goal is that the user knows the options exist, not that they become an expert before choosing.
 
 Useful plain-language framing — what each branch *is*, and what it costs.
 When it's the right one is "Choosing a branch" below; don't read both out.
 
 - **Python-based** — "You write everything in Python, including the interface. The trade-off is that the finished app is a fairly large download and starts a bit slowly, and some antivirus software is suspicious of Python-packaged executables."
 - **Web-based** — "The interface is built with web technology (the same skills as building a website) but runs in a normal desktop window, not a browser. The logic behind it is written in a compiled language, so the finished app is small and starts instantly. The trade-off is learning two new things: the web interface side, and a new backend language."
-- **.NET-based** — "Microsoft's ecosystem, using C#. Produces a small, fast, self-contained application, with strong support for data-heavy interfaces."
 
 ## What to ask
 
@@ -69,8 +62,6 @@ Secondary, when relevant:
 **Python-based** when the team already writes Python, the app needs to reach local hardware, files or existing Python libraries, and it runs on machines you broadly control. Within it: **PySide6** for anything with real screens, tables, or live data; **tkinter** only for a genuinely tiny tool where any dependency at all feels like too much.
 
 **Web-based** when the app should feel polished, or when small size and instant startup matter, or when the team is willing to invest in a compiled backend. This branch is often the right answer for tools distributed outside the organisation, even when the interface itself is simple.
-
-**.NET-based** when a piece of hardware or software you must integrate with only ships a .NET/C# library, or the organisation already runs on .NET, and you want a small self-contained application. Note this genuinely competes with the web-based branch on size and startup — it is not the heavy runtime install it used to be.
 
 **C++/Qt** only as a deliberate exception: an existing C/C++ codebase to link against directly, a hard real-time constraint, or a domain where Qt/C++ is already the established norm (automotive diagnostics tooling, for instance). Say plainly that no detailed skill covers it.
 
@@ -93,9 +84,9 @@ If the team is closer to C and wants minimal new-language friction, say that Wai
 
 ## Workflow: choosing a stack for a new project
 
-1. **Tour the three branches briefly** in plain language, so the user sees options they may not know.
+1. **Tour the two branches briefly** in plain language, so the user sees options they may not know.
 2. **Ask the three primary questions** above, plus any secondary ones that would change the answer.
-3. **Recommend one branch**, stated plainly, with the reasoning tied to what the user told you — not a hedge across all three.
+3. **Recommend one branch**, stated plainly, with the reasoning tied to what the user told you — not a hedge across both.
 4. **If web-based**, present Rust vs Go using the table and let the user choose.
 5. **Hand off explicitly** — see "Handing off to the specialized skill" below.
 6. **If the answer is C++/Qt**, say plainly that no specialized skill exists and give a brief honest pointer instead of inventing detail.
@@ -120,7 +111,7 @@ The one angle no single-project skill can see.
 
 1. **Inventory the stacks** across the tools the user names.
 2. **Check for sprawl**: similar problems solved on different, unjustified stacks. Every additional stack compounds maintenance cost across the whole team, not just its owner — flag it even if each individual choice was locally reasonable at the time.
-3. **Distinguish justified diversity from drift.** The three branches exist because they genuinely serve different needs; using two or three of them deliberately is not sprawl. A tool sitting on something outside the tree without ever having been a deliberate exception is.
+3. **Distinguish justified diversity from drift.** The two branches exist because they genuinely serve different needs; using both deliberately is not sprawl. A tool sitting on something outside the tree without ever having been a deliberate exception is.
 4. **Recommend consolidation only where it's cheap enough to be worth it.** Don't recommend rewriting a working tool for tidiness alone.
 
 ## Handing off to the specialized skill
@@ -139,7 +130,6 @@ Once a branch is chosen, tell the user which block to sync:
 | Python | `tech-stack-python` | `python-desktop-architecture` |
 | Web-based + Rust | `tech-stack-rust`, `tech-stack-web-frontend` | `rust-webview-desktop-architecture`, `frontend-code-standards` |
 | Web-based + Go | `tech-stack-go`, `tech-stack-web-frontend` | `go-webview-desktop-architecture`, `frontend-code-standards` |
-| .NET | `tech-stack-dotnet` | `dotnet-desktop-architecture` |
 
 Give the user the command to run themselves, with the entry id from the table:
 

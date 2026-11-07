@@ -88,33 +88,13 @@ integration branch:
 ### The local gate is the ship tier
 
 `full` is mandatory, with no time ceiling: nothing else will catch what it
-would. A native Git hook runs it during the merge, on the merged tree, so there
-is no separate step to remember and no result to go stale.
+would. Run it by hand on the final tree, after the squash and the rebase and
+before the merge, and merge only if it is green.
 
-**Setting it up**, once per project: copy `references/githooks/pre-merge-commit`
-and `pre-commit` to `.githooks/`, set the command each one names, and add
-`git config core.hooksPath .githooks` to the setup commands in `AGENTS.md`,
-since every clone has to run it. An existing `pre-commit` keeps its content and
-gains the `MERGE_HEAD` branch from the reference. On Linux or macOS, both need
-`chmod +x`.
-
-**Landing:**
-
-- Don't run `full` by hand first; `git merge --no-ff` runs it. Give that command
-  a timeout longer than the gate takes, or a timeout kills the gate mid-merge.
-- A refused merge leaves `MERGE_HEAD` behind. Run `git merge --abort`, go back to
-  the branch, fix, and merge again. Git's own suggestion to finish with
-  `git commit` runs the same gate and refuses for the same reason.
-- `--no-verify` is not an option here, even when told the failure is unrelated:
-  report it and hand back. Only the user bypasses the gate.
-- **No active hook in this clone:** run `full` by hand after the rebase, then
-  merge, and say that the gate was run by hand.
+- A red `full` means don't merge: report the shortest decisive output and hand
+  back. Don't bypass a hook or skip a check because the failure looks unrelated.
 - **No `full` command defined:** say so once, and don't describe the branch as
   verified.
-
-A project may route a merge that touches only documentation to `fast` in its own
-hook: the rest of the gate reads nothing that changed. The project owns that path
-list, and it must not include anything a test reads.
 
 ### CI gates the merge
 

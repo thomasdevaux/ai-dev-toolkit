@@ -27,4 +27,4 @@ that `full` has not.
 ## Ship: landing on the integration branch
 
 `full`, once, on the final tree. Nothing lands unless it is green. Where it
-runs and what enforces it is in the `git-workflow-app` skill.
+runs is in the `git-workflow-app` skill.

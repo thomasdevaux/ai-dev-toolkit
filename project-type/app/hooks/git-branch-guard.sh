@@ -2,7 +2,7 @@
 # PreToolUse hook (matcher: Bash): refuses `git commit` while HEAD sits on an
 # integration branch. This is the one half of git-workflow-app a script can
 # decide from a tool call. "Never push without acceptance" needs a human, so it
-# stays in the rule; the merge gate is a native Git hook (the skill's references).
+# stays in the rule.
 #
 # Deliberately self-contained: unlike self-check's hooks it needs no toolkit
 # checkout, only git, so it does not go through resolve-toolkit-root.sh. One

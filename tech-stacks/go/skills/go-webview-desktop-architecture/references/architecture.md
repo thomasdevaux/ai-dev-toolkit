@@ -404,7 +404,7 @@ which is what couples it to the desktop binary and breaks the moment
     | Script | Means |
     |---|---|
     | `dev.ps1` | the desktop dev loop (`wails3 dev -port <n>`) |
-    | `check.ps1` | the full gate: `golangci-lint fmt --diff`, `golangci-lint run`, `go test`, `internal/domain` free of Wails, regenerated bindings, then the front end's `format:check`, `lint`, `typecheck`, `test`; `-Fast` skips the tests and the bindings (`references/check.ps1`, copied as-is unless the gate needs more) |
+    | `check.ps1` | the full gate: `golangci-lint fmt --diff`, `golangci-lint run`, `go test`, `internal/domain` free of Wails, regenerated bindings, then the front end's `format:check`, `lint`, `typecheck`, `test`; `-Fast` skips the tests, not the bindings: the typecheck reads them (`references/check.ps1`, copied as-is unless the gate needs more) |
     | `build.ps1` | the release build (`wails3 build`) |
     | `package.ps1` | the installer (`wails3 package`), with hand-out copies if the project ships any |
     | `release.ps1` | publishing what `package.ps1` produced |

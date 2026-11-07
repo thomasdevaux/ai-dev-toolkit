@@ -7,8 +7,10 @@ references, not forked. A project whose gate needs more (slow suites, e2e, a tim
 writes its own check.ps1 under the same name, and keeps these steps in it.
 
   scripts/check.ps1          the `full` command
-  scripts/check.ps1 -Fast    the `fast` command: the same checks, minus go test, the bindings
-                             regeneration and the front end's tests
+  scripts/check.ps1 -Fast    the `fast` command: the same checks, minus go test and the front
+                             end's tests. The bindings are regenerated in both: the typecheck
+                             reads them, and against stale ones a changed service signature
+                             would pass `fast` and only fail at the merge
 
 Steps:
   1. frontend/dist exists: main.go embeds it and it is gitignored, so on a fresh clone every Go
@@ -67,7 +69,7 @@ try {
     }
 
     if (Test-Path (Join-Path $repoRoot 'frontend/package.json')) {
-        if (-not $Fast) { Invoke-Step 'wails3 generate bindings' { wails3 task common:generate:bindings } }
+        Invoke-Step 'wails3 generate bindings' { wails3 task common:generate:bindings }
         Invoke-Step 'npm run format:check' { npm.cmd --prefix frontend run format:check }
         Invoke-Step 'npm run lint' { npm.cmd --prefix frontend run lint }
         Invoke-Step 'npm run typecheck' { npm.cmd --prefix frontend run typecheck }

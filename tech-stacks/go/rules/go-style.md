@@ -18,6 +18,10 @@ What tooling cannot decide, and this file does:
   gate runs them (`verification-tiers`): `golangci-lint fmt`, then
   `golangci-lint run`, then `go test ./...`. A finding is either fixed or
   silenced with a reason — never left reported.
+- **In a Wails app, a Wails build is packaging, not a check.** `wails3 build`
+  and `wails3 package` never run to verify a change: the commands above and
+  the gate do. `wails3 dev` is for seeing the app; while it runs it already
+  rebuilds on every Go edit, so nothing else builds alongside it.
 - **Silencing needs a named linter and a why.** `//nolint:errcheck` alone is
   not acceptable; `//nolint:errcheck // best-effort close on a read-only
   file` is. `golangci-lint` is configured to reject the bare form.

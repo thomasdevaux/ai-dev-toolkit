@@ -84,6 +84,12 @@ python -m tools.sync sync project-type-app --toolkit-root . --project-dir demo/p
   hook denies the `git commit` call outright even if the rule is ignored.
   Check the hook stays silent on a feature branch: it must print nothing at
   all when the commit is legitimate.
+- Start a session in a project with no CI and no merge gate — expected: one
+  `merge gate:` line from `merge-gate-check`. Set up the gate as the
+  `git-workflow-app` skill describes, with a `full` command that fails, and ask
+  Claude to land a branch — expected: `git merge --no-ff` is refused, Claude runs
+  `git merge --abort` and reports the failure rather than finishing with
+  `git commit`. The automated half of this is `tests/hooks/test_merge_gate.py`.
 
 ## project-type-none
 

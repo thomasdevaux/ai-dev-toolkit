@@ -1,12 +1,13 @@
 #Requires -Version 5.1
 <#
 The gate: the backend's and the front end's formatters, linters, type checker and tests, in
-order, stopping at the first failure. Run it before landing a branch; CI runs the same file.
+order, stopping at the first failure. The merge runs it (git-workflow-app), or CI does.
 The same file in every project: copied from the toolkit's rust-webview-desktop-architecture
 references, not forked. A project whose gate needs more (slow suites, e2e, a timing table)
 writes its own check.ps1 under the same name, and keeps these steps in it.
 
-  scripts/check.ps1
+  scripts/check.ps1          the `full` command
+  scripts/check.ps1 -Fast    the `fast` command: the same checks, minus clean.ps1 and the tests
 
 Steps:
   1. clean.ps1, the target/ cap;
@@ -18,7 +19,7 @@ Windows PowerShell 5.1 compatible (no ternary, no `&&`).
 #>
 
 [CmdletBinding()]
-param()
+param([switch]$Fast)
 
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
@@ -35,15 +36,15 @@ function Invoke-Step {
 
 Push-Location $repoRoot
 try {
-    & (Join-Path $PSScriptRoot 'clean.ps1')
+    if (-not $Fast) { & (Join-Path $PSScriptRoot 'clean.ps1') }
     Invoke-Step 'cargo fmt' { cargo fmt --all -- --check }
     Invoke-Step 'cargo clippy' { cargo clippy --workspace --all-targets -- -D warnings }
-    Invoke-Step 'cargo test' { cargo test --workspace }
+    if (-not $Fast) { Invoke-Step 'cargo test' { cargo test --workspace } }
     if (Test-Path (Join-Path $repoRoot 'package.json')) {
         Invoke-Step 'npm run format:check' { npm.cmd run format:check }
         Invoke-Step 'npm run lint' { npm.cmd run lint }
         Invoke-Step 'npm run typecheck' { npm.cmd run typecheck }
-        Invoke-Step 'npm test' { npm.cmd test }
+        if (-not $Fast) { Invoke-Step 'npm test' { npm.cmd test } }
     }
     Write-Host 'All checks passed.' -ForegroundColor Green
 }

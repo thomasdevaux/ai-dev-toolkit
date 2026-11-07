@@ -14,9 +14,10 @@ linter should own.
 
 What tooling cannot decide, and this file does:
 
-- **Run the tools before handing work back.** `ruff format`, then
-  `ruff check`, then `mypy` on what you touched. A finding is either fixed or
-  silenced with a reason — never left reported and ignored.
+- **Run the tools once per task, not per edit.** When the task's code is
+  finished, and unless a project gate runs them (`verification-tiers`):
+  `ruff format`, then `ruff check`, then `mypy` on what you touched. A finding is
+  either fixed or silenced with a reason — never left reported and ignored.
 - **Silencing needs a named rule and a why.** `# noqa: E501` alone is not
   acceptable; `# noqa: E501 - URL, cannot wrap` is. Bare `# noqa` and
   blanket `# type: ignore` are never acceptable — they suppress findings

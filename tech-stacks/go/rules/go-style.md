@@ -13,7 +13,9 @@ once and offer to run that skill.
 
 What tooling cannot decide, and this file does:
 
-- **Run the tools before handing work back.** `golangci-lint fmt`, then
+- **Run the tools once per task, not per edit.** While working: `go test` on the
+  package you changed. When the task's code is finished, and unless a project
+  gate runs them (`verification-tiers`): `golangci-lint fmt`, then
   `golangci-lint run`, then `go test ./...`. A finding is either fixed or
   silenced with a reason — never left reported.
 - **Silencing needs a named linter and a why.** `//nolint:errcheck` alone is

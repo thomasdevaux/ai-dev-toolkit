@@ -377,7 +377,7 @@ the dependency that stops it being testable without Tauri.
     | Script | Means |
     |---|---|
     | `dev.ps1` | the desktop dev loop (`tauri dev`), after `clean.ps1` |
-    | `check.ps1` | the full gate: fmt, clippy, tests, then the front end's `format:check`, `lint`, `typecheck`, `test` (`references/check.ps1`, copied as-is unless the gate needs more) |
+    | `check.ps1` | the full gate: fmt, clippy, tests, then the front end's `format:check`, `lint`, `typecheck`, `test`; `-Fast` skips the tests (`references/check.ps1`, copied as-is unless the gate needs more) |
     | `build.ps1` | the release build |
     | `package.ps1` | the installer, with hand-out copies if the project ships any |
     | `release.ps1` | publishing what `package.ps1` produced |

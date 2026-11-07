@@ -18,8 +18,10 @@ say so once and offer to run that skill.
 
 What tooling cannot decide, and this file does:
 
-- **Run the tools before handing work back.** `prettier --write` on the
-  files you changed, then `eslint`, `tsc --noEmit` and the tests (Vitest). A
+- **Run the tools once per task, not per edit.** While working: `prettier
+  --write` on the files you changed and the targeted `vitest run <path>`. When
+  the task's code is finished, and unless a project gate runs them
+  (`verification-tiers`): `eslint`, `tsc --noEmit` and the whole test suite. A
   finding is either fixed or silenced with a reason — never left reported.
   Use the project's own scripts (`format:check`, `lint`, `typecheck`,
   `test`) when it has them: they pin the version and the file set.

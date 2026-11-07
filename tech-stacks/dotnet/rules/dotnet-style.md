@@ -15,9 +15,10 @@ offer to run that skill.
 What tooling cannot decide, and this file does:
 
 - **A build with warnings is a failing build.** The shared configuration sets
-  `TreatWarningsAsErrors`, so this is enforced rather than asked for. Run
-  `dotnet format --verify-no-changes` and `dotnet build` before handing work
-  back.
+  `TreatWarningsAsErrors`, so this is enforced rather than asked for. Once per
+  task, not per edit: when the task's code is finished, and unless a project
+  gate runs them (`verification-tiers`), run
+  `dotnet format --verify-no-changes` and `dotnet build`.
 - **Suppressing needs a rule id and a why.** `#pragma warning disable CA1031`
   alone is not acceptable; the same line with a comment saying what makes it
   the right call, and a matching `restore` scoped as tightly as possible, is.

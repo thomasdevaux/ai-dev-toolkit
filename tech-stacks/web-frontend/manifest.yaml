@@ -7,11 +7,11 @@
   # A web front end is not a language: it is the JavaScript/TypeScript side
   # of a project, whatever sits behind it. package.json marks it in a plain
   # web project and in a Wails app (frontend/package.json, one level down).
-  # src-tauri/ and wails.json mark a desktop app whose front end lives deeper
-  # than detection looks (a monorepo's apps/desktop/), and such an app always
-  # has one — so a Tauri or Wails project is offered this block even then.
-  detect: ["package.json", "src-tauri", "wails.json"]
-  summary: Web front-end coding standards (Prettier, ESLint, tsc, Vitest) - for React on Tauri or Wails, or any package.json project.
+  # src-tauri/ marks a desktop app whose front end lives deeper than detection
+  # looks (a monorepo's apps/desktop/), and such an app always has one — so a
+  # Tauri project is offered this block even then.
+  detect: ["package.json", "src-tauri"]
+  summary: Web front-end coding standards (Prettier, ESLint, tsc, Vitest) - for React on Tauri or Wails, or any package.json project - and hands-on feedback sessions on the running app.
   shared_files:
     - source: tech-stacks/shared/editorconfig.ini
       target: skills/frontend-code-standards/references/editorconfig.ini

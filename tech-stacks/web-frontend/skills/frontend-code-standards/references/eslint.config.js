@@ -6,7 +6,7 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   // Build output, generated bindings and the backend's folder.
-  { ignores: ["dist", "src/bindings", "src-tauri"] },
+  { ignores: ["dist", "src/bindings", "bindings", "src-tauri"] },
   js.configs.recommended,
   tseslint.configs.strictTypeChecked,
   reactHooks.configs.flat.recommended,

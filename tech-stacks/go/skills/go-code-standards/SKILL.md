@@ -32,6 +32,12 @@ release adds, which turns a routine upgrade into an unplanned lint-fixing
 session. The reference enables a named set; growing that set is a decision
 someone makes.
 
+**The build is standardised too, not just the lint.** A pinned toolchain and
+a `go.mod` that keeps `node_modules` out of `./...` are what make the same
+command mean the same thing on every machine. `references/build-and-disk.md`
+explains each setting, what stays machine-local, and why Go needs no equivalent
+of Rust's `clean.ps1`.
+
 ## Procedure
 
 ### A module with no configuration
@@ -39,15 +45,27 @@ someone makes.
 1. Copy `references/.golangci.yml` to the module root.
 2. Replace the `goimports.local-prefixes` placeholder with the module path
    from `go.mod`. Left as-is, import grouping silently does nothing useful.
+   The path needs a dot in its first element (`github.com/acme/tool`): gofumpt
+   reads a dotless one (`changeme`, `mytool`) as standard library, and
+   `golangci-lint fmt --diff` then keeps failing right after `golangci-lint fmt`.
 3. Decide on `revive`'s `exported` rule: keep it for a library whose
    identifiers other modules import, disable it for an application module
    where nothing is.
+   A Wails app is an application module: disable it there.
 4. Copy `references/editorconfig.ini` to the module root as `.editorconfig`
    if there is none. It is the same baseline in every stack, and its `[*.go]`
    section states the tab indentation gofmt is not going to negotiate about.
-5. Run `golangci-lint fmt`, and commit that as one mechanical commit,
+   If there is one, diff it against the reference and report the differences
+   rather than overwriting it — a project's own sections would be lost.
+5. Build configuration: pin `go` and `toolchain` in `go.mod`, and add
+   `ignore ./frontend/node_modules` if the module holds a front end, plus
+   `ignore ./build` for a Wails app. Without them, `./...` picks up Go files
+   shipped inside npm packages and the generated mobile sources. Existing
+   settings are diffed and reported, as for lints. Behind the corporate proxy,
+   Go may need the machine-local settings in `references/corporate-proxy.md`.
+6. Run `golangci-lint fmt`, and commit that as one mechanical commit,
    separate from any behaviour change.
-6. Run `golangci-lint run` and deal with the output per the section below.
+7. Run `golangci-lint run` and deal with the output per the section below.
 
 ### A module that already has a configuration
 
@@ -84,8 +102,10 @@ gets ignored wholesale and the standard dies on day one. Instead:
 
 ## Changing the standard
 
-The reference configuration is the team's, not the module's. A linter worth
-enabling everywhere is changed in
+The reference configuration is the team's, not the module's — the build
+settings included: a project that needs another one records it as an exception
+next to the setting, with its reason. A linter worth enabling everywhere is
+changed in
 `tech-stacks/go/skills/go-code-standards/references/` in the toolkit
 checkout, and reaches projects at their next sync. Editing one module's
 `.golangci.yml` to win an argument is how four modules end up with four

@@ -9,9 +9,11 @@ Pick an architecture profile for a Wails desktop app (Go backend, React frontend
 
 ## Scope
 
-This skill covers **Wails 3** and nothing else. v3 is in beta with a stable desktop API and production apps shipping on it; v2 is still upstream's stable release but is not covered here — new projects start on v3, so that a project doesn't land on the older architecture the month before it would have had to migrate anyway. Upstream publishes a v2→v3 migration guide and reports 1–4 h for a typical app.
+**Wails 3 is the team's only supported version.** v3.0.0 has been stable since October 2026, with weekly feature releases since. Every project starts on it.
 
-**Check which version a codebase uses before writing anything, and don't guess from phrasing.** The tell is `main.go`: v3 passes `Services:` to `application.New`, v2 passes `Bind:` to `wails.Run`. On a v2 codebase, say plainly that this skill doesn't cover it and point at the upstream migration guide rather than translating v2 patterns on the fly.
+**Never write v2 patterns, even when memory suggests them.** The tell is `main.go`: v3 passes `Services:` to `application.New`, v2 passes `Bind:` to `wails.Run` (and has a `wails.json`). If a codebase turns out to be on v2, it is out of scope here: say so and ask the user how to proceed.
+
+**Task stays the build system.** Upstream's Wake (`wails.yaml`, enabled with `WAILS_EXP_USE_WAKE=1`) and its purego backend are experimental, as are the Android and iOS targets, and all sit outside the stable compatibility contract. Don't adopt any of them by default; if a project wants one, it is that project's recorded decision.
 
 If the user hasn't settled on Wails yet, defer to the `desktop-app-architecture` skill.
 
@@ -23,8 +25,30 @@ The folder tree is a **consequence**, not a decision. What determines a Wails pr
 
 Two failure modes to guard against:
 
-- **Over-structuring**: multiple Go packages, a multi-binary layout, or premature abstraction for a single frontend with a single consumer. This costs build time and onboarding friction, and buys nothing.
+- **Over-structuring**: more packages, binaries or modules than there are consumers — a `core`/`domain`/`<capability>` package split, a `cmd/` or a `go.work` for a single frontend. This costs onboarding friction and buys nothing. The fixed layout below is not over-structuring: it is one frontend, one module, the same in every project.
 - **Leaky boundary**: business logic scattered across React components and service methods, with no layer testable on its own. This is the expensive one, because fixing it means redesigning the boundary rather than moving files.
+
+## The layout (the same for every profile)
+
+Every Wails app of the portfolio has the same top-level shape, whatever its profile:
+
+```text
+my-app/
+├── frontend/              # the React package, bindings/ generated inside it
+├── build/                 # generated build assets and platform Taskfiles
+├── internal/              # logic that does not need Wails (profiles B and C)
+├── scripts/               # dev, check, build, package, release
+├── <domain>service.go     # thin services, package main
+├── main.go                # bootstrap only; embeds frontend/dist
+├── Taskfile.yml           # APP_NAME, BIN_DIR
+└── go.mod                 # one module; toolchain pinned, frontend/node_modules and build ignored
+```
+
+Why this and not Tauri's `apps/desktop/`: the layout follows the tool in both branches. Wails' generated tasks run `go build` at the root, and `main.go` embeds `frontend/dist` by relative path, so moving either costs an edit in every platform Taskfile, on every upgrade. What carries over is the point of having one layout: scripts, the gate and the docs are copied between projects unchanged, and adding a CLI later is an addition (`cmd/cli`), never a move.
+
+One difference matters. Tauri's core crate has no Tauri dependency to reach for, so the compiler keeps Tauri out of `domain/`. In a single Go module, `internal/` only restricts who may import it, not what it imports. **The gate supplies the guarantee**: `references/check.ps1` fails when anything `internal/domain` depends on, directly or not, is Wails.
+
+The profile decides **what goes where inside that layout**, not the top-level folders. Full trees are in `references/architecture.md` §3.
 
 ## Three Wails specifics to settle before the rest
 
@@ -48,7 +72,7 @@ Decision rules:
 - **A** only when there's no meaningful system access.
 - **C** only when a second consumer is real and identified. "We might need it later" is not a second consumer, and this is the most common over-structuring mistake.
 
-**One caveat specific to v3 before reaching for C**: the toolchain already builds the same codebase as a GUI-less HTTP server (`wails3 task build:server`, `-tags server`), and it can target iOS and Android. Neither of those is a second consumer in profile C's sense — they're the same application on another surface, built from the same root package, and neither justifies a multi-binary layout on its own. See §9 of the reference for what the server target does and does not solve.
+**One caveat specific to v3 before reaching for C**: the toolchain already builds the same codebase as a GUI-less HTTP server (`wails3 task build:server`, `-tags server`), and it can target iOS and Android, experimentally. Neither of those is a second consumer in profile C's sense — they're the same application on another surface, built from the same root package, and neither justifies a multi-binary layout on its own. See §9 of the reference for what the server target does and does not solve.
 
 **If that second consumer is a CLI companion to the desktop app, there are two ways to build it — never default, always ask which one fits:**
 
@@ -62,6 +86,8 @@ Decision rules:
 
 This matters structurally, not just for naming: the single-binary option doesn't need profile C's shape at all — it stays inside profile B with one added file.
 
+A note on scope: a local HTTP sidecar (a Go process exposing HTTP instead of service bindings) is occasionally seen in the wild, but it's rare enough, and different enough in its concerns (port management, process lifecycle), that it isn't documented here as a profile. If the user's project genuinely needs one, treat it as a one-off design problem rather than reaching for a template.
+
 ## The six decisions
 
 Settle these before creating folders. Full detail is in `references/architecture.md` (§4).
@@ -70,9 +96,9 @@ Settle these before creating folders. Full detail is in `references/architecture
 |---|---|---|
 | W1 | Where does business logic live? | Follows the profile |
 | W2 | Shape of the service surface | Thin service methods, use-case oriented, minimal exported surface (see security note above) |
-| W3 | Go-side state | Struct fields on the service type; `sync.Mutex`/`RWMutex` if shared across goroutines; channels for anything actor-shaped |
-| W4 | Error boundary | Typed error result (a struct with a stable `Code`), never a bare `error` returned raw to JS |
-| W5 | Long-running work | Registered typed events (`application.RegisterEvent[T]`, `app.Event.Emit`); per-call ordering via a request ID when needed |
+| W3 | Go-side state | Stateless; struct fields with `sync.Mutex`/`RWMutex` if shared across goroutines; one owning goroutine beyond 2–3 mutexes |
+| W4 | Error boundary | One typed error (`*AppError` with a stable `Code`) returned as `error`, read from `error.cause` in `ipc/client.ts`; never an internal error passed through |
+| W5 | Long-running work | Beyond ~500 ms: registered typed events (`application.RegisterEvent[T]`, `app.Event.Emit`), and `context.Context` first so the frontend can cancel |
 | W6 | Frontend location | `frontend/` — the Wails default, already a subfolder, no configuration cost |
 
 W2 is the structuring one — spend the effort there. The other five follow from it or from the profile.
@@ -82,24 +108,27 @@ W2 is the structuring one — spend the effort there. The other five follow from
 1. **Determine the profile.** Ask about: what the app does, expected system access, team size, and whether a second consumer of the business logic is planned. Don't assume.
 2. **Propose before building.** State the recommended profile and W1–W6 values, get agreement.
 3. **Read `references/architecture.md`** (§3 for the tree, §5 for scaffolding rules) and **`references/react-conventions.md`** for the frontend side — it defines the `ipc/` / `bindings/` split, the server-state layer, the error handling layers, and the state management default.
-4. **Scaffold with `wails3 init -t react`** rather than writing the tree by hand, then move the generated service into the shape §3 describes. The generated `build/` tree and Taskfiles are load-bearing — don't reconstruct them from memory.
+4. **Scaffold with `wails3 init -n <name> -t react -mod <module path>`** rather than writing the tree by hand, then move the generated service into the shape §3 describes. The generated `build/` tree and Taskfiles are load-bearing — don't reconstruct them from memory. Pass the real module path now (§5, rule 2).
 5. **Create only what is used.** No empty folders, no placeholders for unjustified layers.
 6. **Keep service methods thin.** A service method should: receive the call, invoke `internal/domain`, map the error into the typed result, return. If a service method's body is doing real logic rather than delegating, the boundary has already leaked — and so has the mirror-image mistake of one method per domain function, which turns the service surface into a copy of the domain API instead of a use-case one.
-7. **Design the error type early.** A shared `Result[T]`-shaped struct or a `Code`+`Message` error struct, used consistently across every service method — retrofitting this after several methods return bare strings is expensive.
+7. **Design the error type early.** One `Code`+`Message` error type, returned as `error` by every service method (§4, W4) — retrofitting this after several methods return internal errors is expensive.
 8. **Be deliberate about the exported surface.** Since there's no capability sandbox, review what's registered and what's exported as if it were the permission boundary — because it is one, in practice.
-9. **Generate nothing tied to a forge or CI system.**
-10. **Document W1–W6 in the project README.**
+9. **Set up the fixed pieces** (§5): the pinned toolchain and the two `ignore` lines in `go.mod`, the script names with `references/check.ps1` as `scripts/check.ps1`, one dev port per app, and `go-code-standards` for the lint configuration.
+10. **Generate nothing tied to a forge or CI system.** No `.github/`, no `.gitlab-ci.yml`, no pipeline files, unless the user explicitly asks.
+11. **Document W1–W6 in the project README.**
 
 ## Workflow: auditing an existing project
 
-1. **Confirm it's a v3 codebase** (`Services:` in `main.go`, `frontend/bindings/`, a `Taskfile.yml`). If it's v2, say so and stop — this skill doesn't cover it.
+1. **Confirm it's a v3 codebase** (`Services:` in `main.go`, `frontend/bindings/`, a `Taskfile.yml`). If it's v2, stop and tell the user: this reference doesn't apply. Check that the three Wails versions agree (§5).
 2. **Read `references/architecture.md`** (§6 anti-patterns, §4 decisions) and `references/react-conventions.md` (§8 shared frontend anti-patterns).
-3. **Identify the actual profile** and the gap with the appropriate one.
-4. **Walk the anti-pattern checklist**, present/absent/not applicable, with file and line as evidence.
+3. **Identify the actual profile** and the gap with the appropriate one. A project with a `cmd/cli` nobody uses is really a Workshop carrying an extra binary. A project off the common layout is a finding too, ranked low.
+4. **Walk the anti-pattern checklist**, present/absent/not applicable, with file and line as evidence. An audit without file references can't be acted on.
 5. **Check the service surface specifically**: is every exported method on a registered service something the app genuinely needs exposed, or is a broad service registered "for convenience"? This is easy to miss because there is no manifest file to review — the permission surface has to be read from the `Services:` list and the methods' capitalization.
 6. **Assess W1–W6 as actually implemented.**
-7. **Rank findings by increasing cost to fix.**
-8. **Modify no files** unless asked.
+7. **Rank findings by increasing cost to fix**, so the user can start with what's cheap.
+8. **Modify no files** unless asked. An audit that silently rewrites code can't be trusted or reviewed.
+
+Priority when reporting: leaky boundaries (anti-patterns 1, 2, 3, 9) and the exposed surface (5, 19) matter more than naming or layout issues, because they are the ones that compound.
 
 ## Workflow: migration and refactoring
 
@@ -107,21 +136,23 @@ One misconception to correct up front: **there is no easy migration from B to C.
 
 1. **Check the prerequisite**: is `internal/domain` free of any Wails import? v3 no longer forces a `context` on service methods, so this is usually cleaner than it was in v2 — but check for event emission and application/window calls reaching down into domain code.
 2. **Describe the target boundary before moving code** — service methods, payloads, error types, event contracts.
-3. **Extract module by module.**
-4. For a targeted fix, change **only** the anti-pattern named.
+3. **Extract module by module**, never wholesale.
+4. **Justify each new package**: size, boundary stability, and consumers.
+5. For a targeted fix, change **only** the anti-pattern named, and explain the change before applying it.
 
 ## Workflow: evolving toward a server with remote clients
 
 Three points need surfacing, because none are covered by W1–W6 and all three are easy to get wrong:
 
-1. **Not everything in `internal/domain` can centralize** — local file/process access stays client-side; classify module by module.
+1. **Not everything in `internal/domain` can centralize** — local file/process access stays client-side; classify module by module. This is a product decision, not a mechanical refactor.
 2. **Design W2 as if it were already a network API** — use-case-oriented service methods reuse cleanly as HTTP handlers later (Go makes this concretely easy: a service method and an HTTP handler can share the same underlying `internal/domain` call with very little adaptation).
 3. **Multi-user auth and data isolation are unaddressed by anything here** — and this is *more* pressing in v3, not less, because `wails3 task build:server` will hand you a running HTTP server from the same code in one command. That build serves one application to whoever reaches it; it grants no notion of users, sessions, or isolation between them. Treat that as a separate design pass, and say so before anyone mistakes the server target for a multi-client architecture.
 
 ## Reference files
 
-- `references/architecture.md` — folder trees per profile, the six decisions in detail, the anti-pattern checklist, evolution path, server-evolution detail, standalone prompts.
+- `references/architecture.md` — §1 decisions, §2 profile selection, §3 folder trees per profile, §4 cross-cutting decisions in detail, §4b runtime data and log locations, §5 scaffolding rules, §6 the anti-pattern checklist, §7 evolution path, §8 standalone prompts, §9 evolving toward a server with remote clients.
+- `references/check.ps1` — the gate, copied to `scripts/check.ps1`.
 - `references/react-conventions.md` — frontend conventions for the React side: folder shape, server state, error handling layers, state management default, testing approach.
-- The front end's tooling (Prettier, ESLint, `tsc`, Vitest) is the `frontend-code-standards` skill of the `tech-stack-web-frontend` block, offered on any Wails project.
+- The front end's tooling (Prettier, ESLint, `tsc`, Vitest) is the `frontend-code-standards` skill of the `tech-stack-web-frontend` block, offered on any Wails project; the Go tooling is `go-code-standards`; for hands-on user testing of the running app, `frontend-feedback`, from the same block.
 
 For scaffolding, architecture.md §3/§5 plus the React reference are usually enough. For an audit, §6/§4 plus the React reference's §8.

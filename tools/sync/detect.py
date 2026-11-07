@@ -47,8 +47,8 @@ def _candidate_dirs(project_dir: Path) -> list[Path]:
 
 def _marker_in_dir(directory: Path, marker: str) -> bool:
     """A marker is a filename, a glob, or a directory name — `src-tauri/` marks
-    a Tauri app exactly as `wails.json` marks a Wails one, so existence is what
-    is tested, not file-ness."""
+    a Tauri app exactly as `go.mod` marks a Go module, so existence is what is
+    tested, not file-ness."""
     if "*" in marker:
         return any(directory.glob(marker))
     return (directory / marker).exists()

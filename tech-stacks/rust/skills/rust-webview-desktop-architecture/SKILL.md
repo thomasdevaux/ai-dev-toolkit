@@ -130,6 +130,6 @@ Read `references/architecture.md` when you need the folder trees, the full decis
 
 Read `references/react-conventions.md` for the frontend side — folder shape (`ipc/`, `bindings/`, `features/`), the server-state layer, error handling layers, state management default, and testing approach. React is the mandated frontend for this stack, and the frontend should look the same regardless of which backend is behind it.
 
-The front end's tooling (Prettier, ESLint, `tsc`, Vitest) is the `frontend-code-standards` skill of the `tech-stack-web-frontend` block, offered on any Tauri project; for hands-on user testing of the running app, `tauri-feedback-session`.
+The front end's tooling (Prettier, ESLint, `tsc`, Vitest) is the `frontend-code-standards` skill of the `tech-stack-web-frontend` block, offered on any Tauri project; for hands-on user testing of the running app, `frontend-feedback`, from the same block.
 
 For scaffolding, §3 and §5 plus the React reference are usually enough. For an audit, §6 and §4 plus the React reference's §8.

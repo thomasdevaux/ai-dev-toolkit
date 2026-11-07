@@ -19,7 +19,7 @@ If plain HTML/JS is chosen, keep §2's rule anyway: route all backend calls thro
 ## 1. Folder shape (identical in both stacks)
 
 ```text
-frontend-src/                     # actual path is src/ (Tauri, Wails default) — content below is what goes inside it
+frontend-src/                     # actual path is src/ (Tauri, Wails default) — content below is what goes inside it; Wails generates bindings/ one level up, in frontend/bindings/
 ├── components/                   # presentation only, no calls to backend
 ├── features/                     # domain-oriented slices
 │   └── <feature>/
@@ -75,7 +75,7 @@ No hard mandate, but a default worth stating explicitly so it doesn't get re-lit
 
 Two layers, not one:
 - **React Error Boundaries** for rendering failures — a component throwing during render shouldn't take down the whole app.
-- **Explicit typed handling at the `ipc/` boundary** for backend call failures — map the backend's typed error (Rust's serializable enum, or Wails' typed error result, see the backend-specific reference) to a user-facing message in `ipc/client.ts`, once, rather than scattering `try/catch` blocks per component with ad hoc messages.
+- **Explicit typed handling at the `ipc/` boundary** for backend call failures — map the backend's typed error (Rust's serializable enum, or Wails' typed error, read from `error.cause`, see the backend-specific reference) to a user-facing message in `ipc/client.ts`, once, rather than scattering `try/catch` blocks per component with ad hoc messages.
 
 ## 5. TypeScript strictness
 

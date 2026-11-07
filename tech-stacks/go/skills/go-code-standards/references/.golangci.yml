@@ -1,5 +1,5 @@
 # Shared Go lint configuration — copy to the module root as .golangci.yml.
-# Tooling verified 2026-08-07 against golangci-lint v2, whose schema splits
+# Tooling verified 2026-11-06 against golangci-lint v2.15, whose schema splits
 # `formatters:` from `linters:`. A v1 config is not accepted by v2; run
 # `golangci-lint migrate` on an existing one rather than hand-editing it.
 version: "2"
@@ -13,7 +13,9 @@ formatters:
     - goimports
   settings:
     gofumpt:
-      extra-rules: true
+      extra:
+        group-params: true
+        clothe-returns: true
     goimports:
       local-prefixes:
         # Replace with the module path from go.mod.

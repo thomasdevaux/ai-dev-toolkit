@@ -26,7 +26,9 @@ What tooling cannot decide, and this file does:
   `errors.As` for every caller downstream.
 - **Return errors, don't panic.** `panic` is for genuinely unrecoverable
   programmer error at startup. A library that panics has taken the decision
-  away from its caller.
+  away from its caller. A Wails service method is no exception: its error's
+  text and exported fields reach the frontend as they are, so it returns the
+  app's typed error, never a wrapped internal one.
 - **Accept interfaces, return concrete types.** And define the interface in
   the consuming package, not alongside the implementation — that is what
   keeps the dependency pointing the right way.

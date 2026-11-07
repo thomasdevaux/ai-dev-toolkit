@@ -1,5 +1,5 @@
-// Look at and drive the live Tauri window over the WebView2 debugging port
-// (the dev launcher sets --remote-debugging-port). Node >= 22, no dependency.
+// Look at and drive the live Tauri or Wails window over the WebView2 debugging
+// port (the dev launcher sets --remote-debugging-port). Node >= 22, no dependency.
 //
 //   node scripts/ui.mjs shot [file]        PNG of the window (default: ui.png in the OS temp dir)
 //   node scripts/ui.mjs text               visible text of the page
@@ -15,9 +15,17 @@ import { join } from 'node:path';
 const port = process.env.UI_DEBUG_PORT ?? '9222';
 const base = `http://127.0.0.1:${port}`;
 
+async function listPages() {
+  try {
+    return await (await fetch(`${base}/json`)).json();
+  } catch {
+    console.error(`nothing listening on ${base}: is the dev launcher running with the debugging port?`);
+    process.exit(1);
+  }
+}
+
 async function connect() {
-  const pages = await (await fetch(`${base}/json`)).json();
-  const page = pages.find((p) => p.type === 'page');
+  const page = (await listPages()).find((p) => p.type === 'page');
   if (!page) throw new Error(`no page on ${base}: is the dev launcher running with the debugging port?`);
   const ws = new WebSocket(page.webSocketDebuggerUrl);
   await new Promise((resolve, reject) => {
@@ -55,7 +63,7 @@ async function evaluate(cdp, expression) {
 
 const [cmd, arg] = process.argv.slice(2);
 if (cmd === 'targets') {
-  console.log(JSON.stringify(await (await fetch(`${base}/json`)).json(), null, 2));
+  console.log(JSON.stringify(await listPages(), null, 2));
   process.exit(0);
 }
 const cdp = await connect();

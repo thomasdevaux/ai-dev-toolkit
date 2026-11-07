@@ -34,7 +34,7 @@ What tooling cannot decide, and this file does:
   render first; the disable is right when the effect resets local state on a
   prop change or mirrors a store that has no subscription API.
 - **Generated files are neither formatted nor linted.** The backend's
-  bindings (`src/bindings/`) and build output stay in `.prettierignore` and
+  bindings (`src/bindings/`, Wails' `bindings/`) and build output stay in `.prettierignore` and
   the ESLint `ignores`; a hand edit there is lost on the next generation.
 - **No `any` at the `ipc/` boundary**, and no `as` cast to quiet the type
   checker there — that is where generated types earn their keep.

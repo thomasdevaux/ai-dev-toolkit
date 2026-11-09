@@ -78,7 +78,7 @@ my-app/
 │   ├── index.html
 │   ├── vite.config.ts            # server.port = this app's port, strictPort: true
 │   └── package.json              # format, format:check, lint, typecheck, test
-├── build/                        # generated, load-bearing
+├── build/                        # generated, load-bearing; customize, don't rewrite (windows/info.json FileDescription = app name, shown by Task Manager)
 ├── internal/                     # profiles B and C only
 ├── scripts/                      # §5, rule 13
 ├── <name>service.go
@@ -414,6 +414,11 @@ which is what couples it to the desktop binary and breaks the moment
 15. **`go.mod` gets `ignore ./frontend/node_modules` and `ignore ./build`.** npm packages and the template's mobile targets both ship Go source, and without these lines `go test ./...` and `golangci-lint` take them as part of the module (`build-and-disk.md`).
 16. **`frontend/dist` is gitignored and embedded**, so on a fresh clone `go test` and `golangci-lint` fail with `pattern all:frontend/dist: no matching files found`. `scripts/check.ps1` creates a placeholder; a CI job that doesn't run it needs to do the same or build the front end first. `wails3 build` also runs `go mod tidy`, so read any `go.mod` change a build leaves behind before committing it.
 17. **`frontend/bindings/` is committed**, as the template's `.gitignore` leaves it: `tsc` reads it, and a signature change shows up in the diff of the commit that made it.
+18. **The per-user NSIS installer takes two includes from `references/nsis/`**, which assume `!define WAILS_INSTALL_SCOPE "user"` in `project.nsi` (the template's default is machine-wide: admin, `HKLM`, `Program Files` — none of the includes' registry or folder checks would match), copied to `build/windows/nsis/` and `!include`d from the template's `project.nsi`; both need the `INFO_*`, `UNINST_KEY` and `PRODUCT_EXECUTABLE` defines `wails_info.nsh` / `wails_tools.nsh` already provide.
+    - `path.nsh` — an optional, ticked-by-default component that **appends** the install folder to the user `PATH` and removes only that entry on uninstall. It never rewrites what it cannot read back intact: a `PATH` of 1000+ characters (NSIS strings stop at 1023 and `ReadRegStr` truncates silently) is left alone and the user is told in a dialog. Wire it as `Section "Add to the PATH (current user)" SecPath` calling `AppPathAdd`, and `un.AppPathRemove` in the uninstall section.
+    - `upgrade.nsh` — updating by running a newer installer: reuse the installed folder, refuse a downgrade (exit code 2), wait for the app and an optional second executable (`!define APP_EXTRA_EXE "tool.exe"` before the include) to be closed (silent: exit code 5). Call `AppCheckInstalled` from `.onInit`, `AppWaitForExit` first in the install section, and write `InstallLocation` into `${UNINST_KEY}` next to the uninstaller (`SetRegView 64`).
+    - `makensis` without admin rights: the NSIS zip, unpacked into the user profile — `references/nsis/install-nsis.md`.
+    - Test registry code against a scratch key (`!define APP_ENV_KEY "Software\<co>\Scratch"` before the include), never the real `HKCU\Environment`.
 
 ---
 
@@ -436,7 +441,7 @@ which is what couples it to the desktop binary and breaks the moment
 | 13 | Missing or manual DB migrations | Non-reproducible schema |
 | 14 | Frontend moved out of `frontend/`, or the desktop main package moved under `cmd/` | Fighting the tool's default; breaks the embed and every platform build task (§3.C) |
 | 15 | No test exercising `internal/domain` without constructing the application | Signals logic and Wails runtime were never actually separated |
-| 16 | `build/` Taskfiles hand-rewritten rather than customized | They're regenerated assets; changes are lost and version drift becomes invisible |
+| 16 | `build/` Taskfiles hand-rewritten rather than customized | They're regenerated assets; changes are lost and version drift becomes invisible. Editing a metadata value in place is customizing, not rewriting: `wails3 init` fills `build/windows/info.json` `FileDescription` with the app's tagline, which Windows Task Manager shows as the process name, so set it to the app name |
 | 17 | Writes configuration, database or logs beside the executable | Breaks on any read-only or per-machine install; surfaces only after deployment (§4b) |
 | 18 | Multi-binary layout justified by the server or mobile build target | Those come from the same root package; no second consumer exists (§2, §9) |
 | 19 | Secrets reachable from the frontend: `VITE_` values, files in `frontend/dist`, a service method returning a key | Leak in the bundle or through the permission surface |

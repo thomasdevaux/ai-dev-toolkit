@@ -93,7 +93,8 @@ Two deployment scopes, synced independently — a project's `.claude/`
 | toolkit-self-check | `/toolkit-sync` | project / user | baseline | command | On-demand, read-only onboarding/drift check against the manifest; prints the exact command to sync yourself. |
 |  | `/toolkit-feat` | project / user | baseline | command | Lists suggested-tier blocks and detected tech stacks not yet synced. |
 |  | `/toolkit-help` | project / user | baseline | command | Points at the handbook and README on GitHub. |
-| gitlab | `gitlab` | project | suggested | plugin | Merge requests, issues, and pipelines from inside the session. Opt-in — sync it by id if the project actually uses GitLab. |
+| gitlab | `gitlab-official` | project | suggested | plugin | Merge requests, issues, and pipelines from inside the session. Opt-in — sync it by id if the project actually uses GitLab. |
+|  | `gitlab-workflow` | project | suggested | skills | Team GitLab workflow, manual-only: `/gitlab-issue-plan` → `/gitlab-issue-implement` → `/gitlab-mr-review` → `/gitlab-mr-feedback`, through a stdlib Python tool (`gitlab_tool.py`) that shells out to `glab`. Needs `glab` on PATH and authenticated; independent of the `gitlab` plugin — sync either, or both. |
 | project-type-none | `no-project-type` | project | choice-group: project-type | rule | No docs, requirements, or ADRs imposed — the common rules still apply, and switching to `project-type-app` is one `sync switch` away. |
 | project-type-app | `docs-map` | project | choice-group: project-type | rule | Ten fixed documentation slots; content that fits none is flagged to the user, never filed ad hoc. |
 |  | `requirements` | project | choice-group: project-type | rule | `docs/requirements.md` is one `##` section per requirement: id, status, free-form prose. |

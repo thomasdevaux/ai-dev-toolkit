@@ -33,7 +33,7 @@ stack. `tools/sync` reads the entry, diffs the block's files against the
 project's `.claude/`, and only writes after confirmation — never
 deletes, always shows the diff first.
 
-A block's dependency on an official Anthropic plugin (`gitlab`, a
+A block's dependency on an official Anthropic plugin (`gitlab-official`, a
 language server, ...) is its own `type: official-plugin` entry rather
 than a nested dependency declaration. Syncing it patches only the
 `enabledPlugins` key of `settings.json`, key by key.
@@ -65,7 +65,12 @@ user" (that's exactly the confusion to avoid re-introducing).
   directory-per-entry.
 - **Exception**: a content-free plugin still gets its own directory
   when its *tier* is `suggested` (`suggested/gitlab/manifest.yaml`,
-  `suggested/skill-creator/manifest.yaml`). Not a scope split — the two
+  `suggested/skill-creator/manifest.yaml`). A topic directory may hold
+  several independent entries: `suggested/gitlab/` carries both the
+  official plugin (`gitlab-official`) and our own vendored workflow
+  (`gitlab-workflow`, under `skills/`), synced by id separately. Tests for
+  a suggested block's code live in `tests/suggested/<topic>/`, not in the
+  deployed tree. Not a scope split — the two
   sit at opposite scopes and it changes nothing — a directory because
   `tier: suggested` is exactly what `suggested/` already means, and an
   opt-in entry is the one a reader goes looking for by name. What stays
@@ -173,7 +178,7 @@ sync-adjacent command the agent may run itself, because it writes no files.
 
 A `type: official-plugin` entry's `settings_patch` lands in whichever
 `settings.json` the sync targets, and every entry currently fixes that
-choice itself, deliberately: `gitlab` is `scope: project` because MR and
+choice itself, deliberately: `gitlab-official` is `scope: project` because MR and
 issue access is a property of the repository, identical for everyone who
 clones it; `skill-creator-user` is `scope: user` because authoring a skill
 is an occasional individual act, and a project entry would charge the whole

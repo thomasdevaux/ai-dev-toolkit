@@ -21,7 +21,7 @@ No entry ids syncs every `tier: baseline` entry at once. Expected:
 `common-rules` writes `.claude/rules/{security,language,project-type-profile,
 codegraph}.md` and the `desktop-app-architecture`, `commit-message-format`,
 `caveman` and `codegraph-setup` skills; `context-quality` writes its rule, two skills, and
-registers `context-check.sh`; `gitlab` patches
+registers `context-check.sh`; `gitlab-official` patches
 `enabledPlugins`; `toolkit-self-check` writes its hook and registers it.
 
 Then ask Claude to "write a commit message" anywhere — the language rule

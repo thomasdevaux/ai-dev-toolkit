@@ -1,13 +1,20 @@
-# A plugin, not a vendored block — no rules/skills content of our own to
-# ship, just the plugin_ref and settings_patch. It still gets a directory
-# because its tier is `suggested`; see docs/maintaining.md's "Where a new
-# entry's fragment goes".
+# Two independent entries, synced by id; neither requires the other.
 #
-# Project scope, single entry: MR/issue/pipeline access is a property of
-# the repository, identical for everyone who clones it, so there is no
-# project-vs-user choice to leave open.
+# `gitlab-official` is the official plugin: no content of our own, just the
+# plugin_ref and settings_patch.
+#
+# `gitlab-workflow` is our own team workflow (plan -> approve -> implement
+# -> review -> feedback), vendored under skills/. The four skills talk to
+# GitLab only through gitlab-common/bin/gitlab_tool.py, which shells out to
+# `glab` - the plugin is not involved and not needed. They are manual-only
+# (disable-model-invocation), so installing both never makes the model
+# choose between them. The test suite lives in tests/suggested/gitlab/, not
+# in the deployed tree.
+#
+# Project scope for both: MR/issue access is a property of the repository,
+# identical for everyone who clones it.
 
-- id: gitlab
+- id: gitlab-official
   type: official-plugin
   plugin_ref: "gitlab@claude-plugins-official"
   scope: project
@@ -16,3 +23,20 @@
   settings_patch:
     enabledPlugins:
       "gitlab@claude-plugins-official": true
+
+- id: gitlab-workflow
+  type: file
+  source: suggested/gitlab
+  target: .claude/
+  scope: project
+  tier: suggested
+  summary: >-
+    Team GitLab workflow, run by hand - /gitlab-issue-plan, /gitlab-issue-implement,
+    /gitlab-mr-review, /gitlab-mr-feedback. Needs `glab` on PATH and authenticated
+    (glab auth login, or GITLAB_HOST/GITLAB_TOKEN); independent of the official gitlab plugin.
+  group: GitLab workflow
+  features:
+    - Issue plan
+    - Issue implement
+    - MR review
+    - MR feedback

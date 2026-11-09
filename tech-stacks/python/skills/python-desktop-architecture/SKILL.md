@@ -91,6 +91,8 @@ P1 and P4 are the ones worth real time. P6 is the one most often skipped, and th
 
 **Be honest about the ceiling.** Neither makes anything unreadable to a determined attacker with the right tools. If some logic genuinely must not leave your control, the answer is architectural, not a compiler flag: keep it on a server you control and have the app call it. That's only possible when the app can reach a network, which rules it out for many offline field tools — say so rather than recommending it blindly.
 
+**Installer: NSIS, per user** — when "unzip the folder" is not enough, `references/nsis/installer.nsi` builds an installer that needs no admin rights, with an optional user `PATH` entry and update-in-place (refuses a downgrade, waits for the app to close). `makensis` itself installs without admin rights from the NSIS zip (`references/nsis/install-nsis.md`). Details in `references/architecture.md` §4.
+
 **Nuitka** is worth mentioning as an alternative to PyInstaller when startup time or whole-program speed is the main concern: it compiles the whole application to a native binary, which starts faster and runs faster. It costs longer builds and occasional friction with dynamically-imported dependencies. It is a packaging improvement, not a substitute for the targeted protection above.
 
 ## Workflow: scaffolding a new project
@@ -140,8 +142,9 @@ Different from the reuse case above: here the goal is a server that remote clien
 
 ## Reference files
 
-- `references/architecture.md` — §1 common layout and the PySide6 tree, §2 tkinter, §2b CLI access and reusable logic, §3 background work, §3b the error boundary, §4 packaging, §4b runtime data and log locations, §5 scaffolding rules, §6 protecting sensitive logic, §7 the anti-pattern checklist, §8 standalone prompts, §9 evolving toward a server with remote clients.
+- `references/architecture.md` — §1 common layout and the PySide6 tree, §2 tkinter, §2b CLI access and reusable logic, §3 background work, §3b the error boundary, §4 packaging (PyInstaller, Nuitka, the NSIS installer), §4b runtime data and log locations, §5 scaffolding rules, §6 protecting sensitive logic, §7 the anti-pattern checklist, §8 standalone prompts, §9 evolving toward a server with remote clients.
 - `references/check.ps1` — the gate, copied to `scripts/check.ps1`.
+- `references/nsis/` — the per-user Windows installer: `installer.nsi` (template for a PyInstaller `--onedir` build), `path.nsh` (optional user `PATH` entry), `upgrade.nsh` (update in place), `install-nsis.md` (getting `makensis` without admin rights, from the zip). Architecture §4.
 - The ruff and mypy configuration, and the interpreter and lockfile pinning, are the `python-code-standards` skill of the same block.
 
 For scaffolding, §1, §5 and §3b are usually enough. For an audit, §7 and §3.

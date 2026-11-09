@@ -19,3 +19,13 @@
       target: skills/go-code-standards/references/editorconfig.ini
     - source: tech-stacks/shared/corporate-proxy.md
       target: skills/go-code-standards/references/corporate-proxy.md
+    # The Windows installer pieces (user PATH entry, in-place update) are plain
+    # NSIS includes with no Wails dependency beyond its generated defines; they
+    # live once so a Python/PyInstaller installer can deploy the same files.
+    - source: tech-stacks/shared/nsis/path.nsh
+      target: skills/go-webview-desktop-architecture/references/nsis/path.nsh
+    - source: tech-stacks/shared/nsis/upgrade.nsh
+      target: skills/go-webview-desktop-architecture/references/nsis/upgrade.nsh
+
+    - source: tech-stacks/shared/nsis/install-nsis.md
+      target: skills/go-webview-desktop-architecture/references/nsis/install-nsis.md

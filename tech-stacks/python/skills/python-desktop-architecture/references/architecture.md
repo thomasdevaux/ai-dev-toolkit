@@ -308,6 +308,17 @@ Compiles the whole application to a native binary: faster startup, faster execut
 
 ---
 
+### Windows installer — NSIS, per user
+
+For a hand-out beyond "unzip the folder", `package.ps1` builds a per-user installer from the `--onedir` output with `references/nsis/installer.nsi` (copied to `installer/`, with `path.nsh` and `upgrade.nsh` beside it). It installs under `%LOCALAPPDATA%\Programs`, so there is no UAC prompt; the same two includes serve the Go/Wails installer.
+
+- **`path.nsh`** — an optional, ticked-by-default component that **appends** the install folder to the user `PATH` and removes only that entry on uninstall. It never rewrites what it cannot read back intact: a `PATH` of 1000+ characters (NSIS strings stop at 1023 and `ReadRegStr` truncates silently) is left alone and the user is told in a dialog. Only useful if the folder holds something to run from a terminal: the app, or a CLI built into the same folder (one `.spec`, two `EXE`, one `COLLECT`; `/DAPP_EXTRA_EXE="myapp-cli.exe"`).
+- **`upgrade.nsh`** — updating by running a newer installer: reuse the installed folder, refuse a downgrade (exit code 2), wait for the app and `APP_EXTRA_EXE` to be closed (silent: exit code 5). `installer.nsi` wires `AppCheckInstalled`, `AppWaitForExit` and the `InstallLocation` value, and clears `_internal\` before copying so an update leaves no stale libraries.
+- **Version**: pass `INFO_PRODUCTVERSION` from `pyproject.toml`; a pre-release suffix (`1.2.0-beta.2`) needs a digits-only `INFO_FILEVERSION` as well.
+- **Try it against a scratch key**: `/DAPP_ENV_KEY="Software\<co>\Scratch"` redirects the `PATH` edit away from the real `HKCU\Environment`. Run it silently (`/S /D=<folder>`) through install, update, downgrade and uninstall before shipping.
+- **`makensis` without admin rights**: the NSIS zip, unpacked into the user profile — `references/nsis/install-nsis.md`.
+- Sign the installer as well as the executable inside it (§4, antivirus).
+
 ## 4b. Where the app writes at runtime
 
 Distinct from where the code lives: where the installed application writes

@@ -32,8 +32,8 @@
   tier: suggested
   summary: >-
     Team GitLab workflow, run by hand - /gitlab-issue-plan, /gitlab-issue-implement,
-    /gitlab-mr-review, /gitlab-mr-feedback. Needs `glab` on PATH and authenticated
-    (glab auth login, or GITLAB_HOST/GITLAB_TOKEN); independent of the official gitlab plugin.
+    /gitlab-mr-review, /gitlab-mr-feedback. Needs `glab` on PATH and logged in through OAuth
+    (glab auth login --web; a static GITLAB_TOKEN is refused outside CI); independent of the official gitlab plugin.
   group: GitLab workflow
   features:
     - Issue plan

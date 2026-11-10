@@ -15,15 +15,26 @@ third-party dependencies, no `pip install`, no virtual environment.
   required; the script only uses long-stable stdlib (`argparse`, `json`,
   `subprocess`, `hashlib`, `re`, `fnmatch`).
 - **`glab`**: the tool shells out to it for every GitLab call. It must be on
-  `PATH` and authenticated — either via `glab auth login --hostname <host>`,
-  or non-interactively via the `GITLAB_HOST` and `GITLAB_TOKEN` environment
-  variables (a project access token; `read_api` scope for read-only use,
-  `api` scope once a skill needs to publish). As a convenience, when neither
-  variable is set the tool copies `GITLAB_HOST`/`GITLAB_TOKEN` (and only
-  those) from the project's `.env` into the `glab` child's environment — see
-  `load_glab_env`. It never overrides an existing variable, and never prints,
-  stores or logs the values; the token still belongs to `glab`, so rotation is
-  a `.env`/`glab` concern, not a code change here. `.env` must stay gitignored.
+  `PATH` and logged in through **OAuth, which is the only accepted method on a
+  dev workstation**. Run once per instance:
+
+  ```
+  glab auth login --hostname <host> --web      # opens the browser
+  glab auth login --hostname <host> --device   # no local browser (GitLab 17.9+)
+  ```
+
+  `glab` keeps the token in the OS keyring (Windows Credential Manager) and
+  refreshes it itself. On a self-managed instance, `--web` needs an OAuth
+  application registered on that instance; ask the GitLab admin if the
+  browser flow is refused. Check with `glab auth status`.
+- **No static token.** The tool refuses to run when `GITLAB_TOKEN`,
+  `GITLAB_ACCESS_TOKEN` or `OAUTH_TOKEN` is set (error `auth_policy`, exit
+  code 3): such a variable silently overrides the OAuth login, never
+  refreshes and ends up in shell profiles and `.env` files. Unset it. **CI is
+  the only exemption** (`CI` or `GITLAB_CI` set), where a project access token
+  or job token is the only option.
+- **`.env`**: only `GITLAB_HOST` is read from it (see `load_glab_env`), as a
+  convenience to pick the instance. Credentials are never read from a file.
 
 The test suite (no network, no `glab` required) lives in the toolkit
 repo, not in the synced copy: `python -m pytest tests/suggested` from a

@@ -115,8 +115,9 @@ paths rooted at the worktree, without changing the working directory; say once
 in the report that this fallback was used.
 
 `gitlab_tool.py` itself requires Python (`python`, or `py -3` if `python`
-isn't on PATH) and the `glab` CLI already authenticated (`GITLAB_TOKEN`/
-`GITLAB_HOST` env vars, or `glab auth login`) — see
+isn't on PATH) and the `glab` CLI already logged in through OAuth
+(`glab auth login --hostname <host> --web`; static tokens are refused outside
+CI) — see
 `.claude/skills/gitlab-common/README.md`. Each skill states the minimum
 `gitlab-common-tools` version it needs; check it once per run with
 `--version` before the first real call, and fail clearly on a mismatch rather

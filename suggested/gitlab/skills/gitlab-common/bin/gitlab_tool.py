@@ -26,7 +26,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 EXIT_OK = 0
 EXIT_GENERIC = 1
@@ -71,10 +71,16 @@ def fail(category: str, message: str, hint: str | None = None,
 # Process environment (credentials, console encoding)
 # ---------------------------------------------------------------------------
 
-# Only these two keys are ever read from a `.env` file: they are exactly what
-# `glab` itself reads from its environment. Anything else in the file (an app's
-# own settings) is none of this tool's business.
-GLAB_ENV_KEYS = ("GITLAB_HOST", "GITLAB_TOKEN")
+# Only the host is ever read from a `.env` file: it is not a secret, and it lets
+# `glab` pick the right instance. Credentials never come from a file: on a dev
+# workstation the only accepted login is `glab auth login --web` (OAuth, stored
+# in the OS keyring by `glab`). Anything else in the file (an app's own
+# settings) is none of this tool's business.
+GLAB_ENV_KEYS = ("GITLAB_HOST",)
+
+# Environment variables that make `glab` use a static token instead of its
+# stored OAuth login. Refused outside CI by `enforce_auth_policy`.
+STATIC_TOKEN_VARS = ("GITLAB_TOKEN", "GITLAB_ACCESS_TOKEN", "OAUTH_TOKEN")
 
 
 def parse_env_file(text: str) -> dict[str, str]:
@@ -102,10 +108,10 @@ def parse_env_file(text: str) -> dict[str, str]:
 
 
 def load_glab_env(candidates: list[Path] | None = None) -> None:
-    """Fill GITLAB_HOST / GITLAB_TOKEN from the first `.env` that has them.
+    """Fill GITLAB_HOST from the first `.env` that has it.
 
     Never overrides a variable that is already set, so an explicit environment
-    (or `glab auth login`'s own config) always wins. The values are only handed
+    (or `glab auth login`'s own config) always wins. The value is only handed
     to the `glab` child process through `os.environ` — never printed or logged.
 
     Candidates: the `.env` of the checkout this tool lives in (the developer's
@@ -124,6 +130,27 @@ def load_glab_env(candidates: list[Path] | None = None) -> None:
                 os.environ[key] = value
         if values:
             return
+
+
+def enforce_auth_policy() -> None:
+    """Refuse a static token on a dev workstation: OAuth login is the only way.
+
+    A personal/project access token in the environment overrides `glab`'s
+    stored credentials, outlives its need and leaks easily. Developers run
+    `glab auth login --web` once (OAuth, kept in the OS keyring, refreshed by
+    `glab`). CI (`CI` or `GITLAB_CI` set) is exempt: there a token or job
+    token is the only option.
+    """
+    if os.environ.get("CI") or os.environ.get("GITLAB_CI"):
+        return
+    present = [v for v in STATIC_TOKEN_VARS if os.environ.get(v)]
+    if present:
+        fail("auth_policy",
+             f"static token in the environment ({', '.join(present)}); "
+             "only OAuth login is accepted outside CI",
+             hint="unset the variable(s), then run `glab auth login "
+                  "--hostname <host> --web` once (or `--device` without a browser)",
+             exit_code=EXIT_AUTH)
 
 
 def force_utf8_streams() -> None:
@@ -156,8 +183,9 @@ def run_glab(argv: list[str]) -> str:
         combined = stderr or (proc.stdout or "").strip()
         if "401" in combined or "invalid_token" in combined or "403" in combined:
             fail("auth", f"glab call failed: {combined}",
-                 hint="the token is likely missing, expired, or scoped read_api "
-                      "only (api scope is needed for writes)",
+                 hint="the OAuth login is likely missing or expired: run "
+                      "`glab auth login --hostname <host> --web` "
+                      "(or `--device` without a browser)",
                  exit_code=EXIT_AUTH)
         if "404" in combined:
             fail("not_found", f"glab call failed: {combined}",
@@ -926,6 +954,7 @@ def main(argv: list[str] | None = None) -> int:
         return EXIT_USAGE
     load_glab_env()
     try:
+        enforce_auth_policy()
         func(args)
         return EXIT_OK
     except ToolError as e:

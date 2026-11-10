@@ -15,10 +15,35 @@
 ##
 ## The installed version and folder are read from the uninstall key that wails.writeUninstaller
 ## writes (DisplayVersion) plus an InstallLocation value we add next to it.
+##
+## The uninstaller needs the same guard (an open executable cannot be deleted either): call
+## un.AppWaitForExit first thing in the uninstall section.
+##
+## Messages are English by default. To translate them, define the APP_MSG_* below before the include,
+## typically as "$(LangStringName)" with the LangString declared after !insertmacro MUI_LANGUAGE:
+##   APP_MSG_NEWER          a newer version is installed; may use $AppInstalledVersion
+##   APP_MSG_RUNNING_RETRY  the app is running, Retry/Cancel box
+##   APP_MSG_CANCELLED      aborted by the user (details pane)
+##   APP_MSG_RUNNING_SILENT aborted in silent mode (details pane)
 
 !include "LogicLib.nsh"
 !include "WordFunc.nsh"
 !insertmacro VersionCompare
+
+!ifndef APP_MSG_NEWER
+    !define APP_MSG_NEWER "A newer version of ${INFO_PRODUCTNAME} ($AppInstalledVersion) is already installed. This installer is version ${INFO_PRODUCTVERSION} and will not replace it.$\n$\nUninstall the installed version first if you really want to go back."
+!endif
+!ifndef APP_MSG_RUNNING_RETRY
+    !define APP_MSG_RUNNING_RETRY "${INFO_PRODUCTNAME} is running. Close it (and anything started from it), then click Retry."
+!endif
+!ifndef APP_MSG_CANCELLED
+    !define APP_MSG_CANCELLED "Cancelled: ${INFO_PRODUCTNAME} is running."
+!endif
+!ifndef APP_MSG_RUNNING_SILENT
+    !define APP_MSG_RUNNING_SILENT "${INFO_PRODUCTNAME} is running: close it and run the installer again."
+!endif
+
+Var AppInstalledVersion
 
 # "0.1.0-beta.2" -> "0.1.0": the part VersionCompare can order. Pre-releases of one number are
 # treated as the same version (an update between them is always allowed).
@@ -64,8 +89,9 @@ Function AppCheckInstalled
         ${VersionCompare} $R2 $R3 $R2
         # 1: the installed version is newer than this installer.
         ${If} $R2 == 1
+            StrCpy $AppInstalledVersion $R1
             IfSilent +2 0
-            MessageBox MB_OK|MB_ICONEXCLAMATION "A newer version of ${INFO_PRODUCTNAME} ($R1) is already installed. This installer is version ${INFO_PRODUCTVERSION} and will not replace it.$\n$\nUninstall the installed version first if you really want to go back."
+            MessageBox MB_OK|MB_ICONEXCLAMATION "${APP_MSG_NEWER}"
             SetErrorLevel 2
             Quit
         ${EndIf}
@@ -92,8 +118,10 @@ FunctionEnd
     ${EndIf}
 !macroend
 
-# Called at the start of the install section: waits until nothing in $INSTDIR is running.
-Function AppWaitForExit
+# Called at the start of the install section (AppWaitForExit) or of the uninstall section
+# (un.AppWaitForExit): waits until nothing in $INSTDIR is running.
+!macro AppWaitForExitFunction PREFIX
+Function ${PREFIX}AppWaitForExit
     Push $0
     Push $1
     ${Do}
@@ -107,13 +135,17 @@ Function AppWaitForExit
             ${Break}
         ${EndIf}
         IfSilent quit_silently 0
-        MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "${INFO_PRODUCTNAME} is running. Close it (and anything started from it), then click Retry." IDRETRY retry
-        Abort "Installation cancelled: ${INFO_PRODUCTNAME} is running."
+        MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "${APP_MSG_RUNNING_RETRY}" IDRETRY retry
+        Abort "${APP_MSG_CANCELLED}"
         quit_silently:
         SetErrorLevel 5
-        Abort "${INFO_PRODUCTNAME} is running: close it and run the installer again."
+        Abort "${APP_MSG_RUNNING_SILENT}"
         retry:
     ${Loop}
     Pop $1
     Pop $0
 FunctionEnd
+!macroend
+
+!insertmacro AppWaitForExitFunction ""
+!insertmacro AppWaitForExitFunction "un."

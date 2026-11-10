@@ -17,7 +17,7 @@ changing the label to `agent-plan::approved`.
 `plan`) and `.claude/skills/gitlab-common/references/hierarchy-context.md`.
 Both bind this skill.
 
-Requires gitlab-common-tools >= 0.2.0 — check once with
+Requires gitlab-common-tools >= 0.3.0 — check once with
 `python "<project-root>/.claude/skills/gitlab-common/bin/gitlab_tool.py" --version`
 (`<project-root>`: see `gitlab-common/references/invocation-path.md` —
 `$CLAUDE_PROJECT_DIR` is not set under the Bash tool)

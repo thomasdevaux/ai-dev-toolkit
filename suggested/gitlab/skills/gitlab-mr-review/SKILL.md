@@ -18,7 +18,7 @@ handling) and, when you reach step 6,
 `.claude/skills/gitlab-common/references/draft-notes.md`. Both bind this
 skill; they are not repeated below.
 
-Requires gitlab-common-tools >= 0.2.0 — check once with
+Requires gitlab-common-tools >= 0.3.0 — check once with
 `python "<project-root>/.claude/skills/gitlab-common/bin/gitlab_tool.py" --version`
 (`<project-root>`: see `gitlab-common/references/invocation-path.md` —
 `$CLAUDE_PROJECT_DIR` is not set under the Bash tool)

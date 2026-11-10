@@ -31,10 +31,14 @@ once the tool lives outside the project (user-level skills directory).
 
 ## Credentials and console encoding
 
-- The tool fills `GITLAB_HOST` / `GITLAB_TOKEN` from the project's `.env` when
-  they are not already in the environment (only those two keys are read; see
-  `README.md`). A worktree has no `.env` of its own — the tool looks at the
+- Authentication is `glab`'s OAuth login (`glab auth login --hostname <host>
+  --web`); see `README.md`. The tool aborts with `auth_policy` if a static
+  token variable (`GITLAB_TOKEN`, ...) is set outside CI. It fills only
+  `GITLAB_HOST` from the project's `.env` when it is not already in the
+  environment. A worktree has no `.env` of its own — the tool looks at the
   `.env` of the checkout it lives in first, so this works from a worktree too.
+  On an `auth` or `auth_policy` error, stop and tell the user to log in; never
+  work around it.
 - Output is forced to UTF-8: comment bodies start with an emoji and would
   otherwise crash on a Windows cp1252 pipe. No `PYTHONIOENCODING` needed.
 

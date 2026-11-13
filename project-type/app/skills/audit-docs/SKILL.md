@@ -54,6 +54,12 @@ that runs, so it has to be worth running.
    describes. Flag a doc untouched despite related recent changes — name the
    commits that make it suspect, so the user can judge.
 
+   A filled `developer-guide.md` gets one extra check: its prerequisites
+   table must match the manifests (pinned tool versions, minimum runtime),
+   and its "Check your setup" command must still exist and say what the
+   guide expects. A wrong version there is the failure a new developer
+   hits first.
+
 4. **Requirements against the code.** Step 1 already covered the table's
    structure. What's left needs reading the repository: rows the code
    contradicts (`done` but the feature isn't there; a shipped feature with no

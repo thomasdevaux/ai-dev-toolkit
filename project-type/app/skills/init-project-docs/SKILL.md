@@ -82,7 +82,34 @@ Read-then-write: never overwrite an existing file. Report what you skipped.
    artifact, already has a second contributor in `git log`, or already has
    users, say so and offer to fill that slot now instead of leaving the stub.
 
-5. **Report**: files created, files left untouched, and any trigger you found
+5. **Writing `developer-guide.md`** (when its trigger has fired). The reader
+   is a human on a fresh PC; the guide's job is to take them from nothing to
+   a green check, so keep it to that. In this order:
+
+   - **Prerequisites first, as one table**: tool, version, why, install
+     link or command. Read versions from the manifests (`go.mod`,
+     `package.json`, lockfiles, pinned CLIs), never from memory; say
+     "exactly" where a version is pinned and "or later" where it isn't.
+     Put tools only maintainers need (installer, release CLI) in a second
+     table. Open with the OS and shell, and tell the reader to open a new
+     terminal afterwards so `PATH` refreshes.
+   - **No admin rights?** When the team's PCs are locked down, give the
+     per-user path: zip builds, the *user* `PATH` and how to edit it.
+   - **Traps**, a short list of what costs an afternoon: coupled versions,
+     the corporate TLS proxy, the script execution policy.
+   - **First setup**: clone and install commands, then a **Check your
+     setup** block, the versions command plus the project's `fast` check,
+     with the exact output that means "ready".
+   - **Day to day**: one "I want to / Run" table. Point to the Commands
+     table of `AGENTS.md` instead of re-describing each script.
+   - **Contributing**: pointers only (git workflow, commit format, ADR
+     index).
+
+   Noise to cut: anything `AGENTS.md`, a rule or `architecture.md` already
+   says, what each script does internally, and rationale that belongs in an
+   ADR.
+
+6. **Report**: files created, files left untouched, and any trigger you found
    already fired.
 
 ## What not to do

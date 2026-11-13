@@ -404,10 +404,12 @@ which is what couples it to the desktop binary and breaks the moment
     | Script | Means |
     |---|---|
     | `dev.ps1` | the desktop dev loop (`wails3 dev -port <n>`) |
-    | `check.ps1` | the full gate: `golangci-lint fmt --diff`, `golangci-lint run`, `go test`, `internal/domain` free of Wails, regenerated bindings, then the front end's `format:check`, `lint`, `typecheck`, `test`; `-Fast` skips the tests, not the bindings: the typecheck reads them (`references/check.ps1`, copied as-is unless the gate needs more) |
+    | `check.ps1` | the full gate: `golangci-lint fmt --diff`, `golangci-lint run`, `go test`, `internal/domain` free of Wails, regenerated bindings, then the front end's `format:check`, `lint`, `typecheck`, `test`; `-Fast` skips the tests, not the bindings: the typecheck reads them (`references/check.ps1`, copied as-is unless the gate needs more, always with `references/node-env.ps1` beside it) |
     | `build.ps1` | the release build (`wails3 build`) |
     | `package.ps1` | the installer (`wails3 package`), with hand-out copies if the project ships any |
     | `release.ps1` | publishing what `package.ps1` produced |
+
+    Every script that reaches the npm registry, directly or through `wails3`, dot-sources `scripts/node-env.ps1` (`references/node-env.ps1`, copied as-is) first: behind a TLS-inspecting proxy Node rejects the corporate root CA, `npm install` fails with `UNABLE_TO_GET_ISSUER_CERT_LOCALLY`, and `wails3 dev` reports it as a bare exit code. The helper adds `--use-system-ca` to `NODE_OPTIONS` (TLS verification stays on) and does nothing on a Node without the flag.
 
     Other scripts are fine (`dev-feedback.ps1`, `sign.ps1`...); these names always mean the same thing, and match the Tauri and Python branches'. Tauri has a sixth, `clean.ps1`, which has no equivalent here because Go's cache caps itself (`build-and-disk.md`). The npm scripts `dev`, `build` and `build:dev` stay the frontend's own (Vite), and the build tasks call them by those names.
 14. **One dev port per app.** Pick a port no other app of the portfolio uses instead of the template's `9245`: pass it as `wails3 dev -port <n>` in `scripts/dev.ps1`, change `VITE_PORT`'s default in `Taskfile.yml` and the fallback in `vite.config.ts` to match, and record it in the README. The template sets `strictPort: true`, so two apps on one port fail at startup rather than show each other's dev server — keep it.
@@ -420,6 +422,7 @@ which is what couples it to the desktop binary and breaks the moment
     - `project.nsi` — a complete per-user `project.nsi` to start from instead of the template's: it wires `upgrade.nsh` (and `un.AppWaitForExit` in the uninstaller), reads the French/English system language, offers a desktop shortcut whose choice survives updates, a "Launch" box on the last page, and **uninstalls only the files it wrote** (`Delete` + a non-recursive `RMDir`, never `RMDir /r $INSTDIR`: the user may have picked Documents). Settings and the WebView2 profile (`%AppData%\<exe name>`, go-webview2's default) are deleted only after a Yes in a dialog, never in silent mode. Keep it saved as UTF-8 **with BOM** (Unicode installer: no BOM means ANSI, accents garbled). `wails3 package` already passes `-DWAILS_INSTALL_SCOPE=user`, so the `!define` must stay behind `!ifndef`. Translate `upgrade.nsh` by defining the `APP_MSG_*` it lists before the include.
     - `makensis` without admin rights: the NSIS zip, unpacked into the user profile — `references/nsis/install-nsis.md`.
     - Test registry code against a scratch key (`!define APP_ENV_KEY "Software\<co>\Scratch"` before the include), never the real `HKCU\Environment`.
+19. **A Windows-only app drops the other platforms' Taskfiles.** `wails3` evaluates the `sh:` variables of every included Taskfile when it loads, so the `darwin`, `linux`, `ios` and `android` ones run `uname` even for `wails3 dev` on Windows, and fail unless Git's `usr/bin` is on the `PATH`. Remove their `includes:` lines from the root `Taskfile.yml` and delete `build/darwin`, `build/linux`, `build/ios` and `build/android` with them; keep `build/Taskfile.yml` and `build/windows/`. A project that really ships on another platform keeps that one's include, and that is its recorded decision.
 
 ---
 
@@ -451,6 +454,7 @@ which is what couples it to the desktop binary and breaks the moment
 | 22 | The `mcp` build tag, or `WAILS_MCP=1`, in a release build or script, or `--remote-debugging-port` in a file without `//go:build !production` | Ships a local control channel into the app |
 | 23 | Wake, purego or a mobile target adopted with no recorded decision | Experimental upstream, outside the stable compatibility contract |
 | 24 | Long-running service method with no `context.Context` first parameter | The frontend's `.cancel()` has nothing to act on (W5) |
+| 25 | A Windows-only app still including the darwin, linux, ios and android Taskfiles | `wails3 dev` runs their `uname` on load and fails on a machine without Git's `usr/bin` on the `PATH` (§5, rule 19) |
 
 **Reporting priority**: leaky boundaries (1, 2, 3, 9) and the exposed surface (5, 19) before naming or layout issues — those are the ones that compound over time.
 

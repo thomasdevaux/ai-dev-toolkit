@@ -113,7 +113,7 @@ W2 is the structuring one — spend the effort there. The other five follow from
 6. **Keep service methods thin.** A service method should: receive the call, invoke `internal/domain`, map the error into the typed result, return. If a service method's body is doing real logic rather than delegating, the boundary has already leaked — and so has the mirror-image mistake of one method per domain function, which turns the service surface into a copy of the domain API instead of a use-case one.
 7. **Design the error type early.** One `Code`+`Message` error type, returned as `error` by every service method (§4, W4) — retrofitting this after several methods return internal errors is expensive.
 8. **Be deliberate about the exported surface.** Since there's no capability sandbox, review what's registered and what's exported as if it were the permission boundary — because it is one, in practice.
-9. **Set up the fixed pieces** (§5): the pinned toolchain and the two `ignore` lines in `go.mod`, the script names with `references/check.ps1` as `scripts/check.ps1`, one dev port per app, and `go-code-standards` for the lint configuration.
+9. **Set up the fixed pieces** (§5): the pinned toolchain and the two `ignore` lines in `go.mod`, the script names with `references/check.ps1` as `scripts/check.ps1` together with `references/node-env.ps1` as `scripts/node-env.ps1` (the gate dot-sources it, so it fails without it), one dev port per app, and `go-code-standards` for the lint configuration.
 10. **Generate nothing tied to a forge or CI system.** No `.github/`, no `.gitlab-ci.yml`, no pipeline files, unless the user explicitly asks.
 11. **Document W1–W6 in the project README.**
 
@@ -152,6 +152,7 @@ Three points need surfacing, because none are covered by W1–W6 and all three a
 
 - `references/architecture.md` — §1 decisions, §2 profile selection, §3 folder trees per profile, §4 cross-cutting decisions in detail, §4b runtime data and log locations, §5 scaffolding rules, §6 the anti-pattern checklist, §7 evolution path, §8 standalone prompts, §9 evolving toward a server with remote clients.
 - `references/check.ps1` — the gate, copied to `scripts/check.ps1`.
+- `references/node-env.ps1` — helper the scripts dot-source so Node trusts the OS certificate store behind the corporate proxy, copied to `scripts/node-env.ps1` (architecture.md §5, item 13).
 - `references/nsis/project.nsi` — ready-made per-user installer script (update in place, safe uninstall, French/English, desktop shortcut); `references/nsis/path.nsh`, `references/nsis/upgrade.nsh` — its NSIS includes: optional user `PATH` entry, update in place (architecture.md §5, item 18); `references/nsis/install-nsis.md` — installing `makensis` from the NSIS zip, without admin rights.
 - `references/react-conventions.md` — frontend conventions for the React side: folder shape, server state, error handling layers, state management default, testing approach.
 - The front end's tooling (Prettier, ESLint, `tsc`, Vitest) is the `frontend-code-standards` skill of the `tech-stack-web-frontend` block, offered on any Wails project; the Go tooling is `go-code-standards`; for hands-on user testing of the running app, `frontend-feedback`, from the same block.

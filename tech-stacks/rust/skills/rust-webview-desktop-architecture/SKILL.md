@@ -93,7 +93,8 @@ D2 is the structuring one. When in doubt, spend the effort there.
 6. **Keep `main.rs` to bootstrap only**; all setup goes in `lib.rs`. Anything else blocks mobile targets and makes the app untestable.
 7. **Write a minimal capability** in `src-tauri/capabilities/`. Never a broad or permissive one — a wide capability cancels most of Tauri's security model.
 8. **Generate nothing tied to a forge or CI system.** No `.github/`, no `.gitlab-ci.yml`, no pipeline files, unless the user explicitly asks.
-9. **Document the chosen D1–D7 in the project README**, so the next person inherits the reasoning and not just the folders.
+9. **Set up the scripts** (§5, rule 11): the script names, with `references/check.ps1` as `scripts/check.ps1` together with `references/node-env.ps1` as `scripts/node-env.ps1` (the gate dot-sources it, so it fails without it).
+10. **Document the chosen D1–D7 in the project README**, so the next person inherits the reasoning and not just the folders.
 
 ## Workflow: auditing an existing project
 
@@ -127,6 +128,8 @@ This is a distinct scenario from the B→C migration above: the goal isn't reuse
 ## Reference file
 
 Read `references/architecture.md` when you need the folder trees, the full decision detail, or the audit checklist. It contains: §1 decisions, §2 profile selection, §3 folder trees per profile, §4 cross-cutting decisions in detail, §4b runtime data and log locations, §5 scaffolding rules, §6 the anti-pattern checklist, §7 evolution path, §8 standalone prompts, §9 evolving toward a server with remote clients.
+
+`references/check.ps1` is the gate, copied to `scripts/check.ps1`; `references/node-env.ps1` is the helper the scripts dot-source so Node trusts the OS certificate store behind the corporate proxy, copied to `scripts/node-env.ps1`.
 
 Read `references/react-conventions.md` for the frontend side — folder shape (`ipc/`, `bindings/`, `features/`), the server-state layer, error handling layers, state management default, and testing approach. React is the mandated frontend for this stack, and the frontend should look the same regardless of which backend is behind it.
 

@@ -23,6 +23,7 @@ param([switch]$Fast)
 
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
+. (Join-Path $PSScriptRoot 'node-env.ps1')  # trust the OS cert store behind a TLS-inspecting proxy
 
 function Invoke-Step {
     param([string]$Name, [scriptblock]$Command)

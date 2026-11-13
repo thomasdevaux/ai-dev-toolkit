@@ -51,6 +51,9 @@ a dependency and a script).
    directory, since local scope belongs to it:
    `claude mcp add --scope local agentation -- npx -y agentation-mcp server`.
    It only loads at session start: after adding it, the session restarts.
+   Both steps fetch from the npm registry: behind the corporate proxy they
+   fail with `UNABLE_TO_GET_ISSUER_CERT_LOCALLY` until Node trusts the OS
+   store (`frontend-code-standards/references/corporate-proxy.md`).
 3. **The window driver.** Copy `references/ui.mjs` to `scripts/ui.mjs`. Node
    22 or later, no dependency.
 4. **The debugging port and the dev launcher**, as the stack's reference

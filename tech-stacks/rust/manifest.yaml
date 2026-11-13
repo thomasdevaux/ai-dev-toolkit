@@ -23,3 +23,6 @@
       target: skills/rust-code-standards/references/editorconfig.ini
     - source: tech-stacks/shared/corporate-proxy.md
       target: skills/rust-code-standards/references/corporate-proxy.md
+    # Sourced by every script that reaches npm; identical for Tauri and Wails.
+    - source: tech-stacks/shared/node-env.ps1
+      target: skills/rust-webview-desktop-architecture/references/node-env.ps1

@@ -377,11 +377,13 @@ the dependency that stops it being testable without Tauri.
     | Script | Means |
     |---|---|
     | `dev.ps1` | the desktop dev loop (`tauri dev`), after `clean.ps1` |
-    | `check.ps1` | the full gate: fmt, clippy, tests, then the front end's `format:check`, `lint`, `typecheck`, `test`; `-Fast` skips the tests (`references/check.ps1`, copied as-is unless the gate needs more) |
+    | `check.ps1` | the full gate: fmt, clippy, tests, then the front end's `format:check`, `lint`, `typecheck`, `test`; `-Fast` skips the tests (`references/check.ps1`, copied as-is unless the gate needs more, always with `references/node-env.ps1` beside it as `scripts/node-env.ps1`: the gate dot-sourcing it fails without it) |
     | `build.ps1` | the release build |
     | `package.ps1` | the installer, with hand-out copies if the project ships any |
     | `release.ps1` | publishing what `package.ps1` produced |
     | `clean.ps1` | the `target/` cap (`rust-code-standards` references) |
+
+    Every script that reaches the npm registry, directly or through `tauri`, dot-sources `scripts/node-env.ps1` first: behind a TLS-inspecting proxy Node rejects the corporate root CA and `npm install` fails with `UNABLE_TO_GET_ISSUER_CERT_LOCALLY`. The helper adds `--use-system-ca` to `NODE_OPTIONS` (TLS verification stays on) and does nothing on a Node without the flag.
 
     Other scripts are fine (`dev-web.ps1`, `sign.ps1`...); these six names always mean the same thing, and the first five match the Wails and Python branches'. The npm scripts `dev` and `build` stay the frontend's own (Vite), not the app's.
 12. **One dev port per app.** Pick a port no other app of the portfolio uses, set it in `vite.config.ts` with `server.strictPort: true` and in `devUrl`, and record it in the README. Without `strictPort`, Vite moves to the next free port while `devUrl` still names the old one, so two apps running side by side can show each other's dev server.

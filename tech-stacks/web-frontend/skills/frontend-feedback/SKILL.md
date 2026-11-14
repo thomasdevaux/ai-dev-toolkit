@@ -1,13 +1,12 @@
 ---
 name: frontend-feedback
-description: Collect and act on end-user feedback from a running front end (Tauri and Wails today, one reference per stack). The user writes notes on elements of the live window (Agentation); the agent gets them with the source file:line, drives the window over its debugging port, fixes fast and logs each finding for one verification at closure. Use when the user starts or resumes a hands-on testing or feedback session on a running app, says they will test by hand, or sends Agentation notes.
+description: Collect and act on end-user feedback from a running front end (Tauri and Wails today, one reference per stack). The user writes notes on elements of the live window (Agentation); the agent gets them with the source file:line, drives the window over its debugging port, fixes fast and verifies once at closure. Use when the user starts or resumes a hands-on testing or feedback session on a running app, says they will test by hand, or sends Agentation notes.
 ---
 
 # Front-end feedback
 
 Hands-on user testing of the running app, with fast fix loops: fix now, verify
-once at closure. Every finding goes into one log (see "Findings log"), and this
-skill is the procedure around it.
+once at closure. This skill is the procedure around it.
 
 ## Find the stack
 
@@ -75,7 +74,6 @@ a dependency and a script).
 3. Note the session whose URL is this app's dev URL, which its dev port
    identifies. **The notes server is shared**: it listens on port 4747 for every
    project, so the list can hold sessions from other apps.
-4. Name the log that will hold the findings, and the branch it lives on.
 
 ## Receive notes
 
@@ -105,38 +103,17 @@ app.
 ## Fix loop
 
 - Per finding: read the code at the given source line, fix, run the
-  project's inner-loop check on what changed, add a row to the findings log.
-  No full gate and no per-fix manual verification. Vite hot-reloads
+  project's inner-loop check on what changed. No full gate and no per-fix manual verification. Vite hot-reloads
   front-end edits, except files under `public/`, which need
   `node scripts/ui.mjs eval "location.reload()"`; backend edits rebuild and
   restart the app.
-- Defect or behaviour change, same loop. A change is never silent: the row
-  names the spec it departs from, and the log's decisions record it. Specs,
-  requirements and ADRs, where the project has them, are reconciled at closure;
-  an ADR it contradicts is amended at closure, up to Proposed only.
-- A cheap test goes with the fix; otherwise flag the row `needs-test`.
+- Defect or behaviour change, same loop. A change is never silent: say which
+  spec it departs from. Specs, requirements and ADRs, where the project has
+  them, are reconciled at closure; an ADR it contradicts is amended at closure,
+  up to Proposed only.
+- A cheap test goes with the fix; otherwise say the fix still needs one.
 - A genuinely new feature is a question for the user, not a loop item.
 - No commit, merge or push without the user's ask.
-
-## Findings log
-
-A file in the project: an existing plan or log if it keeps one, otherwise
-`docs/feedback/<YYYY-MM-DD>.md`, whatever the project type.
-
-```markdown
-# Feedback session <YYYY-MM-DD>
-
-Branch: <branch>. Dev URL: <url>.
-
-## Findings
-
-| # | Note | Source | Change | Spec departed from | needs-test |
-|---|------|--------|--------|--------------------|------------|
-
-## Decisions
-
-- #<n>: <behaviour change, and who confirmed it>
-```
 
 ## Gotchas
 
@@ -159,11 +136,9 @@ Branch: <branch>. Dev URL: <url>.
 ## Closure
 
 1. The project's full gate.
-2. The findings log becomes the verification list: walk it on a release
-   build, write the `needs-test` tests.
-3. Reconcile specs, requirements and ADRs for the change rows, where the
-   project has them, get a fresh-context review of the diff, and mark the log
-   closed.
+2. Walk the fixed notes on a release build, and write the tests still owed.
+3. Reconcile specs, requirements and ADRs for the behaviour changes, where the
+   project has them, and get a fresh-context review of the diff.
 
 ## Adding a stack
 

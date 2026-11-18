@@ -16,6 +16,8 @@ Steps:
   1. frontend/dist exists: main.go embeds it and it is gitignored, so on a fresh clone every Go
      step would otherwise fail on the //go:embed pattern. A placeholder is enough, and the next
      real front-end build replaces it;
+  1b. when scripts/set-version.ps1 exists: the build metadata is consistent (-Check, and -SelfTest
+     so the check itself stays proven);
   2. golangci-lint fmt --diff, golangci-lint run, go test, on the whole module;
   3. when internal/domain exists: nothing it imports, directly or not, is Wails. The compiler
      does not guarantee this in a single module, so the gate does;
@@ -48,6 +50,12 @@ try {
     if (-not (Test-Path $dist)) {
         New-Item -ItemType Directory -Path $dist | Out-Null
         New-Item -ItemType File -Path (Join-Path $dist '.gitkeep') | Out-Null
+    }
+
+    $setVersion = Join-Path $PSScriptRoot 'set-version.ps1'
+    if (Test-Path $setVersion) {
+        Invoke-Step 'set-version -Check' { powershell -NoProfile -File $setVersion -Check }
+        Invoke-Step 'set-version -SelfTest' { powershell -NoProfile -File $setVersion -SelfTest }
     }
 
     Invoke-Step 'golangci-lint fmt' { golangci-lint fmt --diff }

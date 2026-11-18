@@ -35,9 +35,14 @@
 !define APP_MSG_RUNNING_SILENT "$(MsgRunningSilent)"
 !include "upgrade.nsh"
 
-# The version information for this two must consist of 4 parts
-VIProductVersion "${INFO_PRODUCTVERSION}.0"
-VIFileVersion    "${INFO_PRODUCTVERSION}.0"
+# The version information for this two must consist of 4 numeric parts: a pre-release suffix
+# ("0.1.0-beta.1") is dropped here, the full string stays in the ProductVersion/FileVersion keys below.
+!searchparse /noerrors "${INFO_PRODUCTVERSION}" "" INFO_NUMERICVERSION "-"
+!ifndef INFO_NUMERICVERSION
+    !define INFO_NUMERICVERSION "${INFO_PRODUCTVERSION}"
+!endif
+VIProductVersion "${INFO_NUMERICVERSION}.0"
+VIFileVersion    "${INFO_NUMERICVERSION}.0"
 
 VIAddVersionKey "CompanyName"     "${INFO_COMPANYNAME}"
 VIAddVersionKey "FileDescription" "${INFO_PRODUCTNAME} Installer"

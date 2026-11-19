@@ -273,8 +273,9 @@ explainable in three sentences to a beginner.
 | `project-type-profile` rule | Replaced by `agentkit.yaml` + `init` |
 | `commit-message-format` | Keep; attribution ban moves to `commit-msg` hook + push rule |
 | `desktop-app-architecture` | Move from common to the app profile |
-| CodeGraph (rule, skill, agent, hook) | **Measure first** (see open questions) |
-| `caveman`, `session-report`, statusline, LSP plugins | Community / optional user tooling |
+| CodeGraph (rule, skill, agent, hook) | Community module, opt-in (measured: speed, not accuracy or cost) |
+| `caveman`, `session-report`, statusline | Community / optional user tooling |
+| LSP plugins | Not in core (Claude-only, unused without a hint). Optional `lsp` module proposed, undecided — see `migration-plan.md` |
 | `project-context` rule, `init-` / `audit-project-context` | Rule → two lines; skills merged into one `project-context` skill |
 | `context-check`, `codegraph-freshness`, `git-branch-guard` hooks | Replaced by `doctor`, pre-commit, CI |
 | `/toolkit-*` commands, auto-apply rule, `resolve-toolkit-root`, `companyAnnouncements` | Replaced by the CLI + one portable `agentkit` skill |
@@ -368,6 +369,48 @@ on their own for someone discovering the kit.
   `community/` any reviewer.
 - **Keep the kit small**: every block added is maintenance handed over.
 
+## Code intelligence: measured
+
+Benchmark run 2026-11-19 on three real repositories (CaliGrapHY Go/Wails,
+FourmiFi Rust/Tauri, Commitment Go/Wails), six read-only navigation tasks
+(call path, impact of a signature change, data flow) with a hand-checked
+answer each, graded blind by an LLM judge. Headless Claude Code 2.1.327,
+isolated from user settings, `.claude/` removed from the clones; each tool
+got a one-paragraph "Code navigation" hint in `AGENTS.md`, as the kit would
+ship it. 96 runs (4 configs × 6 tasks × Haiku/Sonnet × 2), after a 36-run
+triage with Haiku.
+
+| Model | Config | Correct | $/run | Turns | Tool used |
+|---|---|---|---|---|---|
+| Haiku | grep + Read | 92.6 % | 0.015 | 18.8 | — |
+| Haiku | CodeGraph 1.6.2 | 93.3 % | 0.017 | 10.8 | 12/12 |
+| Haiku | codebase-memory-mcp 0.12.1 | 95.8 % | 0.015 | 21.8 | 5/12 |
+| Haiku | Serena 2.1.0 | 95.4 % | 0.016 | 24.4 | 10/12 |
+| Sonnet | grep + Read | 97.2 % | 0.164 | 15.4 | — |
+| Sonnet | CodeGraph | 95.8 % | 0.202 | 9.7 | 12/12 |
+| Sonnet | codebase-memory-mcp | 95.8 % | 0.169 | 16.9 | 11/12 |
+| Sonnet | Serena | 100 % | 0.166 | 18.3 | 10/12 |
+
+What it settles:
+
+- **grep + Read is enough for the core**, and a Haiku-class model is viable
+  on it: the lever for cheaper runs is the model, not a tool.
+- **No tool saves money.** CodeGraph cuts turns by ~40 % and wall time by
+  ~15 % but costs more (its answers grow the context); the others cost the
+  same as grep.
+- **Accuracy gaps are 1–3 points**, within noise at n=12; Serena leads.
+- **An installed tool is ignored without a hint** (triage: LSP and ast-grep
+  0/6, Serena and codebase-memory 1/6), and a hint is no guarantee (Haiku
+  loaded codebase-memory's tools and still used grep in 7 of 12 runs). A
+  module that ships a tool ships its usage hint.
+- Serena 2.1 exposes a single REPL tool by default; it needs
+  `--agent-interface tools`. Its application code is GPL-3.0-or-later.
+- Dropped: codebase-memory-mcp, ast-grep (no measured gain), Claude's LSP
+  tool (not portable).
+
+Not measured: editing tasks (refactors, renames — Serena's claimed
+strength), other harnesses, repositories larger than ~250k lines.
+
 ## Open questions
 
 1. **Harness spike** — done for the three CLIs (results above); the design
@@ -375,11 +418,10 @@ on their own for someone discovering the kit.
    the Copilot and Claude harnesses; its Local harness is going away).
    Optional: run the canary fixture in VS Code's Copilot harness once someone
    has access.
-2. **CodeGraph** — compare grep only, native LSP and CodeGraph on 3–4 real
-   tasks (tokens, turns, correctness, via `session-report`); re-check at
-   each CodeGraph major release. Trends to keep in view: structural graphs
-   (CodeGraph, Sourcegraph), semantic indexes (Claude Context, CocoIndex),
-   LSP built into the harness, repo maps (Aider).
+2. ~~CodeGraph~~ — measured (see "Code intelligence: measured"). Decided:
+   nothing in the core; CodeGraph and Serena as optional community modules.
+   Re-run the benchmark at a major release of either, and add editing
+   (refactor) tasks the first time someone proposes Serena for a project.
 3. ~~"Outside a project" baseline~~ — decided: **opt-in** via
    `agentkit user install`, recommended at onboarding. Making it mandatory
    would have a project's `doctor` nag about a machine install that adds

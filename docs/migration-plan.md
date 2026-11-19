@@ -20,7 +20,7 @@ the *done* criteria and what a new session cannot guess.
 | Decision | Needed by | Default if nobody decides |
 |---|---|---|
 | Pilot project: CaliGrapHY or Commitment (both Go/Wails) | Step 5.1 | Commitment (smaller, already AGENTS.md-centred) |
-| GitHub repo: owner, private/public | Step 0.2 | Private, under the maintainer's account — **ask before creating** |
+| ~~GitHub repo~~ | — | Decided: private, `thomasdevaux/agentic-software-kit` |
 | LSP: optional `lsp` module (`.github/lsp.json` for Copilot, doc for Claude, Serena for Vibe, `doctor` checks binaries) vs dropped | Step 2 (modules) | Proposed in session 2026-11-19, not confirmed |
 | Final PyPI name (`agentkit` may be taken on public PyPI; irrelevant on the GitLab registry) | Step 4.3 | `agentkit` on GitLab, no public PyPI |
 
@@ -53,7 +53,7 @@ the *done* criteria and what a new session cannot guess.
   `Legacy: ai-dev-toolkit 0.0.1 snapshot`, tag `v0-legacy`. No history
   carried over (deliberate).
   *Done when*: `git log --oneline` shows exactly one commit, tagged.
-- [ ] **0.2 Remote.** Ask the maintainer, then `gh repo create` (see open
+- [x] **0.2 Remote.** Ask the maintainer, then `gh repo create` (see open
   decisions). Push `main` and the tag.
 - [ ] **0.3 Clear the floor.** One commit removing the legacy tree from the
   working state (it stays in `v0-legacy`), adding the empty v1 layout:

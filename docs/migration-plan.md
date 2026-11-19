@@ -48,7 +48,7 @@ the *done* criteria and what a new session cannot guess.
 
 ## Step 0 — Bootstrap the new repository
 
-- [ ] **0.1 Legacy snapshot.** `git archive` the old repo's `main` into a
+- [x] **0.1 Legacy snapshot.** `git archive` the old repo's `main` into a
   fresh directory `C:\dev\agentic-software-kit`, `git init`, one commit
   `Legacy: ai-dev-toolkit 0.0.1 snapshot`, tag `v0-legacy`. No history
   carried over (deliberate).
